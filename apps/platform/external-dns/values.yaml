@@ -1,0 +1,24 @@
+# external-dns Helm values
+provider: cloudflare
+
+# Cloudflare API token (will be set via secret)
+env:
+  - name: CF_API_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: cloudflare-api-token
+        key: token
+
+domainFilters:
+  - joeriberman.nl
+
+# Sync Gateway API resources
+sources:
+  - service
+  - gateway-httproute
+
+policy: sync  # or 'upsert-only' for safety
+txtOwnerId: talos-cluster
+
+# Logging
+logLevel: info

@@ -1,0 +1,38 @@
+# Kubernetes credentials
+kubeconfig
+*.kubeconfig
+
+# Talos secrets and credentials
+talos/secrets.yml
+talos/talosconfig
+
+# Certificate and key files
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Secret files
+secrets.yaml
+secrets.yml
+*-secrets.yaml
+*-secrets.yml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
