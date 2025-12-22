@@ -1,33 +1,58 @@
-# Argo CD Helm values
-global:
-  domain: argocd.example.com  # Update with your domain
+argo-cd:
+  global:
+    domain: argocd.joeriberman.nl
 
-server:
-  service:
-    type: LoadBalancer  # Get IP from Cilium
-  
-  # Insecure mode (use ingress/gateway for TLS termination)
-  extraArgs:
-    - --insecure
-
-  ingress:
-    enabled: false  # We'll use Gateway API instead
-
-configs:
-  params:
-    server.insecure: true
-  
-  cm:
-    # Enable Git repository self-healing
-    timeout.reconciliation: 180s
+  server:
+    service:
+      type: LoadBalancer
     
-    # Enable ApplicationSet controller
-    application.instanceLabelKey: argocd.argoproj.io/instance
+    extraArgs:
+      - --insecure
 
-# Enable notifications (optional)
-notifications:
-  enabled: false
+    ingress:
+      enabled: false
+    
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
 
-# Enable ApplicationSet controller
-applicationSet:
-  enabled: true
+  controller:
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  repoServer:
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  redis:
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  dex:
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  notifications:
+    enabled: false
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  applicationSet:
+    enabled: true
+    networkPolicy:
+      create: true
+      defaultDenyIngress: false
+
+  configs:
+    params:
+      server.insecure: true
+    
+    cm:
+      timeout.reconciliation: 180s
+      application.instanceLabelKey: argocd.argoproj.io/instance
+

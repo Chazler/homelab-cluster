@@ -36,3 +36,7 @@ secrets.yml
 *.tmp
 *.bak
 *.backup
+
+# Helm files
+**/*.tgz
+**/charts/

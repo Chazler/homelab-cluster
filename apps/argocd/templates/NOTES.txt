@@ -1,0 +1,15 @@
+ArgoCD has been deployed to your cluster!
+
+To access the ArgoCD UI:
+
+1. Get the initial admin password:
+   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+2. Access the UI via LoadBalancer:
+   kubectl get svc -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+3. Login with:
+   Username: admin
+   Password: (from step 1)
+
+For more information, visit: https://argo-cd.readthedocs.io/
