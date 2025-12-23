@@ -5,6 +5,8 @@ kubeconfig
 # Talos secrets and credentials
 talos/secrets.yml
 talos/talosconfig
+talos/controlplane.yaml
+talos/worker.yaml
 
 # Certificate and key files
 *.key

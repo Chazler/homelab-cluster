@@ -20,13 +20,24 @@ Talos Linux cluster with GitOps managed by Argo CD.
 ## Structure
 
 ```
-talos/          # Machine configs, secrets, patches
+talos/          # Machine configs, secrets, patches (NEVER commit configs!)
 apps/           # Argo CD applications
   argocd/       # Argo CD self-management
   platform/     # Platform services (gateway, DNS)
-  infrastructure/ # Infrastructure services
+  infrastructure/ # Infrastructure services (Cilium)
 manifests/      # Direct Kubernetes manifests
 ```
+
+## Security Notice
+
+⚠️ **Sensitive files are excluded from Git:**
+- `talos/secrets.yml` - Cluster secrets and certificates
+- `talos/talosconfig` - Admin credentials
+- `talos/controlplane.yaml` - Machine config with embedded secrets
+- `talos/worker.yaml` - Machine config with embedded secrets
+- `kubeconfig` - Kubernetes admin credentials
+
+Use `talos/rotate-secrets.sh` to generate fresh configs.
 
 ## Quick Start
 
