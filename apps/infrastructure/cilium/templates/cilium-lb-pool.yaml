@@ -20,6 +20,6 @@ spec:
     - key: node-role.kubernetes.io/control-plane
       operator: DoesNotExist  # Only workers announce (optional)
   interfaces:
-  - ^eth[0-9]+  # Adjust if your nodes use different interface names (e.g., ens, eno, enp)
+  - enp1s0
   externalIPs: true
   loadBalancerIPs: true
