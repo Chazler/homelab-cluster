@@ -1,25 +1,26 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app
+  name: local-path-provisioner
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/Chazler/homelab-cluster.git
-    targetRevision: main
-    path: apps
-    directory:
-      recurse: true
-      exclude: '{values.yaml,Chart.yaml,Chart.lock,README.md,*.txt,templates/*}'
+    repoURL: https://charts.rancher.io
+    chart: local-path-provisioner
+    targetRevision: 0.0.30
+    helm:
+      valuesObject:
+        storageClass:
+          defaultClass: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-      prune: true
-      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

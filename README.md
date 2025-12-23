@@ -4,12 +4,15 @@ Talos Linux cluster with GitOps managed by Argo CD.
 
 ## Stack
 
-- Talos Linux 1.11.5
-- Kubernetes v1.34.1
-- Cilium CNI with LB-IPAM
-- Argo CD for GitOps
-- Envoy Gateway (Gateway API)
-- external-dns (Cloudflare)
+- **OS:** Talos Linux 1.11.5
+- **Orchestration:** Kubernetes v1.34.1
+- **Networking:** Cilium CNI with LB-IPAM
+- **GitOps:** Argo CD
+- **Ingress:** Envoy Gateway (Gateway API)
+- **DNS:** external-dns (Cloudflare)
+- **Storage:** Rancher Local Path Provisioner
+- **Secrets:** Sealed Secrets
+- **Monitoring:** kube-prometheus-stack (Prometheus, Grafana, Alertmanager)
 
 ## Network
 

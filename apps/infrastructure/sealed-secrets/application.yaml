@@ -1,25 +1,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app
+  name: sealed-secrets
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/Chazler/homelab-cluster.git
-    targetRevision: main
-    path: apps
-    directory:
-      recurse: true
-      exclude: '{values.yaml,Chart.yaml,Chart.lock,README.md,*.txt,templates/*}'
+    repoURL: https://bitnami-labs.github.io/sealed-secrets
+    chart: sealed-secrets
+    targetRevision: 2.16.1
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-      prune: true
-      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

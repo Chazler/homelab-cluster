@@ -1,0 +1,2 @@
+# Values for sealed-secrets
+fullnameOverride: sealed-secrets-controller
