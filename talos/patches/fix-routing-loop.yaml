@@ -1,0 +1,8 @@
+machine:
+  sysctls:
+    # Allow receiving packets for IPs that are not explicitly assigned to the interface
+    net.ipv4.conf.enp1s0.rp_filter: "0"
+    net.ipv4.conf.all.rp_filter: "0"
+    # Ensure we answer ARP for the LB IPs
+    net.ipv4.conf.enp1s0.arp_ignore: "1"
+    net.ipv4.conf.enp1s0.arp_announce: "2"
