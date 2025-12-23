@@ -4,6 +4,9 @@ cilium:
 
   devices: "enp1s0"
 
+  l2Announcements:
+    enabled: true
+
   kubeProxyReplacement: true
   
   k8sServiceHost: 10.0.0.10
