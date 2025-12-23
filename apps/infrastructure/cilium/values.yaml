@@ -2,6 +2,8 @@ cilium:
   ipam:
     mode: kubernetes
 
+  devices: "enp1s0"
+
   kubeProxyReplacement: true
   
   k8sServiceHost: 10.0.0.10
