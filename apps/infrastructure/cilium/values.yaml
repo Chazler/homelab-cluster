@@ -6,6 +6,8 @@ cilium:
 
   l2Announcements:
     enabled: true
+  
+  enableL2NeighDiscovery: true
 
   kubeProxyReplacement: true
   
