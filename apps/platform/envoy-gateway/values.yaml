@@ -1,12 +1,13 @@
-# Envoy Gateway Helm values
-config:
-  envoyGateway:
-    gateway:
-      controllerName: gateway.envoyproxy.io/gatewayclass-controller
-    provider:
-      type: Kubernetes
+gateway-helm:
+  # Envoy Gateway Helm values
+  config:
+    envoyGateway:
+      gateway:
+        controllerName: gateway.envoyproxy.io/gatewayclass-controller
+      provider:
+        type: Kubernetes
 
-# Service type for Envoy Gateway
-service:
-  type: LoadBalancer
-  annotations: {}
+  # Service type for Envoy Gateway
+  service:
+    type: LoadBalancer
+    annotations: {}
