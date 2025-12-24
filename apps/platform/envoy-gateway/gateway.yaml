@@ -1,0 +1,27 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: envoy-gateway
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: main-gateway
+  namespace: envoy-gateway-public
+spec:
+  gatewayClassName: evoy-gateway
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: "*.joeriberman.nl"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: main-gateway-cert
