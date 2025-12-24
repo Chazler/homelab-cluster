@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: registry-1.docker.io/envoyproxy
-    targetRevision: v1.2.4
-    chart: gateway-helm
+    repoURL: https://github.com/Chazler/homelab-cluster.git
+    targetRevision: main
+    path: apps/platform/envoy-gateway
     helm:
       valueFiles:
         - values.yaml
