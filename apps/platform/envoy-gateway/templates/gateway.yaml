@@ -1,7 +1,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: GatewayClass
 metadata:
-  name: eg
+  name: envoy-gateway
   namespace: argocd
 spec:
   controllerName: gateway.envoyproxy.io/gatewayclass-controller
@@ -12,9 +12,10 @@ metadata:
   name: main-gateway
   namespace: argocd
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
+    'cert-manager.io/revision-history-limit': "1"
+    'cert-manager.io/cluster-issuer': letsencrypt-dns
 spec:
-  gatewayClassName: eg
+  gatewayClassName: envoy-gateway
   infrastructure:
     parametersRef:
       group: gateway.envoyproxy.io
