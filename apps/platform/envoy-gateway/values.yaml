@@ -9,5 +9,5 @@ gateway-helm:
 
   # Service type for Envoy Gateway
   service:
-    type: LoadBalancer
+    type: ClusterIP
     annotations: {}
