@@ -11,6 +11,9 @@ spec:
     repoURL: https://github.com/Chazler/homelab-cluster.git
     targetRevision: main
     path: apps/infrastructure/cilium
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: kube-system
@@ -20,7 +23,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=false
-      - RespectIgnoreDifferences=true
+      - ServerSideApply=true
   ignoreDifferences:
     - group: ""
       kind: ConfigMap

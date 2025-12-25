@@ -1,5 +1,0 @@
-# Values for kube-prometheus-stack
-grafana:
-  adminPassword: "prom-operator"
-  ingress:
-    enabled: false # Enable this once you have Gateway/Ingress set up
