@@ -13,7 +13,7 @@ spec:
     path: apps
     directory:
       recurse: true
-      exclude: '**/values.yaml,**/Chart.yaml,**/Chart.lock,**/README.md,**/*.txt,**/templates/*,**/charts/*'
+      exclude: '{**/values.yaml,**/Chart.yaml,**/Chart.lock,**/README.md,**/*.txt,**/templates/**/*,**/charts/**/*}'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
