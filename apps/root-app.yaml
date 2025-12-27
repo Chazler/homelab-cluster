@@ -1,23 +1,32 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
-  name: root-app
+  name: cluster-apps
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/Chazler/homelab-cluster.git
-    targetRevision: main
-    path: apps
-    directory:
-      recurse: true
-      exclude: '**/values.yaml,**/Chart.yaml,**/Chart.lock,**/README.md,**/*.txt,**/templates/**,**/charts/**'
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/Chazler/homelab-cluster.git
+        revision: main
+        files:
+          - path: "apps/*/*.yaml"
+  template:
+    metadata:
+      name: '{{.path.basename}}'
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Chazler/homelab-cluster.git
+        targetRevision: main
+        path: '{{.path.path}}'
+      destination:
+        server: https://kubernetes.default.svc
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
