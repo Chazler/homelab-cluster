@@ -3,6 +3,17 @@ argo-cd:
     domain: argocd.joeriberman.nl
 
   server:
+    replicas: 1
+
+    httproute:
+      enabled: true
+      hostnames:
+        - argocd.feddema.dev
+      parentRefs:
+        - name: envoy-gateway-main
+          namespace: envoy-gateway
+          sectionName: web-https
+
     service:
       type: LoadBalancer
     
