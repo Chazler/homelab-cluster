@@ -1,24 +1,24 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: root-app
+  name: envoy-gateway
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/Chazler/homelab-cluster.git
     targetRevision: main
-    path: apps
-    directory:
-      recurse: true
-      include: '*.yaml'
-      exclude: '{**/Chart.yaml,**/values.yaml,**/templates/**,**/charts/**,.helmignore}'
+    path: apps/networking/envoy-gateway
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
-    namespace: argocd
+    namespace: envoy-gateway-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
