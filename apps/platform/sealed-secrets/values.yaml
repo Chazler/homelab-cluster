@@ -1,4 +1,6 @@
 sealed-secrets:
+  createcontroller: true
+  
   serviceAccount:
     create: true
     name: sealed-secrets-controller
