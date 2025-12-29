@@ -86,7 +86,7 @@ cilium:
     tls:
       auto:
         enabled: true
-        method: cronJob
+        method: helm
         certValidityDuration: 1095  # 3 years
     
     relay:
