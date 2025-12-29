@@ -1,0 +1,20 @@
+sealed-secrets:
+  serviceAccount:
+    create: true
+    name: sealed-secrets-controller
+
+  secretName: "sealed-secrets-key"
+  keyrenewperiod: "0"
+
+  podSecurityContext:
+  enabled: true
+  fsGroup: 65534
+
+  containerSecurityContext:
+    enabled: true
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 1001
+
+  networkPolicy:
+    enabled: false
