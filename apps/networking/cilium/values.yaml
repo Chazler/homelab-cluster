@@ -49,7 +49,7 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: true
+        enabled: false # Disabled until prometheus is installed
 
   # Monitoring Configuration
   monitor:
@@ -58,7 +58,7 @@ cilium:
   prometheus:
     enabled: true
     serviceMonitor:
-      enabled: true
+      enabled: false # Disabled until prometheus is installed
 
   dashboards:
     enabled: true
@@ -77,7 +77,7 @@ cilium:
         - icmp
         - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
       serviceMonitor:
-        enabled: true
+        enabled: false # Disabled until prometheus is installed
       dashboards:
         enabled: true
         annotations:
@@ -95,7 +95,7 @@ cilium:
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: true
+          enabled: false # Disabled until prometheus is installed
     
     ui:
       enabled: true
