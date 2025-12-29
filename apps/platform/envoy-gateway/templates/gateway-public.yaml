@@ -3,6 +3,7 @@ kind: Gateway
 metadata:
   name: envoy-gateway-public
   annotations:
+    'cert-manager.io/revision-history-limit': '1'
     'cert-manager.io/cluster-issuer': letsencrypt-dns
 spec:
   gatewayClassName: envoy-gateway
@@ -20,5 +21,6 @@ spec:
       tls:
         mode: Terminate
         certificateRefs:
-          - kind: Secret
-            name: wildcard-tls  # wildcard TLS certificate
+        - group: ''
+          kind: Secret
+          name: wildcard-tls  # wildcard TLS certificate
