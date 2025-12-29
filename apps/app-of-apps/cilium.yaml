@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/Chazler/homelab-cluster.git
-    targetRevision: main
+    revision: main
     path: apps/networking/cilium
   destination:
     server: https://kubernetes.default.svc
