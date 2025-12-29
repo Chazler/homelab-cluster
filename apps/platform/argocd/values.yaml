@@ -10,7 +10,7 @@ argo-cd:
   server:
     replicas: 1
     httproute:
-      enabled: true
+      enabled: false
       hostnames:
         - argocd.k8s.joeriberman.nl
       parentRefs:
