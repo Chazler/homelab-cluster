@@ -8,12 +8,12 @@ spec:
   gatewayClassName: envoy-gateway
   addresses:
     - type: IPAddress
-      value: 10.0.1.2  # your LB IP
+      value: 10.0.1.2
   listeners:
     - name: web-https
       protocol: HTTPS
       port: 443
-      hostname: '*'             # wildcard listener
+      hostname: '*.k8s.joeriberman.nl'  # wildcard listener
       allowedRoutes:
         namespaces:
           from: All
