@@ -1,4 +1,0 @@
-# Values for local-path-provisioner
-storageClass:
-  defaultClass: true
-  name: local-path

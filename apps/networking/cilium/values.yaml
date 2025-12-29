@@ -16,7 +16,7 @@ cilium:
   kubeProxyReplacement: true
   
   # API Server Configuration
-  k8sServiceHost: 10.0.0.10
+  k8sServiceHost: localhost
   k8sServicePort: 6443
 
   # Talos-specific security context
@@ -24,6 +24,7 @@ cilium:
     capabilities:
       ciliumAgent: [ CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID ]
       cleanCiliumState: [ NET_ADMIN,SYS_ADMIN,SYS_RESOURCE ]
+      
   # Talos-specific cgroup configuration
   cgroup:
     autoMount:
