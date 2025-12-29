@@ -2,7 +2,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: wildcard-k8s-joeriberman
-  namespace: envoy-gateway-system
+  namespace: envoy-gateway
 spec:
   secretName: wildcard-tls
   issuerRef:
