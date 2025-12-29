@@ -1,0 +1,24 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: envoy-gateway-public
+  annotations:
+    'cert-manager.io/cluster-issuer': letsencrypt-dns
+spec:
+  gatewayClassName: envoy-gateway
+  addresses:
+    - type: IPAddress
+      value: 10.0.1.2  # your LB IP
+  listeners:
+    - name: web-https
+      protocol: HTTPS
+      port: 443
+      hostname: '*'             # wildcard listener
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - kind: Secret
+            name: wildcard-tls  # wildcard TLS certificate
