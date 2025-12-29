@@ -1,6 +1,6 @@
 sealed-secrets:
   createcontroller: true
-  
+
   serviceAccount:
     create: true
     name: sealed-secrets-controller
@@ -9,8 +9,8 @@ sealed-secrets:
   keyrenewperiod: "0"
 
   podSecurityContext:
-  enabled: true
-  fsGroup: 65534
+    enabled: true
+    fsGroup: 65534
 
   containerSecurityContext:
     enabled: true
