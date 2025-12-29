@@ -19,19 +19,6 @@ gateway-helm:
         level:
           default: warn
 
-httpRoutes:
-  - name: argocd
-    namespace: argocd
-    hostname: argocd.yourdomain.com
-    serviceName: argocd-server
-    servicePort: 80
-
-  - name: jellyfin
-    namespace: default
-    hostname: jellyfin.joeriberman.nl
-    serviceName: jellyfin-external
-    servicePort: 443
-    
 externalServices:
   - name: jellyfin-external
     namespace: default
