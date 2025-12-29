@@ -15,7 +15,7 @@ argo-cd:
         - argocd.k8s.joeriberman.nl
       parentRefs:
         - name: envoy-gateway-public
-          namespace: envoy-gateway-system
+          namespace: envoy-gateway
           sectionName: web-https
 
     extraArgs:
