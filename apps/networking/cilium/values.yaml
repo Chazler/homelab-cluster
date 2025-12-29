@@ -108,7 +108,7 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: true
+        enabled: false # Disabled until prometheus is installed
     dashboards:
       enabled: true
       annotations:
