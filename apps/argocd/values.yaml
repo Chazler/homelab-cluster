@@ -1,22 +1,23 @@
 argo-cd:
   global:
-    domain: argocd.joeriberman.nl
-
+    logging:
+      level: info
+      format: json
+  crds:
+    annotations:
+      argocd.argoproj.io/sync-options: ServerSideApply=true
+  
   server:
     replicas: 1
-
     httproute:
       enabled: true
       hostnames:
-        - argocd.feddema.dev
+        - argocd.k8s.joeriberman.nl
       parentRefs:
-        - name: envoy-gateway-main
-          namespace: envoy-gateway
+        - name: envoy-gateway-public
+          namespace: envoy-gateway-system
           sectionName: web-https
 
-    service:
-      type: LoadBalancer
-    
     extraArgs:
       - --insecure
 

@@ -18,10 +18,3 @@ gateway-helm:
       logging:
         level:
           default: warn
-
-externalServices:
-  - name: jellyfin-external
-    namespace: default
-    externalHost: 192.168.1.81  # IP or hostname
-    port: 443
-    targetPort: 443
