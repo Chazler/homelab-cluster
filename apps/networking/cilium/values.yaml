@@ -16,8 +16,8 @@ cilium:
   kubeProxyReplacement: true
   
   # API Server Configuration
-  k8sServiceHost: localhost
-  k8sServicePort: 6443
+  k8sServiceHost: 127.0.0.1  # KubePrism listens on localhost
+  k8sServicePort: 7445       # KubePrism port (from your Talos config)
 
   # Talos-specific security context
   securityContext:
