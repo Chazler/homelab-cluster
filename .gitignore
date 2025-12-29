@@ -18,6 +18,7 @@ talos/worker.yaml
 # Secret files
 secrets.yaml
 secrets.yml
+secret.yaml
 *-secrets.yaml
 *-secrets.yml
 
