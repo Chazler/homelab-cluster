@@ -1,8 +1,6 @@
 apiVersion: v2
 name: envoy-gateway
 version: 1.0.1
-annotations:
-  argocd.argoproj.io/sync-options: ServerSideApply=true
 
 dependencies:
   - name: gateway-helm
