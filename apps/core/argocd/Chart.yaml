@@ -1,6 +1,6 @@
 apiVersion: v2
 name: argocd
-version: 1.0.0
+version: 1.0.1
 annotations:
   argocd.argoproj.io/sync-options: ServerSideApply=true
 
