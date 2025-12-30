@@ -43,3 +43,4 @@ secret.yaml
 # Helm files
 **/*.tgz
 **/charts/
+Chart.lock
