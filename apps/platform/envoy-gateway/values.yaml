@@ -18,7 +18,3 @@ gateway-helm:
       logging:
         level:
           default: warn
-
-  crds:
-    annotations:
-      argocd.argoproj.io/sync-options: ServerSideApply=true
