@@ -1,8 +1,6 @@
 apiVersion: v2
 name: argocd
-version: 1.0.1
-annotations:
-  argocd.argoproj.io/sync-options: ServerSideApply=true
+version: 1.0.2
 
 dependencies:
   - name: argo-cd
