@@ -15,10 +15,6 @@ metadata:
 spec:
   serviceSelector:
     matchLabels: {}  # Matches all LoadBalancer services
-  nodeSelector:
-    matchExpressions:
-    - key: node-role.kubernetes.io/control-plane
-      operator: DoesNotExist  # Only workers announce (optional)
   interfaces:
   - enp1s0
   externalIPs: true
