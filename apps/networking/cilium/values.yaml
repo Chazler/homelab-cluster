@@ -4,7 +4,7 @@ cilium:
     mode: kubernetes
 
   # Network Interface Configuration
-  devices: "enp1s0"
+  devices: "enp2s0"
 
   # L2 Announcements for LoadBalancer services
   l2announcements:
