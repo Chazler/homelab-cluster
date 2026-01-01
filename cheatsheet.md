@@ -9,5 +9,9 @@ kubectl describe order wildcard-tls-1-1065682888 -n envoy-gateway 2>/dev/null | 
 
 kubectl describe certificaterequest wildcard-tls-1 -n envoy-gateway | tail -30
 
-kubectl get application envoy-gateway -n argocd -o yaml | grep -A 5 "syncPolicy:
-"
+kubectl get application envoy-gateway -n argocd -o yaml | grep -A 5 "syncPolicy:"
+
+
+kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableL2Announcements
+kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep KubeProxyReplacement
+kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableExternalIPs
