@@ -16,6 +16,6 @@ spec:
   serviceSelector:
     matchLabels: {}  # Matches all LoadBalancer services
   interfaces:
-  - enp2s0
+  - enp1s0
   externalIPs: true
   loadBalancerIPs: true
