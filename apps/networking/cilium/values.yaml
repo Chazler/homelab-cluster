@@ -7,10 +7,11 @@ cilium:
   devices: "enp1s0"
 
   # L2 Announcements for LoadBalancer services
-  l2Announcements:
+  l2announcements:
     enabled: true
   
-  enableL2NeighDiscovery: true
+  l2NeighDiscovery:
+    enabled: true
 
   # Kube-proxy replacement
   kubeProxyReplacement: true
