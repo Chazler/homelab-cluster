@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: TLSRoute
+metadata:
+  name: external-server
+  namespace: default
+spec:
+  hostnames:
+    - joeriberman.nl
+    - jellyfin.joeriberman.nl
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
+      namespace: envoy-gateway
+      sectionName: tls-passthrough
+  rules:
+    - backendRefs:
+        - group: ""
+          kind: Service
+          name: external-server
+          port: 443
