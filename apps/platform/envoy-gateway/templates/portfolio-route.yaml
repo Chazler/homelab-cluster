@@ -7,10 +7,10 @@ spec:
     - joeriberman.nl
   rules:
     - backendRefs:
-        - group: ""
-          kind: Service
+        - group: gateway.networking.k8s.io
+          kind: IPAddress
           name: portfolio-ip
-          port: 443 
+          port: 3010 
 ---
 apiVersion: gateway.networking.k8s.io/v1alpha2
 kind: IPAddress
