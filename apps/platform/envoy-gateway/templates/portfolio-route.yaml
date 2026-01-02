@@ -1,0 +1,21 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: portfolio-route
+spec:
+  hostnames:
+    - joeriberman.nl
+  rules:
+    - backendRefs:
+        - name: external-website
+          port: 443 
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: external-website
+subsets:
+  - addresses:
+      - ip: 192.168.1.81
+    ports:
+      - port: 3010

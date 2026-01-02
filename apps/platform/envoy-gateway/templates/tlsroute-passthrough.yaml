@@ -5,7 +5,6 @@ metadata:
   namespace: default
 spec:
   hostnames:
-    - joeriberman.nl
     - jellyfin.joeriberman.nl
   parentRefs:
     - group: gateway.networking.k8s.io
