@@ -1,5 +1,4 @@
----
-apiVersion: cilium.io/v2alpha1
+sapiVersion: cilium.io/v2alpha1
 kind: CiliumLoadBalancerIPPool
 metadata:
   name: default-pool
@@ -7,15 +6,4 @@ spec:
   allowFirstLastIPs: "No"
   blocks:
   - cidr: 10.0.1.0/24  # 10.0.1.0 - 10.0.1.255 (256 IPs)
----
-apiVersion: cilium.io/v2alpha1
-kind: CiliumL2AnnouncementPolicy
-metadata:
-  name: default-policy
-spec:
-  serviceSelector:
-    matchLabels: {}  # Matches all LoadBalancer services
-  interfaces:
-  - enp1s0
-  externalIPs: true
-  loadBalancerIPs: true
+  
