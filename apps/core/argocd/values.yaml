@@ -27,7 +27,7 @@ argo-cd:
       hostnames:
         - argocd.k8s.joeriberman.nl
       parentRefs:
-        - name: envoy-gateway-public
+        - name: envoy-gateway
           namespace: envoy-gateway
           sectionName: web-https
   
