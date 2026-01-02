@@ -4,21 +4,11 @@ metadata:
   name: external-server
   namespace: default
 spec:
+  type: ExternalName
+  # ExternalName must be a DNS name, not a raw IP.
+  # nip.io resolves <ip>.nip.io to that IP (e.g., 192.168.1.81.nip.io -> 192.168.1.81).
+  externalName: 192.168.1.81.nip.io
   ports:
     - name: https
       port: 443
       protocol: TCP
-      targetPort: 443
----
-apiVersion: v1
-kind: Endpoints
-metadata:
-  name: external-server
-  namespace: default
-subsets:
-  - addresses:
-      - ip: 192.168.1.81
-    ports:
-      - name: https
-        port: 443
-        protocol: TCP
