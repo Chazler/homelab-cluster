@@ -7,15 +7,15 @@ spec:
     - joeriberman.nl
   rules:
     - backendRefs:
-        - name: external-website
+        - group: ""
+          kind: Service
+          name: portfolio-ip
           port: 443 
 ---
-apiVersion: v1
-kind: Endpoints
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: IPAddress
 metadata:
-  name: external-website
-subsets:
-  - addresses:
-      - ip: 192.168.1.81
-    ports:
-      - port: 3010
+    name: portfolio-ip
+spec:
+  addresses:
+    - 192.168.1.81
