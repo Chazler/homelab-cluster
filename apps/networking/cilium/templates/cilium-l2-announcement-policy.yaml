@@ -1,4 +1,4 @@
-apiVersion: gateway.envoyproxy.io/v1alpha1
+apiVersion: v2
 kind: CiliumL2AnnouncementPolicy
 metadata:
   name: default-policy
