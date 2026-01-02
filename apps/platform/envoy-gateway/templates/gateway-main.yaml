@@ -10,7 +10,7 @@ spec:
   gatewayClassName: envoy-gateway
   addresses:
     - type: IPAddress
-      value: 10.0.1.2
+      value: 10.0.0.242
   listeners:
     # HTTPS Termination for *.k8s.joeriberman.nl
     - name: web-https
