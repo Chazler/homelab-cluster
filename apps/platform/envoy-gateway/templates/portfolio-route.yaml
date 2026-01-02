@@ -12,10 +12,10 @@ spec:
           name: portfolio-ip
           port: 3010 
 ---
-apiVersion: gateway.networking.k8s.io/v1alpha2
-kind: IPAddress
+apiVersion: v1
+kind: Service
 metadata:
-    name: portfolio-ip
+  name: portfolio-name
 spec:
-  addresses:
-    - 192.168.1.81
+  type: ExternalName
+  externalName: 192.168.1.81.nip.io
