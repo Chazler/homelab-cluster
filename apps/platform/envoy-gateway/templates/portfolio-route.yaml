@@ -7,9 +7,7 @@ spec:
     - joeriberman.nl
   rules:
     - backendRefs:
-        - group: gateway.networking.k8s.io
-          kind: IPAddress
-          name: portfolio-ip
+          name: portfolio-name
           port: 3010 
 ---
 apiVersion: v1
@@ -19,3 +17,5 @@ metadata:
 spec:
   type: ExternalName
   externalName: 192.168.1.81.nip.io
+  ports:
+      port: 3010
