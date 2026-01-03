@@ -44,3 +44,4 @@ secret.yaml
 **/*.tgz
 **/charts/
 Chart.lock
+cheatsheet-secret.md
