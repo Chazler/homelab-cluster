@@ -40,3 +40,4 @@ route:
     kind: Service
     serviceName: vault-ui
     port: 8200
+    weight: 1
