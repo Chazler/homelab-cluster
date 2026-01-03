@@ -9,7 +9,7 @@ vault:
 
     dataStorage:
       enabled: true
-      size: 5Gi
+      size: 2Gi
       storageClass: platform-rwo
     
     affinity:
