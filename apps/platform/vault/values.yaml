@@ -30,9 +30,13 @@ route:
   enabled: true
   hostname: vault.k8s.joeriberman.nl
   parentGateway:
+    group: gateway.networking.k8s.io
+    kind: Gateway
     name: envoy-gateway
     namespace: envoy-gateway
     sectionName: web-https
   backend:
+    group: ''
+    kind: Service
     serviceName: vault-ui
     port: 8200

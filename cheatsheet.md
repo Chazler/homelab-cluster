@@ -15,3 +15,7 @@ kubectl get application envoy-gateway -n argocd -o yaml | grep -A 5 "syncPolicy:
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableL2Announcements
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep KubeProxyReplacement
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableExternalIPs
+
+
+talosctl upgrade --nodes 10.0.0.10 \
+  --image factory.talos.dev/metal-installer/
