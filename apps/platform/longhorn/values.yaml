@@ -1,0 +1,6 @@
+storageClass:
+  name: platform-rwo
+  provisioner: driver.longhorn.io
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+  isDefault: true
