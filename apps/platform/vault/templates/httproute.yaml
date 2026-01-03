@@ -24,4 +24,5 @@ spec:
           kind: {{ .Values.route.backend.kind | quote }}
           name: {{ .Values.route.backend.serviceName | quote }}
           port: {{ .Values.route.backend.port }}
+          weight: {{ .Values.route.backend.weight }}
 {{- end }}
