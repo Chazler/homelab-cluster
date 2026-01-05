@@ -16,7 +16,9 @@ metadata:
   {{- end }}
 spec:
   parentRefs:
-    - name: envoy-gateway
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: envoy-gateway
       namespace: envoy-gateway
       sectionName: web-https
   hostnames:
@@ -27,7 +29,9 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: auth-blackhole
+        - group: ''
+          kind: Service
+          name: auth-blackhole
           port: 80
 ---
 apiVersion: v1
