@@ -6,9 +6,9 @@ kyverno:
       clusterRole:
         extraResources:
           - apiGroups:
-              - gateway.envoyproxy.io
+              - ""
             resources:
-              - securitypolicies
+              - secrets
             verbs:
               - get
               - list
@@ -18,9 +18,9 @@ kyverno:
               - patch
               - delete
           - apiGroups:
-              - gateway.networking.k8s.io
+              - gateway.envoyproxy.io
             resources:
-              - referencegrants
+              - securitypolicies
             verbs:
               - get
               - list
@@ -35,9 +35,9 @@ kyverno:
       clusterRole:
         extraResources:
           - apiGroups:
-              - gateway.envoyproxy.io
+              - ""
             resources:
-              - securitypolicies
+              - secrets
             verbs:
               - get
               - list
@@ -47,9 +47,9 @@ kyverno:
               - patch
               - delete
           - apiGroups:
-              - gateway.networking.k8s.io
+              - gateway.envoyproxy.io
             resources:
-              - referencegrants
+              - securitypolicies
             verbs:
               - get
               - list
@@ -67,14 +67,12 @@ policies:
     labelKey: auth.joeriberman.nl/oidc
     labelValue: "true"
 
-    issuer: "https://accounts.google.com"
-    redirectURL: https://auth.joeriberman.nl/oauth2/callback
-    cookieDomain: "joeriberman.nl"
-
-    # Central OIDC client secret location.
+    # Source namespace for cloning the OIDC secrets into target namespaces.
     secretNamespace: envoy-gateway
     clientSecretName: oidc-client-secret
     clientIDSecretName: oidc-client-id
 
-    # Generate a ReferenceGrant in secretNamespace for each namespace which opts-in.
-    generateReferenceGrant: true
+    issuer: https://accounts.google.com
+    redirectURL: https://auth.joeriberman.nl/oauth2/callback
+    cookieDomain: joeriberman.nl
+
