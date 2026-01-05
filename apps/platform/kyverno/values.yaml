@@ -13,6 +13,10 @@ kyverno:
               - get
               - list
               - watch
+              - create
+              - update
+              - patch
+              - delete
           - apiGroups:
               - gateway.networking.k8s.io
             resources:
@@ -21,6 +25,10 @@ kyverno:
               - get
               - list
               - watch
+              - create
+              - update
+              - patch
+              - delete
 
   backgroundController:
     rbac:
@@ -34,6 +42,10 @@ kyverno:
               - get
               - list
               - watch
+              - create
+              - update
+              - patch
+              - delete
           - apiGroups:
               - gateway.networking.k8s.io
             resources:
@@ -42,6 +54,10 @@ kyverno:
               - get
               - list
               - watch
+              - create
+              - update
+              - patch
+              - delete
 
 policies:
   envoyOidc:
