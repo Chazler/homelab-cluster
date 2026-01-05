@@ -1,0 +1,87 @@
+{{- if .Values.policies.envoyOidc.enabled }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: generate-envoy-oidc-securitypolicy
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: generate-securitypolicy
+      match:
+        any:
+          - resources:
+              kinds:
+                - gateway.networking.k8s.io/v1/HTTPRoute
+              selector:
+                matchLabels:
+                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
+      generate:
+        apiVersion: gateway.envoyproxy.io/v1alpha1
+        kind: SecurityPolicy
+        name: oidc-{{ "{{request.object.metadata.name}}" }}
+        namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
+        synchronize: true
+        data:
+          apiVersion: gateway.envoyproxy.io/v1alpha1
+          kind: SecurityPolicy
+          metadata:
+            name: oidc-{{ "{{request.object.metadata.name}}" }}
+            namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
+          spec:
+            targetRef:
+              group: gateway.networking.k8s.io
+              kind: HTTPRoute
+              name: {{ "{{request.object.metadata.name}}" | quote }}
+            oidc:
+              provider:
+                issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
+              redirectURL: {{ required "policies.envoyOidc.redirectURL is required when enabled" .Values.policies.envoyOidc.redirectURL | quote }}
+              {{- if .Values.policies.envoyOidc.cookieDomain }}
+              cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
+              {{- end }}
+              clientIDRef:
+                name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
+                namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
+              clientSecret:
+                name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
+                namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
+
+    {{- if .Values.policies.envoyOidc.generateReferenceGrant }}
+    - name: generate-referencegrant
+      match:
+        any:
+          - resources:
+              kinds:
+                - gateway.networking.k8s.io/v1/HTTPRoute
+              selector:
+                matchLabels:
+                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
+      generate:
+        apiVersion: gateway.networking.k8s.io/v1beta1
+        kind: ReferenceGrant
+        name: oidc-secret-from-{{ "{{request.object.metadata.namespace}}" }}
+        namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
+        synchronize: true
+        data:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          metadata:
+            name: oidc-secret-from-{{ "{{request.object.metadata.namespace}}" }}
+            namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
+          spec:
+            from:
+              - group: gateway.envoyproxy.io
+                kind: SecurityPolicy
+                namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
+            to:
+              - group: ""
+                kind: Secret
+                name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
+              {{- if and .Values.policies.envoyOidc.clientIDSecretName (ne .Values.policies.envoyOidc.clientIDSecretName .Values.policies.envoyOidc.clientSecretName) }}
+              - group: ""
+                kind: Secret
+                name: {{ .Values.policies.envoyOidc.clientIDSecretName | quote }}
+              {{- end }}
+    {{- end }}
+{{- end }}

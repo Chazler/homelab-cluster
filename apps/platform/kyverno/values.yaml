@@ -1,0 +1,22 @@
+kyverno:
+  fullnameOverride: kyverno
+
+policies:
+  envoyOidc:
+    enabled: true
+
+    # HTTPRoutes with this label will get an OIDC SecurityPolicy generated.
+    labelKey: auth.joeriberman.nl/oidc
+    labelValue: "true"
+
+    issuer: "https://accounts.google.com"
+    redirectURL: https://auth.joeriberman.nl/oauth2/callback
+    cookieDomain: "joeriberman.nl"
+
+    # Central OIDC client secret location.
+    secretNamespace: envoy-gateway
+    clientSecretName: oidc-client-secret
+    clientIDSecretName: oidc-client-id
+
+    # Generate a ReferenceGrant in secretNamespace for each namespace which opts-in.
+    generateReferenceGrant: true

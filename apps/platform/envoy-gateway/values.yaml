@@ -18,3 +18,13 @@ gateway-helm:
       logging:
         level:
           default: warn
+
+routes:
+  auth:
+    enabled: true
+    hostname: auth.joeriberman.nl
+    labels: {}
+    oidc:
+      enabled: true
+      labelKey: auth.joeriberman.nl/oidc
+      labelValue: "true"
