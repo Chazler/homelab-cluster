@@ -76,3 +76,6 @@ policies:
     redirectURL: https://auth.joeriberman.nl/oauth2/callback
     cookieDomain: joeriberman.nl
 
+    emailWhitelist:
+      - joeriberman@gmail.com
+
