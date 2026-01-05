@@ -27,21 +27,6 @@ spec:
             kind: Secret
             name: wildcard-tls
     
-    # HTTPS Termination for *.k8s.joeriberman.nl
-    - name: web-https-k8s
-      protocol: HTTPS
-      port: 443
-      hostname: "*.k8s.joeriberman.nl"
-      allowedRoutes:
-        namespaces:
-          from: All
-      tls:
-        mode: Terminate
-        certificateRefs:
-          - group: ""
-            kind: Secret
-            name: wildcard-k8s-tls
-    
     # # TLS Passthrough for other traffic
     # # Note: You must define TLSRoutes with specific hostnames to match this listener.
     # # If you encounter conflicts, ensure TLSRoutes specify hostnames that do not overlap with *.k8s.joeriberman.nl
