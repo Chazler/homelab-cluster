@@ -11,12 +11,12 @@ kubectl describe certificaterequest wildcard-tls-1 -n envoy-gateway | tail -30
 
 kubectl get application envoy-gateway -n argocd -o yaml | grep -A 5 "syncPolicy:"
 
-
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableL2Announcements
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep KubeProxyReplacement
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableExternalIPs
 
 
 kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
 talosctl upgrade --nodes 10.0.0.10 \
   --image factory.talos.dev/metal-installer/
