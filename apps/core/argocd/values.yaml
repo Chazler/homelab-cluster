@@ -25,7 +25,7 @@ argo-cd:
     httproute:
       enabled: true
       hostnames:
-        - argocd.k8s.joeriberman.nl
+        - argocd.joeriberman.nl
       parentRefs:
         - group: gateway.networking.k8s.io
           kind: Gateway

@@ -28,7 +28,7 @@ vault:
 
 route:
   enabled: true
-  hostname: vault.k8s.joeriberman.nl
+  hostname: vault.joeriberman.nl
   labels: {}
   oidc:
     enabled: true
