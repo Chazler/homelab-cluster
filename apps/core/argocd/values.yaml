@@ -31,7 +31,7 @@ argo-cd:
           kind: Gateway
           name: envoy-gateway
           namespace: envoy-gateway
-          sectionName: web-https
+          sectionName: web-https-k8s
   
   repoServer:
     replicas: 1
