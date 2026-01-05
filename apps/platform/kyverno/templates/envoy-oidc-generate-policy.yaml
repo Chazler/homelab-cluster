@@ -85,4 +85,26 @@ spec:
                 name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
               clientSecret:
                 name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
+            {{- if .Values.policies.envoyOidc.emailWhitelist }}
+            authorization:
+              defaultAction: Deny
+              rules:
+                - action: Allow
+                  name: allow-whitelisted-emails
+                  principal:
+                    jwt:
+                      provider: google
+                      claims:
+                        - name: email
+                          values:
+                            {{- range .Values.policies.envoyOidc.emailWhitelist }}
+                            - {{ . | quote }}
+                            {{- end }}
+            jwt:
+              providers:
+                - name: google
+                  issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
+                  remoteJWKS:
+                    uri: https://www.googleapis.com/oauth2/v3/certs
+            {{- end }}
 {{- end }}
