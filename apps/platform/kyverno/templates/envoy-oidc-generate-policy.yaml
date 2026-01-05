@@ -81,6 +81,8 @@ spec:
               {{- if .Values.policies.envoyOidc.cookieDomain }}
               cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
               {{- end }}
+              cookieNames:
+                idToken: id-token
               clientIDRef:
                 name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
               clientSecret:
@@ -106,5 +108,8 @@ spec:
                   issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
                   remoteJWKS:
                     uri: https://www.googleapis.com/oauth2/v3/certs
+                  extractFrom:
+                    cookies:
+                    - id-token
             {{- end }}
 {{- end }}
