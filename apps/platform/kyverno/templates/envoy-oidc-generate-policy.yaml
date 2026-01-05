@@ -47,7 +47,7 @@ spec:
           namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
           name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
 
-    - name: generate-securitypolicy
+    - name: generate-securitypolicy-protected
       match:
         any:
           - resources:
@@ -56,6 +56,13 @@ spec:
               selector:
                 matchLabels:
                   {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
+      {{- if .Values.policies.envoyOidc.emailWhitelist }}
+      exclude:
+        any:
+          - resources:
+              names:
+                - auth
+      {{- end }}
       skipBackgroundRequests: true
       generate:
         apiVersion: gateway.envoyproxy.io/v1alpha1
@@ -112,4 +119,49 @@ spec:
                     cookies:
                     - id-token
             {{- end }}
+
+    {{- if .Values.policies.envoyOidc.emailWhitelist }}
+    - name: generate-securitypolicy-auth
+      match:
+        all:
+          - resources:
+              kinds:
+                - gateway.networking.k8s.io/v1/HTTPRoute
+              names:
+                - auth
+              selector:
+                matchLabels:
+                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
+      skipBackgroundRequests: true
+      generate:
+        apiVersion: gateway.envoyproxy.io/v1alpha1
+        kind: SecurityPolicy
+        name: oidc-{{ "{{request.object.metadata.name}}" }}
+        namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
+        synchronize: true
+        data:
+          apiVersion: gateway.envoyproxy.io/v1alpha1
+          kind: SecurityPolicy
+          metadata:
+            name: oidc-{{ "{{request.object.metadata.name}}" }}
+            namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
+          spec:
+            targetRef:
+              group: gateway.networking.k8s.io
+              kind: HTTPRoute
+              name: {{ "{{request.object.metadata.name}}" | quote }}
+            oidc:
+              provider:
+                issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
+              redirectURL: {{ required "policies.envoyOidc.redirectURL is required when enabled" .Values.policies.envoyOidc.redirectURL | quote }}
+              {{- if .Values.policies.envoyOidc.cookieDomain }}
+              cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
+              {{- end }}
+              cookieNames:
+                idToken: id-token
+              clientIDRef:
+                name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
+              clientSecret:
+                name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
+    {{- end }}
 {{- end }}
