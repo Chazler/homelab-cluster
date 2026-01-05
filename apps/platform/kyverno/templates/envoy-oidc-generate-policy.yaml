@@ -8,6 +8,7 @@ spec:
   background: true
   rules:
     - name: clone-oidc-client-id
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
@@ -27,6 +28,7 @@ spec:
           name: {{ required "policies.envoyOidc.clientIDSecretName is required when enabled" .Values.policies.envoyOidc.clientIDSecretName | quote }}
 
     - name: clone-oidc-client-secret
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
