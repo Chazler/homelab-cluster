@@ -17,5 +17,6 @@ kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep KubeProx
 kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableExternalIPs
 
 
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
 talosctl upgrade --nodes 10.0.0.10 \
   --image factory.talos.dev/metal-installer/

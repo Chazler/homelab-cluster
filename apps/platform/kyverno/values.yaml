@@ -1,6 +1,48 @@
 kyverno:
   fullnameOverride: kyverno
 
+  admissionController:
+    rbac:
+      clusterRole:
+        extraResources:
+          - apiGroups:
+              - gateway.envoyproxy.io
+            resources:
+              - securitypolicies
+            verbs:
+              - get
+              - list
+              - watch
+          - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - referencegrants
+            verbs:
+              - get
+              - list
+              - watch
+
+  backgroundController:
+    rbac:
+      clusterRole:
+        extraResources:
+          - apiGroups:
+              - gateway.envoyproxy.io
+            resources:
+              - securitypolicies
+            verbs:
+              - get
+              - list
+              - watch
+          - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - referencegrants
+            verbs:
+              - get
+              - list
+              - watch
+
 policies:
   envoyOidc:
     enabled: true
