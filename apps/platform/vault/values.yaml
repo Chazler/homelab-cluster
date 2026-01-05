@@ -39,7 +39,7 @@ route:
     kind: Gateway
     name: envoy-gateway
     namespace: envoy-gateway
-    sectionName: web-https
+    sectionName: web-https-k8s
   backend:
     group: ''
     kind: Service

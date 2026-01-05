@@ -12,7 +12,7 @@ spec:
     - type: IPAddress
       value: 10.0.0.242
   listeners:
-    # HTTPS Termination for *.k8s.joeriberman.nl
+    # HTTPS Termination for *.joeriberman.nl
     - name: web-https
       protocol: HTTPS
       port: 443
@@ -26,6 +26,21 @@ spec:
           - group: ""
             kind: Secret
             name: wildcard-tls
+    
+    # HTTPS Termination for *.k8s.joeriberman.nl
+    - name: web-https-k8s
+      protocol: HTTPS
+      port: 443
+      hostname: "*.k8s.joeriberman.nl"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: wildcard-k8s-tls
     
     # # TLS Passthrough for other traffic
     # # Note: You must define TLSRoutes with specific hostnames to match this listener.
