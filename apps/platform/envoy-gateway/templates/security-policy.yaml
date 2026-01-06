@@ -1,0 +1,51 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: central-oidc
+  namespace: envoy-gateway
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: auth
+      namespace: envoy-gateway
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: vault
+      namespace: vault
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: argocd-server
+      namespace: argocd
+  oidc:
+    provider:
+      issuer: "https://accounts.google.com"
+    redirectURL: "https://auth.joeriberman.nl/oauth2/callback"
+    cookieDomain: "joeriberman.nl"
+    cookieNames:
+      idToken: id-token
+    clientIDRef:
+      name: oidc-client-id
+    clientSecret:
+      name: oidc-client-secret
+  authorization:
+    defaultAction: Deny
+    rules:
+      - action: Allow
+        name: allow-whitelisted-emails
+        principal:
+          jwt:
+            provider: google
+            claims:
+              - name: email
+                values:
+                  - joeriberman@gmail.com
+  jwt:
+    providers:
+      - name: google
+        issuer: "https://accounts.google.com"
+        remoteJWKS:
+          uri: https://www.googleapis.com/oauth2/v3/certs
+        extractFrom:
+          cookies:
+          - id-token
