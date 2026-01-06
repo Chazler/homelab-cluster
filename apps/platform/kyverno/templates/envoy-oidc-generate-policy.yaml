@@ -84,7 +84,7 @@ spec:
             oidc:
               provider:
                 issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
-              redirectURL: {{ required "policies.envoyOidc.redirectURL is required when enabled" .Values.policies.envoyOidc.redirectURL | quote }}
+              redirectURL: "https://{{ "{{request.object.spec.hostnames[0]}}" }}/oauth2/callback"
               {{- if .Values.policies.envoyOidc.cookieDomain }}
               cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
               {{- end }}
@@ -153,7 +153,7 @@ spec:
             oidc:
               provider:
                 issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
-              redirectURL: {{ required "policies.envoyOidc.redirectURL is required when enabled" .Values.policies.envoyOidc.redirectURL | quote }}
+              redirectURL: "https://{{ "{{request.object.spec.hostnames[0]}}" }}/oauth2/callback"
               {{- if .Values.policies.envoyOidc.cookieDomain }}
               cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
               {{- end }}
