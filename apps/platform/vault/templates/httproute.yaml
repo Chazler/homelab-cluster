@@ -54,15 +54,13 @@ spec:
       name: oidc-client-id
     clientSecret:
       name: oidc-client-secret
-  authorization:
-    defaultAction: Deny
-    rules:
-      - action: Allow
-        name: allow-whitelisted-emails
-        principal:
-          jwt:
-            provider: google
-            claims:
-              - name: email
-                values: ["joeriberman@gmail.com"]
+    scopes:
+      - openid
+      - email
+      - profile
+    authorization:
+      matchClaims:
+        email:
+          values:
+            - joeriberman@gmail.com
 {{- end }}
