@@ -73,7 +73,6 @@ policies:
     clientIDSecretName: oidc-client-id
 
     issuer: https://accounts.google.com
-    redirectURL: https://auth.joeriberman.nl/oauth2/callback
     cookieDomain: joeriberman.nl
 
     emailWhitelist:
