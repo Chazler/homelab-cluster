@@ -109,15 +109,6 @@ spec:
                             {{- range .Values.policies.envoyOidc.emailWhitelist }}
                             - {{ . | quote }}
                             {{- end }}
-            jwt:
-              providers:
-                - name: google
-                  issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
-                  remoteJWKS:
-                    uri: https://www.googleapis.com/oauth2/v3/certs
-                  extractFrom:
-                    cookies:
-                    - id-token
             {{- end }}
 
     {{- if .Values.policies.envoyOidc.emailWhitelist }}
