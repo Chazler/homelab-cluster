@@ -64,8 +64,5 @@ spec:
             provider: google
             claims:
               - name: email
-                values:
-                  {{- range .Values.policies.envoyOidc.emailWhitelist }}
-                  - {{ . | quote }}
-                  {{- end }}
+                values: ["joeriberman@gmail.com"]
 {{- end }}
