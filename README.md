@@ -93,7 +93,7 @@ kubectl exec -n vault vault-1 -- vault operator unseal <SECRET>
 
 Routes opt-in to OIDC by adding this label to their `HTTPRoute`:
 
-- `auth.joeriberman.nl/oidc: "true"`
+- `oidc: "true"`
 
 In this repo’s wrapper charts, you can usually enable this by setting the route value (which adds the label automatically):
 
@@ -108,5 +108,4 @@ Configuration lives in:
 Notes:
 
 - The OIDC client Secret is expected in the `envoy-gateway` namespace (default name: `envoy-oidc`).
-- The redirect URL is fixed to `https://auth.joeriberman.nl/oauth2/callback` and the `auth.joeriberman.nl` host is routed through Envoy Gateway.
-- A `ReferenceGrant` in `envoy-gateway` is generated automatically per opting-in namespace so the generated `SecurityPolicy` can reference the central Secret.
+- The redirect URL is generated per-route as `https://<route-hostname>/oauth2/callback`.

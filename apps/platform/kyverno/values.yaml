@@ -64,7 +64,7 @@ policies:
     enabled: true
 
     # HTTPRoutes with this label will get an OIDC SecurityPolicy generated.
-    labelKey: auth.joeriberman.nl/oidc
+    labelKey: oidc
     labelValue: "true"
 
     # Source namespace for cloning the OIDC secrets into target namespaces.
@@ -74,6 +74,16 @@ policies:
 
     issuer: https://accounts.google.com
     cookieDomain: joeriberman.nl
+
+    # - store idToken as plaintext so the JWT filter can read claims
+    scopes:
+      - email
+    idTokenCookieName: id-token
+
+    jwtProviderName: google
+    remoteJWKS:
+      uri: https://www.googleapis.com/oauth2/v3/certs
+      cacheDuration: 300s
 
     emailWhitelist:
       - joeriberman@gmail.com

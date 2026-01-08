@@ -26,5 +26,5 @@ routes:
     labels: {}
     oidc:
       enabled: true
-      labelKey: auth.joeriberman.nl/oidc
+      labelKey: oidc
       labelValue: "true"

@@ -56,25 +56,18 @@ spec:
               selector:
                 matchLabels:
                   {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
-      {{- if .Values.policies.envoyOidc.emailWhitelist }}
-      exclude:
-        any:
-          - resources:
-              names:
-                - auth
-      {{- end }}
       skipBackgroundRequests: true
       generate:
         apiVersion: gateway.envoyproxy.io/v1alpha1
         kind: SecurityPolicy
-        name: oidc-{{ "{{request.object.metadata.name}}" }}
+        name: oidc-policy-{{ "{{request.object.metadata.name}}" }}
         namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
         synchronize: true
         data:
           apiVersion: gateway.envoyproxy.io/v1alpha1
           kind: SecurityPolicy
           metadata:
-            name: oidc-{{ "{{request.object.metadata.name}}" }}
+            name: oidc-policy-{{ "{{request.object.metadata.name}}" }}
             namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
           spec:
             targetRef:
@@ -89,7 +82,13 @@ spec:
               cookieDomain: {{ .Values.policies.envoyOidc.cookieDomain | quote }}
               {{- end }}
               cookieNames:
-                idToken: id-token
+                idToken: {{ .Values.policies.envoyOidc.idTokenCookieName | default "id-token" | quote }}
+              {{- if .Values.policies.envoyOidc.scopes }}
+              scopes:
+                {{- range .Values.policies.envoyOidc.scopes }}
+                - {{ . | quote }}
+                {{- end }}
+              {{- end }}
               clientIDRef:
                 name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
               clientSecret:
@@ -102,54 +101,24 @@ spec:
                   name: allow-whitelisted-emails
                   principal:
                     jwt:
-                      provider: google
+                      provider: {{ .Values.policies.envoyOidc.jwtProviderName | default "google" | quote }}
                       claims:
                         - name: email
                           values:
                             {{- range .Values.policies.envoyOidc.emailWhitelist }}
                             - {{ . | quote }}
                             {{- end }}
+            jwt:
+              providers:
+                - name: {{ .Values.policies.envoyOidc.jwtProviderName | default "google" | quote }}
+                  issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
+                  remoteJWKS:
+                    uri: {{ required "policies.envoyOidc.remoteJWKS.uri is required when emailWhitelist is set" .Values.policies.envoyOidc.remoteJWKS.uri | quote }}
+                    {{- if .Values.policies.envoyOidc.remoteJWKS.cacheDuration }}
+                    cacheDuration: {{ .Values.policies.envoyOidc.remoteJWKS.cacheDuration }}
+                    {{- end }}
+                  extractFrom:
+                    cookies:
+                      - {{ .Values.policies.envoyOidc.idTokenCookieName | default "id-token" | quote }}
             {{- end }}
-
-    {{- if .Values.policies.envoyOidc.emailWhitelist }}
-    - name: generate-securitypolicy-auth
-      match:
-        all:
-          - resources:
-              kinds:
-                - gateway.networking.k8s.io/v1/HTTPRoute
-              names:
-                - auth
-              selector:
-                matchLabels:
-                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
-      skipBackgroundRequests: true
-      generate:
-        apiVersion: gateway.envoyproxy.io/v1alpha1
-        kind: SecurityPolicy
-        name: oidc-{{ "{{request.object.metadata.name}}" }}
-        namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
-        synchronize: true
-        data:
-          apiVersion: gateway.envoyproxy.io/v1alpha1
-          kind: SecurityPolicy
-          metadata:
-            name: oidc-{{ "{{request.object.metadata.name}}" }}
-            namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
-          spec:
-            targetRef:
-              group: gateway.networking.k8s.io
-              kind: HTTPRoute
-              name: {{ "{{request.object.metadata.name}}" | quote }}
-            oidc:
-              provider:
-                issuer: {{ required "policies.envoyOidc.issuer is required when enabled" .Values.policies.envoyOidc.issuer | quote }}
-              redirectURL: "https://{{ "{{request.object.spec.hostnames[0]}}" }}/oauth2/callback"
-              {{- if .Values.policies.envoyOidc.cookieDomain }}
-              {{- end }}
-              clientIDRef:
-                name: {{ default (required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName) .Values.policies.envoyOidc.clientIDSecretName | quote }}
-              clientSecret:
-                name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
-    {{- end }}
 {{- end }}

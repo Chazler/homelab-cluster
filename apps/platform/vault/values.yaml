@@ -32,7 +32,7 @@ route:
   labels: {}
   oidc:
     enabled: true
-    labelKey: auth.joeriberman.nl/oidc
+    labelKey: oidc
     labelValue: "true"
   parentGateway:
     group: gateway.networking.k8s.io
