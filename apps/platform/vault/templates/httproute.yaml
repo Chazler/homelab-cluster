@@ -56,7 +56,8 @@ spec:
       name: oidc-client-secret
     cookieNames:
       idToken: id-token
-    scopes: ["openid", "email", "profile"]
+    scopes:
+      - email
     disableTokenEncryption: true
   authorization:
     defaultAction: Deny
