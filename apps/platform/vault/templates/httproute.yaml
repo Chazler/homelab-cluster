@@ -69,6 +69,7 @@ spec:
             provider: google
             claims:
               - name: email
+                valueType: string
                 values:
                   - joeriberman@gmail.com
   jwt:
@@ -76,6 +77,7 @@ spec:
       - name: google
         issuer: https://accounts.google.com
         remoteJWKS:
+          cacheDuration: 300s
           uri: https://www.googleapis.com/oauth2/v3/certs
         extractFrom:
           cookies:
