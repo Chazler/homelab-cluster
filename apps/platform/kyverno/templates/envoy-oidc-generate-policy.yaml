@@ -56,7 +56,7 @@ spec:
               selector:
                 matchLabels:
                   {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
-      skipBackgroundRequests: true
+      skipBackgroundRequests: false
       generate:
         apiVersion: gateway.envoyproxy.io/v1alpha1
         kind: SecurityPolicy
