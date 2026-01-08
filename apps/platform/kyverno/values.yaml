@@ -61,7 +61,7 @@ kyverno:
 
 policies:
   envoyOidc:
-    enabled: false
+    enabled: true
 
     # HTTPRoutes with this label will get an OIDC SecurityPolicy generated.
     labelKey: auth.joeriberman.nl/oidc
