@@ -36,4 +36,36 @@ spec:
           name: {{ .Values.route.backend.serviceName | quote }}
           port: {{ .Values.route.backend.port }}
           weight: {{ .Values.route.backend.weight }}
+---
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata:
+  name: oidc-policy-vault
+spec:
+  targetRef:
+    group: gateway.networking.k8s.io
+    kind: HTTPRoute
+    name: vault
+  oidc:
+    provider:
+      issuer: https://accounts.google.com
+    redirectURL: "https://vault.joeriberman.nl/oauth2/callback"
+    clientIDRef:
+      name: oidc-client-id
+    clientSecret:
+      name: oidc-client-secret
+  authorization:
+    defaultAction: Deny
+    rules:
+      - action: Allow
+        name: allow-whitelisted-emails
+        principal:
+          jwt:
+            provider: google
+            claims:
+              - name: email
+                values:
+                  {{- range .Values.policies.envoyOidc.emailWhitelist }}
+                  - {{ . | quote }}
+                  {{- end }}
 {{- end }}
