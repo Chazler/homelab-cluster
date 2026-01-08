@@ -54,13 +54,27 @@ spec:
       name: oidc-client-id
     clientSecret:
       name: oidc-client-secret
-    scopes:
-      - openid
-      - email
-      - profile
-    authorization:
-      matchClaims:
-        email:
-          values:
-            - joeriberman@gmail.com
+    cookieNames:
+      idToken: id-token
+  authorization:
+    defaultAction: Deny
+    rules:
+      - action: Allow
+        name: allow-specific-email
+        principal:
+          jwt:
+            provider: google
+            claims:
+              - name: email
+                values:
+                  - joeriberman@gmail.com
+  jwt:
+    providers:
+      - name: google
+        issuer: https://accounts.google.com
+        remoteJWKS:
+          uri: https://www.googleapis.com/oauth2/v3/certs
+        extractFrom:
+          cookies:
+          - id-token
 {{- end }}
