@@ -23,6 +23,7 @@ argo-cd:
   server:
     replicas: 1
     httproute:
+      labels: { "auth.joeriberman.nl/oidc": "true" }
       enabled: true
       hostnames:
         - argocd.joeriberman.nl
