@@ -1,5 +1,9 @@
 replicaCount: 2
 
+# GHCR is private; this secret is created via a SealedSecret in templates/sealed-secret.yaml
+imagePullSecrets:
+  - ghcr-image-pull-secret
+
 image:
   repository: ghcr.io/chazler/portfolio
   tag: latest

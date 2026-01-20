@@ -14,6 +14,12 @@ spec:
       labels:
         {{- include "portfolio.selectorLabels" . | nindent 8 }}
     spec:
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- range .Values.imagePullSecrets }}
+        - name: {{ . | quote }}
+        {{- end }}
+      {{- end }}
       containers:
         - name: portfolio
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
