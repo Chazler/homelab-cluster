@@ -1,0 +1,38 @@
+replicaCount: 2
+
+image:
+  repository: ghcr.io/chazler/portfolio
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+# Prefer Gateway API (Envoy Gateway) routing over Ingress in this cluster.
+route:
+  enabled: true
+  hostname: joeriberman.nl
+  labels: {}
+  parentGateway:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: web-https
+  backend:
+    group: ''
+    kind: Service
+    # If omitted, defaults to this chart's Service name.
+    serviceName: ''
+    port: 80
+    weight: 1
+
+# The container serves a health endpoint at GET /health
+probes:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 2
+  failureThreshold: 3

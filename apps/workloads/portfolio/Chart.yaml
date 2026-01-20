@@ -1,0 +1,18 @@
+apiVersion: v2
+name: portfolio
+description: Helm chart for the portfolio website (static React build served by nginx)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+home: https://joeriberman.nl
+sources:
+  - https://github.com/Chazler/portfolio
+maintainers:
+  - name: Joeri Berman
+keywords:
+  - portfolio
+  - react
+  - nginx
+  - static-site
+annotations:
+  artifacthub.io/category: content-management
