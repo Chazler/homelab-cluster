@@ -1,0 +1,14 @@
+1) Install into the release namespace:
+   helm install {{ .Release.Name }} {{ .Chart.Name }} -n {{ .Release.Namespace }} --create-namespace
+
+2) Verify external routing and DNS:
+   {{- if .Values.route.enabled }}
+   HTTPRoute enabled.
+   Host: {{ .Values.route.hostname }}
+   {{- else }}
+   External routing is disabled.
+   {{- end }}
+
+3) Port-forward to test locally:
+   kubectl -n {{ .Release.Namespace }} port-forward svc/{{ include "portfolio.fullname" . }} 8080:{{ .Values.service.port }}
+   curl -i http://localhost:8080{{ .Values.probes.path }}
