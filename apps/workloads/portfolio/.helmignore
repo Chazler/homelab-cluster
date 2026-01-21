@@ -1,0 +1,3 @@
+# Never package plaintext secrets
+secret.yaml
+templates/secret.yaml
