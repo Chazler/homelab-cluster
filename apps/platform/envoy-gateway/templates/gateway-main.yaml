@@ -12,6 +12,21 @@ spec:
     - type: IPAddress
       value: 10.0.0.242
   listeners:
+    # HTTPS Termination for the apex domain joeriberman.nl (wildcard does NOT match apex)
+    - name: web-https-apex
+      protocol: HTTPS
+      port: 443
+      hostname: "joeriberman.nl"
+      allowedRoutes:
+        namespaces:
+          from: All
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: apex-tls
+
     # HTTPS Termination for *.joeriberman.nl
     - name: web-https
       protocol: HTTPS

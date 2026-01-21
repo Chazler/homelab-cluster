@@ -20,8 +20,10 @@ spec:
       {{- if .Values.route.parentGateway.sectionName }}
       sectionName: {{ .Values.route.parentGateway.sectionName | quote }}
       {{- end }}
+  {{- if .Values.route.hostname }}
   hostnames:
     - {{ .Values.route.hostname | quote }}
+  {{- end }}
   rules:
     - matches:
         - path:
