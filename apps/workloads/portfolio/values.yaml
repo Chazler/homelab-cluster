@@ -7,7 +7,7 @@ imagePullSecrets:
 image:
   repository: ghcr.io/chazler/portfolio
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
