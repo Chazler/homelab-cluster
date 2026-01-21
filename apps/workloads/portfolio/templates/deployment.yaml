@@ -14,10 +14,14 @@ spec:
       labels:
         {{- include "portfolio.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if .Values.imagePullSecrets }}
+      {{- if or .Values.imagePullSecrets .Values.pullSecret.enabled }}
       imagePullSecrets:
+        {{- if .Values.imagePullSecrets }}
         {{- range .Values.imagePullSecrets }}
         - name: {{ . | quote }}
+        {{- end }}
+        {{- else }}
+        - name: {{ .Values.pullSecret.name | quote }}
         {{- end }}
       {{- end }}
       containers:

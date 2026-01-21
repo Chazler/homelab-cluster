@@ -1,9 +1,7 @@
 1) Install into the release namespace:
    helm install {{ .Release.Name }} {{ .Chart.Name }} -n {{ .Release.Namespace }} --create-namespace
 
-   If the image is private, set `imagePullSecrets` in values.yaml and ensure the secret exists in the namespace.
-
-   GitOps option (recommended): set `pullSecret.enabled=true` and provide `pullSecret.encryptedDockerConfigJson` (kubeseal output).
+   Private GHCR image: either set `imagePullSecrets` to an existing Secret name, OR set `pullSecret.enabled=true` and provide `pullSecret.encryptedDockerConfigJson`.
 
 2) Verify external routing and DNS:
    {{- if .Values.route.enabled }}
