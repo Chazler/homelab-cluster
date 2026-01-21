@@ -16,6 +16,7 @@ service:
 # Prefer Gateway API (Envoy Gateway) routing over Ingress in this cluster.
 route:
   enabled: true
+  # Homepage (apex domain)
   hostname: joeriberman.nl
   labels: {}
   parentGateway:
@@ -23,7 +24,7 @@ route:
     kind: Gateway
     name: envoy-gateway
     namespace: envoy-gateway
-    sectionName: web-https
+    sectionName: web-https-apex
   backend:
     group: ''
     kind: Service
