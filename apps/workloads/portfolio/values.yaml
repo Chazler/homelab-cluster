@@ -1,8 +1,14 @@
 replicaCount: 2
 
-# GHCR is private; this secret is created via a SealedSecret in templates/sealed-secret.yaml
-imagePullSecrets:
-  - ghcr-image-pull-secret
+# Optional explicit pull secrets (names). If empty, and pullSecret.enabled=true, the chart will use pullSecret.name.
+imagePullSecrets: []
+
+# Create a SealedSecret for GHCR pulls.
+# Put the kubeseal output for the ".dockerconfigjson" key in encryptedDockerConfigJson.
+pullSecret:
+  enabled: true
+  name: ghcr-image-pull-secret
+  encryptedDockerConfigJson: ""
 
 image:
   repository: ghcr.io/chazler/portfolio
