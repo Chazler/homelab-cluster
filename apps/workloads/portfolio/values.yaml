@@ -13,10 +13,8 @@ service:
   type: ClusterIP
   port: 80
 
-# Prefer Gateway API (Envoy Gateway) routing over Ingress in this cluster.
 route:
   enabled: true
-  # Homepage (apex domain)
   hostname: joeriberman.nl
   labels: {}
   parentGateway:
@@ -28,12 +26,10 @@ route:
   backend:
     group: ''
     kind: Service
-    # If omitted, defaults to this chart's Service name.
     serviceName: ''
     port: 80
     weight: 1
 
-# The container serves a health endpoint at GET /health
 probes:
   enabled: true
   path: /health
