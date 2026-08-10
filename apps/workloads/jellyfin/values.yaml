@@ -1,0 +1,39 @@
+# Keep Jellyfin stopped until the archived /config has been restored to the PVC.
+replicaCount: 0
+
+image:
+  repository: linuxserver/jellyfin
+  tag: latest
+  pullPolicy: Always
+
+persistence:
+  storageClass: platform-rwo
+  size: 10Gi
+
+service:
+  port: 8096
+
+route:
+  hostname: jellyfin.joeriberman.nl
+  parentGateway:
+    name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: web-https
+
+# Set this to true only while copying the staged backup into the PVC.
+restoreHelper:
+  enabled: false
+
+podSecurityContext:
+  fsGroup: 1000
+
+restoreHelperSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    memory: 2Gi

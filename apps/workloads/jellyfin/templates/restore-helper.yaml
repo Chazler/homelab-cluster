@@ -1,0 +1,33 @@
+{{- if .Values.restoreHelper.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "jellyfin.fullname" . }}-restore-helper
+  labels:
+    {{- include "jellyfin.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jellyfin.name" . }}-restore-helper
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "jellyfin.name" . }}-restore-helper
+    spec:
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: restore-helper
+          image: alpine:3.21
+          command: ["sh", "-c", "sleep infinity"]
+          securityContext:
+            {{- toYaml .Values.restoreHelperSecurityContext | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: {{ include "jellyfin.fullname" . }}-config
+{{- end }}
