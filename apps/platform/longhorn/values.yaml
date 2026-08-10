@@ -1,3 +1,11 @@
+longhorn:
+  defaultSettings:
+    # The cluster has two storage nodes, so three replicas can never become healthy.
+    defaultReplicaCount: 2
+  persistence:
+    # The wrapper chart defines platform-rwo below; avoid two default classes.
+    defaultClass: false
+
 storageClass:
   name: platform-rwo
   provisioner: driver.longhorn.io
