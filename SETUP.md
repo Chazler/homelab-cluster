@@ -1,217 +1,204 @@
-# Talos Cluster Setup Guide
+# Talos Cluster Setup
 
-This document tracks the commands and steps taken to set up a 2-node Talos Kubernetes cluster with Cilium CNI and modern tooling.
-
-## Environment
-
-- **Network**: 10.0.0.0/24 VLAN (isolated)
-- **Gateway**: 10.0.0.1
-- **Control Plane**: 10.0.0.10 (talos-r7i-mbe)
-- **Worker**: 10.0.0.11 (talos-twk-hmz)
-- **Talos Version**: 1.11.5
-- **Kubernetes Version**: 1.34.1
+This guide rebuilds the cluster represented by this repository. It assumes the node addresses and network ranges documented in [README.md](README.md).
 
 ## Prerequisites
 
-- Talos ISO flashed to USB drive
-- Static IPs configured in router DHCP/VLAN settings
-- Both nodes booted from USB in maintenance mode
+Install:
 
-## Step 1: Generate Talos Configuration
+- `talosctl`
+- `kubectl`
+- Helm
+- Cilium CLI
+- `kubeseal`
+
+Boot each target node from a Talos installer image and confirm it is reachable in maintenance mode. Verify installation disk and interface names on each machine rather than assuming `/dev/sdb` and `enp1s0` are correct:
 
 ```bash
-# Generate secrets and configs
-talosctl gen config cluster https://10.0.0.10:6443 \
-  --output-dir talos/ \
-  --with-secrets talos/secrets.yml
-
-# This creates:
-# - talos/controlplane.yaml
-# - talos/worker.yaml
-# - talos/talosconfig
-# - talos/secrets.yml
+talosctl get disks --insecure --nodes <node-address>
+talosctl get links --insecure --nodes <node-address>
 ```
 
-## Step 2: Apply Configurations
+## 1. Generate Talos configuration
+
+Generate secrets once, then generate machine configurations with Cilium as the CNI and kube-proxy disabled:
 
 ```bash
-# Apply control plane config (node booted from USB, in maintenance mode)
+talosctl gen secrets --output-file talos/secrets.yml
+
+talosctl gen config homelab-cluster https://10.0.0.10:6443 \
+  --output-dir talos \
+  --with-secrets talos/secrets.yml \
+  --config-patch @talos/patches/cilium-cni.yaml \
+  --config-patch @talos/patches/disable-kube-proxy.yaml
+```
+
+Review both generated files before applying them. Configure the correct installation disk, static address or DHCP reservation, interface, routes and certificate SANs. Generated machine configurations contain private keys and must remain outside Git.
+
+Validate them:
+
+```bash
+talosctl validate --config talos/controlplane.yaml --mode metal
+talosctl validate --config talos/worker.yaml --mode metal
+```
+
+## 2. Install Talos
+
+These commands erase the configured installation disks:
+
+```bash
 talosctl apply-config --insecure \
   --nodes 10.0.0.10 \
   --file talos/controlplane.yaml
 
-# Wait for control plane to install to /dev/sda and reboot
-# Remove USB drive after installation, let node boot from disk
-
-# Apply worker config (node booted from USB, in maintenance mode)
 talosctl apply-config --insecure \
-  --nodes 10.0.0.11 \
+  --nodes 10.0.0.20 \
   --file talos/worker.yaml
-
-# Wait for worker to install to /dev/sda and reboot
-# Remove USB drive after installation
 ```
 
-## Step 3: Configure Talosctl Context
+Remove the installer media after installation and wait for both machines to reboot.
+
+## 3. Configure talosctl and bootstrap etcd
 
 ```bash
-# Merge talosconfig into default config
 talosctl config merge talos/talosconfig
-
-# Verify context
-talosctl config contexts
-talosctl -n 10.0.0.10 version
+talosctl bootstrap --nodes 10.0.0.10
+talosctl kubeconfig --nodes 10.0.0.10 kubeconfig
+export KUBECONFIG="$PWD/kubeconfig"
 ```
 
-## Step 4: Bootstrap Cluster
+The nodes remain `NotReady` until Cilium is installed.
+
+## 4. Install Cilium
+
+Build the pinned dependency and install the repository wrapper chart:
 
 ```bash
-# Bootstrap etcd on control plane
-talosctl bootstrap -n 10.0.0.10
+helm dependency build apps/networking/cilium
+helm upgrade --install cilium apps/networking/cilium \
+  --namespace kube-system
 
-# Wait for bootstrap to complete (~2-3 minutes)
-talosctl -n 10.0.0.10 get members
-```
-
-## Step 5: Get Kubeconfig
-
-```bash
-# Fetch kubeconfig from control plane
-talosctl kubeconfig -n 10.0.0.10 kubeconfig
-
-# Set environment variable for kubectl
-export KUBECONFIG=/Users/joeriberman/Git/talos-cluster/kubeconfig
-
-# Verify nodes
-kubectl get nodes
-```
-
-## Step 6: Switch to Cilium CNI
-
-```bash
-# Create patch directory
-mkdir -p talos/patches
-
-# Create cilium-cni.yaml patch:
-cat > talos/patches/cilium-cni.yaml <<EOF
-cluster:
-  network:
-    cni:
-      name: none  # Disable built-in CNI (Flannel), Cilium will handle it
-EOF
-
-# Apply patch to both nodes
-talosctl patch machineconfig -n 10.0.0.10 --patch @talos/patches/cilium-cni.yaml
-talosctl patch machineconfig -n 10.0.0.11 --patch @talos/patches/cilium-cni.yaml
-```
-
-## Step 7: Install Cilium
-
-```bash
-# Install Cilium CLI
-brew install cilium-cli
-
-# Install Cilium with Talos-specific settings
-cilium install \
-    --set ipam.mode=kubernetes \
-    --set kubeProxyReplacement=false \
-    --set securityContext.capabilities.ciliumAgent="{CHOWN,KILL,NET_ADMIN,NET_RAW,IPC_LOCK,SYS_ADMIN,SYS_RESOURCE,DAC_OVERRIDE,FOWNER,SETGID,SETUID}" \
-    --set securityContext.capabilities.cleanCiliumState="{NET_ADMIN,SYS_ADMIN,SYS_RESOURCE}" \
-    --set cgroup.autoMount.enabled=false \
-    --set cgroup.hostRoot=/sys/fs/cgroup
-
-# Wait for Cilium to be ready
 cilium status --wait
-
-# Run connectivity test (optional)
-cilium connectivity test
 ```
 
-## Step 8: Configure Cilium LoadBalancer IP Pool
+Verify full kube-proxy replacement before continuing:
 
 ```bash
-# Apply LoadBalancer IP pool and L2 announcement policy
-kubectl apply -f manifests/cilium-lb-pool.yaml
+kubectl -n kube-system exec ds/cilium -c cilium-agent -- \
+  cilium-dbg status --verbose
 
-# Verify IP pool
-kubectl get ciliumloadbalancerippool -A
-kubectl get ciliuml2announcementpolicy -A
+kubectl -n kube-system get daemonset kube-proxy
 ```
 
-## Step 9: Install Argo CD
+`KubeProxyReplacement` must be `True`, and the final command should report that kube-proxy does not exist.
+
+## 5. Install Argo CD
 
 ```bash
-# Create namespace and install Argo CD
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# Wait for pods to be ready
-kubectl get pods -n argocd -w
+helm dependency build apps/core/argocd
+helm upgrade --install argocd apps/core/argocd \
+  --namespace argocd \
+  --create-namespace
 ```
 
-## Next Steps
-
-- [ ] Install Envoy Gateway
-- [ ] Configure external-dns with Cloudflare
-- [ ] Set up cert-manager for TLS certificates
-- [ ] Deploy portfolio application
-- [ ] Configure Cloudflare Tunnel (optional, for external access)
-- [ ] Install observability stack (Prometheus, Grafana, Hubble UI)
-
-## Useful Commands
+Wait for its controllers:
 
 ```bash
-# Check Talos node status
-talosctl -n 10.0.0.10 dashboard
-talosctl -n 10.0.0.10,10.0.0.11 health
+kubectl rollout status deployment/argocd-server -n argocd
+kubectl rollout status deployment/argocd-repo-server -n argocd
+kubectl rollout status statefulset/argocd-application-controller -n argocd
+```
 
-# Check Kubernetes nodes
-kubectl get nodes -o wide
+## 6. Enable GitOps
 
-# Check Cilium status
+Apply Cilium and Argo CD self-management, followed by the platform and workload ApplicationSets:
+
+```bash
+kubectl apply -f apps/app-of-apps/cilium.yaml
+kubectl apply -f apps/app-of-apps/argocd.yaml
+kubectl apply -f apps/app-of-apps/platform-applications.yaml
+kubectl apply -f apps/app-of-apps/workload-applications.yaml
+```
+
+Monitor reconciliation:
+
+```bash
+kubectl get applications,applicationsets -n argocd
+kubectl get pods -A
+```
+
+## 7. Validate networking, TLS and storage
+
+```bash
 cilium status
-cilium connectivity test
-
-# View logs
-talosctl -n 10.0.0.10 logs kubelet
-talosctl -n 10.0.0.10 logs controller-runtime
-
-# Access Argo CD (temporary)
-kubectl port-forward svc/argocd-server -n argocd 8080:443
-# Get initial admin password
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+kubectl get ciliumloadbalancerippool,ciliuml2announcementpolicy
+kubectl get gateway,httproute -A
+kubectl get clusterissuer
+kubectl get certificate -n envoy-gateway
+kubectl get storageclass
+kubectl -n longhorn get volumes.longhorn.io
 ```
 
-## File Structure
+Expected results:
 
+- Gateway address is `10.0.0.242`.
+- Apex and wildcard certificates are Ready.
+- `platform-rwo` is the only default StorageClass.
+- Active Longhorn volumes have two healthy replicas.
+
+## 8. Initialize Vault only on a new empty cluster
+
+Do not initialize Vault if it already contains data.
+
+```bash
+kubectl exec -it -n vault vault-0 -- \
+  vault operator init -key-shares=1 -key-threshold=1
 ```
-talos-cluster/
-├── talos/
-│   ├── controlplane.yaml      # Control plane machine config
-│   ├── worker.yaml             # Worker machine config
-│   ├── talosconfig             # Talosctl client config
-│   ├── secrets.yml             # Cluster secrets (keep safe!)
-│   └── patches/
-│       └── cilium-cni.yaml     # CNI patch
-├── manifests/
-│   └── cilium-lb-pool.yaml     # Cilium LoadBalancer IP pool
-├── kubeconfig                  # Kubernetes admin config
-└── SETUP.md                    # This file
+
+Store the unseal key and initial root token in a secure password manager. Unseal the first member, join the second member to Raft if required, then unseal it:
+
+```bash
+kubectl exec -it -n vault vault-0 -- vault operator unseal
+kubectl exec -it -n vault vault-1 -- vault operator unseal
+kubectl get pods -n vault
 ```
 
-## Troubleshooting
+## Operations
 
-### Nodes stuck in NotReady
-- Check Cilium status: `cilium status`
-- Check pod networking: `kubectl get pods -A`
-- Verify CNI patch applied: `talosctl -n 10.0.0.10 get machineconfig -o yaml | grep cni`
+### Upgrade Talos
 
-### Can't connect to nodes
-- Verify talosconfig has correct endpoints: `cat ~/.talos/config`
-- Check network connectivity: `ping 10.0.0.10`
-- Use `--insecure` flag if certificates are mismatched (only in maintenance mode)
+Upgrade one node at a time. Start with the worker and verify cluster and storage health before upgrading the control plane:
 
-### LoadBalancer stuck in Pending
-- Check Cilium LB-IPAM: `kubectl get ciliumloadbalancerippool -A`
-- Verify L2 announcements: `kubectl get ciliuml2announcementpolicy -A`
-- Check interface names match your nodes: `talosctl -n 10.0.0.10 get links`
+```bash
+talosctl upgrade --nodes 10.0.0.20 --image <installer-image>
+talosctl -n 10.0.0.10,10.0.0.20 health
+
+talosctl upgrade --nodes 10.0.0.10 --image <installer-image>
+talosctl -n 10.0.0.10,10.0.0.20 health
+```
+
+Vault must be manually unsealed after either Vault pod restarts until Google Cloud KMS auto-unseal is configured.
+
+### Diagnose certificate issuance
+
+```bash
+kubectl get certificate,certificaterequest,order,challenge -A
+kubectl describe challenge -n envoy-gateway <challenge-name>
+kubectl logs -n cert-manager deployment/cert-manager
+```
+
+### Diagnose storage
+
+```bash
+kubectl -n longhorn get volumes.longhorn.io
+kubectl -n longhorn get replicas.longhorn.io
+kubectl get pv,pvc -A
+```
+
+### Access Argo CD locally
+
+The normal endpoint is `https://argocd.joeriberman.nl`. For emergency access:
+
+```bash
+kubectl port-forward service/argocd-server -n argocd 8080:443
+```

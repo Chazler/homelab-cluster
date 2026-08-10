@@ -1,22 +1,59 @@
-### Create sealed secret
+# Operations Cheatsheet
+
+## Cluster health
+
 ```bash
-cat ./secret.yaml | kubeseal --controller-namespace sealed-secrets --controller-name sealed-secrets --format yaml > ./sealed-secret.yaml
+talosctl -n 10.0.0.10,10.0.0.20 health
+kubectl get nodes
+kubectl get pods -A
+kubectl get applications -n argocd
+cilium status
 ```
 
+## Vault
 
-kubectl describe order wildcard-tls-1-1065682888 -n envoy-gateway 2>/dev/null | tail -
-40
+```bash
+kubectl get pods -n vault
+kubectl exec -n vault vault-0 -- vault status
+kubectl exec -n vault vault-1 -- vault status
 
-kubectl describe certificaterequest wildcard-tls-1 -n envoy-gateway | tail -30
+# Interactive: do not put the unseal key in shell history.
+kubectl exec -it -n vault vault-0 -- vault operator unseal
+kubectl exec -it -n vault vault-1 -- vault operator unseal
+```
 
-kubectl get application envoy-gateway -n argocd -o yaml | grep -A 5 "syncPolicy:"
+## Certificates and routes
 
-kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableL2Announcements
-kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep KubeProxyReplacement
-kubectl -n kube-system exec ds/cilium -- cilium-dbg config --all | grep EnableExternalIPs
+```bash
+kubectl get gateway,httproute -A
+kubectl get certificate,certificaterequest,order,challenge -A
+kubectl describe challenge -n envoy-gateway <challenge-name>
+```
 
+## Cilium
 
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+```bash
+cilium status
+kubectl -n kube-system exec ds/cilium -c cilium-agent -- cilium-dbg status --verbose
+kubectl get ciliumloadbalancerippool,ciliuml2announcementpolicy
+```
 
-talosctl upgrade --nodes 10.0.0.10 \
-  --image factory.talos.dev/metal-installer/
+## Longhorn
+
+```bash
+kubectl -n longhorn get volumes.longhorn.io
+kubectl -n longhorn get replicas.longhorn.io
+kubectl get pv,pvc -A
+```
+
+## Create a sealed secret
+
+Keep `secret.yaml` local; it is ignored by Git.
+
+```bash
+kubeseal \
+  --controller-namespace sealed-secrets \
+  --controller-name sealed-secrets \
+  --format yaml \
+  < secret.yaml > sealed-secret.yaml
+```
