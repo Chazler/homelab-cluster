@@ -29,6 +29,13 @@ and `/dev/net/tun`. Images are digest-pinned and only Jellyfin is public.
    after validation. This enables downloads, imports, renames, and subtitles.
 7. Disable `restoreHelper` after the migration is complete.
 
+## Post-restore service addresses
+
+Backup configuration still contains addresses from the former Docker host. Set
+Jellystat's `JF_HOST` to `http://jellyfin:8096`, Jellyseerr's Jellyfin host to
+`jellyfin:8096`, and the Deluge host in Sonarr, Sonarr Anime, and Radarr to
+`vpn:8112`. Their other credentials and settings remain unchanged.
+
 Jellyfin, Jellyseerr, and Jellystat are published through Envoy Gateway as they
 were on the old server. Administrative services stay cluster-internal until
 equivalent authentication is configured.

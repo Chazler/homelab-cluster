@@ -37,7 +37,7 @@ publicRoutes:
 
 # The helper remains enabled until every PVC has been restored and checked.
 restoreHelper:
-  enabled: true
+  enabled: false
 
 podSecurityContext:
   fsGroup: 1000
