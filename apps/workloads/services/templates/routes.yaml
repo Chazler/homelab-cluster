@@ -39,6 +39,35 @@ spec:
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
+  name: umami-public
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.gateway.name }}
+      namespace: {{ .Values.gateway.namespace }}
+      sectionName: {{ .Values.gateway.sectionName }}
+  hostnames:
+    - {{ .Values.umami.hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: Exact
+            value: /script.js
+        - path:
+            type: PathPrefix
+            value: /api/send
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: umami
+          port: 3000
+          weight: 1
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
   name: idea-triage
   namespace: {{ .Release.Namespace }}
   labels:

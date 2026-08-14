@@ -76,9 +76,11 @@ OIDC with the `oidc: "true"` label, which makes Kyverno generate an Envoy
 Jellyfin do not carry this route label. Deluge has no public route and is
 reachable only by the other media services through its VPN pod.
 
-AdGuard Home, Umami, Idea Triage and n8n use the same OIDC protection.
-Polylearn is intentionally public. AdGuard's DNS listener is a separate Cilium
-LoadBalancer service and does not pass through Envoy.
+AdGuard Home, the Umami dashboard, Idea Triage and n8n use the same OIDC
+protection. Umami's tracker script and event-ingestion endpoint remain public
+so browsers can submit analytics. Polylearn is intentionally public. AdGuard's
+DNS listener is a separate Cilium LoadBalancer service and does not pass
+through Envoy.
 
 ## Bootstrap order
 

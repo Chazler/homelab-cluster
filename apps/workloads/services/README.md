@@ -9,7 +9,7 @@ GHCR pull credential are committed only as SealedSecrets.
 | Service | Endpoint | Access |
 | --- | --- | --- |
 | AdGuard Home | `adguard.joeriberman.nl` | Google OIDC |
-| Umami | `umami.joeriberman.nl` | Google OIDC |
+| Umami | `umami.joeriberman.nl` | Dashboard via Google OIDC; tracker paths public |
 | Polylearn | `polylearn.joeriberman.nl` | Public |
 | Idea Triage | `idea-triage.joeriberman.nl` | Google OIDC |
 | n8n | `n8n.joeriberman.nl` | Google OIDC |
