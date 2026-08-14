@@ -49,3 +49,6 @@ cheatsheet-secret.md
 
 # Local restore data
 .restore/
+
+# Local task planning
+.tasks/
