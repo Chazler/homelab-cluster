@@ -1,0 +1,83 @@
+revisionHistoryLimit: 3
+
+storageClass: platform-rwo
+imagePullSecret: ghcr-image-pull-secret
+
+gateway:
+  name: envoy-gateway
+  namespace: envoy-gateway
+  sectionName: web-https
+
+postgres:
+  image: postgres@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+  storage: 10Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 1Gi
+
+adguard:
+  image: adguard/adguardhome@sha256:1ea34eafe5dc691007946e8eaab7bf46b0de9412f39213d8c06e48b53bf9a6c5
+  hostname: adguard.joeriberman.nl
+  dnsAddress: 10.0.0.243
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+umami:
+  image: ghcr.io/umami-software/umami@sha256:8edfe4beaef13f9d1300619fa264ef250a3688df9cc54d24ca830ca31cb475ec
+  hostname: umami.joeriberman.nl
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+
+polylearn:
+  image: ghcr.io/chazler/polylearn@sha256:0a30f70df8d683232210cf0a82d3e164e4960bb9dcf03529103a9cf683a64500
+  hostname: polylearn.joeriberman.nl
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
+
+ideaTriage:
+  frontendImage: ghcr.io/chazler/idea-triage-frontend@sha256:ac460c71c4ec2c07bde64bacc3af82519677cc632dcd91f6e3ea9fdda089fdd3
+  apiImage: ghcr.io/chazler/idea-triage-api@sha256:317758962502fccf9cc8dbc55c048c1faa23ed840351057e52fce46171821ee3
+  hostname: idea-triage.joeriberman.nl
+  exportsStorage: 2Gi
+  resources:
+    frontend:
+      requests:
+        cpu: 25m
+        memory: 32Mi
+      limits:
+        memory: 128Mi
+    api:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 512Mi
+
+n8n:
+  image: n8nio/n8n@sha256:f5140088385af2d4e681e177d8264bcb41e8fe126062030c5c65cd8f3e1605e1
+  hostname: n8n.joeriberman.nl
+  configStorage: 2Gi
+  filesStorage: 2Gi
+  resources:
+    requests:
+      cpu: 50m
+      memory: 256Mi
+    limits:
+      memory: 1Gi

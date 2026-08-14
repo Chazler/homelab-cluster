@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: polylearn
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: polylearn
+    {{- include "services.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: polylearn
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: polylearn
+        app.kubernetes.io/part-of: services
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecret }}
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: polylearn
+          image: {{ .Values.polylearn.image | quote }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Amsterdam
+            - name: SUPABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: services-secrets
+                  key: SUPABASE_URL
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: services-secrets
+                  key: SUPABASE_ANON_KEY
+          ports:
+            - name: http
+              containerPort: 80
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.polylearn.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /app/config
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: polylearn-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: polylearn
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app.kubernetes.io/name: polylearn
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

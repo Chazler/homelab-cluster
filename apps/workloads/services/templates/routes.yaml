@@ -1,0 +1,72 @@
+{{- $routes := list
+  (dict "name" "adguard" "hostname" .Values.adguard.hostname "service" "adguard" "port" 80 "oidc" true)
+  (dict "name" "umami" "hostname" .Values.umami.hostname "service" "umami" "port" 3000 "oidc" true)
+  (dict "name" "polylearn" "hostname" .Values.polylearn.hostname "service" "polylearn" "port" 80 "oidc" false)
+  (dict "name" "n8n" "hostname" .Values.n8n.hostname "service" "n8n" "port" 5678 "oidc" true)
+-}}
+{{- range $route := $routes }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ $route.name }}
+  namespace: {{ $.Release.Namespace }}
+  {{- if $route.oidc }}
+  labels:
+    oidc: "true"
+  {{- end }}
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $.Values.gateway.name }}
+      namespace: {{ $.Values.gateway.namespace }}
+      sectionName: {{ $.Values.gateway.sectionName }}
+  hostnames:
+    - {{ $route.hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: {{ $route.service }}
+          port: {{ $route.port }}
+---
+{{- end }}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: idea-triage
+  namespace: {{ .Release.Namespace }}
+  labels:
+    oidc: "true"
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.gateway.name }}
+      namespace: {{ .Values.gateway.namespace }}
+      sectionName: {{ .Values.gateway.sectionName }}
+  hostnames:
+    - {{ .Values.ideaTriage.hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: idea-triage-api
+          port: 8000
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: idea-triage-frontend
+          port: 80

@@ -24,9 +24,11 @@ Last verified: 2026-08-14.
 - Kyverno-generated Envoy OIDC policies
 - Vault Community Edition with integrated Raft storage
 
-The workload layer includes Home Assistant and a media stack built around
+The workload layer includes Home Assistant; a media stack built around
 Jellyfin, Jellyseerr, Jellystat, Sonarr, Radarr, Prowlarr, Bazarr, SABnzbd and
-Deluge. Container images are pinned by digest.
+Deluge; and a services stack containing AdGuard Home, Umami, Polylearn, Idea
+Triage and n8n. Umami and Idea Triage use separate roles and databases on one
+PostgreSQL instance. Container images are pinned by digest.
 
 Metrics Server, Prometheus, Grafana, Alertmanager and external-dns are not currently installed.
 
@@ -38,6 +40,9 @@ Metrics Server, Prometheus, Grafana, Alertmanager and external-dns are not curre
 | Pod network | `10.244.0.0/16` |
 | Service network | `10.96.0.0/12` |
 | Cilium LoadBalancer pool | `10.0.0.240/28` (`.241` through `.254`) |
+
+Envoy Gateway uses `10.0.0.242`. AdGuard DNS uses `10.0.0.243` and exposes
+TCP and UDP port 53 directly to the LAN.
 
 Cilium owns Kubernetes Service routing. Talos has `cluster.proxy.disabled: true`; do not reinstall kube-proxy unless `cilium.kubeProxyReplacement` is disabled first.
 
@@ -70,6 +75,10 @@ OIDC with the `oidc: "true"` label, which makes Kyverno generate an Envoy
 `SecurityPolicy` with an email allowlist. Public-facing services such as
 Jellyfin do not carry this route label. Deluge has no public route and is
 reachable only by the other media services through its VPN pod.
+
+AdGuard Home, Umami, Idea Triage and n8n use the same OIDC protection.
+Polylearn is intentionally public. AdGuard's DNS listener is a separate Cilium
+LoadBalancer service and does not pass through Envoy.
 
 ## Bootstrap order
 
@@ -144,4 +153,7 @@ deployment must create its own Web application client, register every
 - The two-member Vault Raft cluster cannot maintain quorum after losing either member.
 - The media library is a retained local PV on `k8s-worker-2`; it is node-bound
   and is not replicated by Longhorn.
+- Umami and Idea Triage share one PostgreSQL instance. Their databases and
+  roles are isolated, but the database pod and volume remain a shared failure
+  domain.
 - Vault must be manually unsealed after restarts.
