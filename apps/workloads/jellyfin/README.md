@@ -37,8 +37,11 @@ Jellystat's `JF_HOST` to `http://jellyfin:8096`, Jellyseerr's Jellyfin host to
 `vpn:8112`. Their other credentials and settings remain unchanged.
 
 Jellyfin, Jellyseerr, and Jellystat are published through Envoy Gateway as they
-were on the old server. Administrative services stay cluster-internal until
-equivalent authentication is configured.
+were on the old server. Sonarr, Sonarr Anime, Radarr, Prowlarr, Bazarr, and
+SABnzbd are also published, but their HTTPRoutes carry the `oidc: "true"`
+label. The cluster Kyverno policy generates an Envoy Google OIDC
+SecurityPolicy and enforces the configured email allowlist before forwarding
+requests to those administrative services.
 
 The PV uses the `Retain` policy. Never delete or reformat the underlying LVM
 volume as part of Kubernetes cleanup.

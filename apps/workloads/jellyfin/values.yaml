@@ -35,6 +35,26 @@ publicRoutes:
     hostname: jellystat.joeriberman.nl
     port: 3000
 
+adminRoutes:
+  sonarr:
+    hostname: sonarr.joeriberman.nl
+    port: 8989
+  sonarr-anime:
+    hostname: sonarr-anime.joeriberman.nl
+    port: 8990
+  radarr:
+    hostname: radarr.joeriberman.nl
+    port: 7878
+  prowlarr:
+    hostname: prowlarr.joeriberman.nl
+    port: 9696
+  bazarr:
+    hostname: bazarr.joeriberman.nl
+    port: 6767
+  sabnzbd:
+    hostname: sabnzbd.joeriberman.nl
+    port: 8080
+
 # The helper remains enabled until every PVC has been restored and checked.
 restoreHelper:
   enabled: false

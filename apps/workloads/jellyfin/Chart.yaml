@@ -2,5 +2,5 @@ apiVersion: v2
 name: jellyfin
 description: Jellyfin and supporting media services restored from downloadbox
 type: application
-version: 0.2.0
+version: 0.3.0
 appVersion: "2026.08.13"
