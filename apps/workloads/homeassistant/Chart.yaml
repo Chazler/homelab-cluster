@@ -1,0 +1,6 @@
+apiVersion: v2
+name: homeassistant
+description: Home Assistant restored from the downloadbox
+type: application
+version: 0.1.0
+appVersion: "2026.8.1"
