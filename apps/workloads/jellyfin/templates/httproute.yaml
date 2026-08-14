@@ -5,7 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   parentRefs:
-    - name: {{ .Values.route.parentGateway.name }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.route.parentGateway.name }}
       namespace: {{ .Values.route.parentGateway.namespace }}
       sectionName: {{ .Values.route.parentGateway.sectionName }}
   hostnames:
@@ -16,5 +18,8 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: {{ include "jellyfin.fullname" . }}
+        - group: ""
+          kind: Service
+          name: {{ include "jellyfin.fullname" . }}
           port: {{ .Values.service.port }}
+          weight: 1

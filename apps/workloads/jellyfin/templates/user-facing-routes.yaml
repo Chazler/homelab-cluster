@@ -6,7 +6,9 @@ metadata:
   namespace: {{ $.Release.Namespace }}
 spec:
   parentRefs:
-    - name: {{ $.Values.route.parentGateway.name }}
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ $.Values.route.parentGateway.name }}
       namespace: {{ $.Values.route.parentGateway.namespace }}
       sectionName: {{ $.Values.route.parentGateway.sectionName }}
   hostnames:
@@ -17,7 +19,10 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: {{ $name }}
+        - group: ""
+          kind: Service
+          name: {{ $name }}
           port: {{ $route.port }}
+          weight: 1
 ---
 {{- end }}
