@@ -10,6 +10,10 @@ exposed by the static `jellyfin-media` local PV at
 `/var/mnt/vault/media/downloadbox/data`. During recovery, both Talos and the
 pods mount this data read-only.
 
+The namespace uses the privileged Pod Security level because Jellyfin mounts
+`/dev/dri` for hardware transcoding and the VPN sidecar requires `NET_ADMIN`
+and `/dev/net/tun`. Images are digest-pinned and only Jellyfin is public.
+
 ## Recovery sequence
 
 1. Sync the chart. Application containers wait for `.restore-complete` files,
