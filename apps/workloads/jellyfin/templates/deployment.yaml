@@ -16,11 +16,20 @@ spec:
         app.kubernetes.io/name: {{ include "jellyfin.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.nodeName | quote }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-restore
+          image: alpine:3.21
+          command: ["sh", "-c", "until test -f /config/.restore-complete; do sleep 5; done"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
       containers:
         - name: jellyfin
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: {{ .Values.image.ref | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: PUID
@@ -35,7 +44,35 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            - name: media
+              mountPath: /data
+              readOnly: {{ .Values.media.readOnly }}
+            - name: transcode
+              mountPath: /data/transcode
+            - name: dri
+              mountPath: /dev/dri
+          startupProbe:
+            tcpSocket:
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: {{ include "jellyfin.fullname" . }}-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: {{ .Values.media.claimName }}
+        - name: transcode
+          emptyDir:
+            medium: Memory
+        - name: dri
+          hostPath:
+            path: /dev/dri
+            type: Directory

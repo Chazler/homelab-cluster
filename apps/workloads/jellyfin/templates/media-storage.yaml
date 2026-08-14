@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: {{ .Values.media.persistentVolumeName }}
+  labels:
+    app.kubernetes.io/part-of: {{ include "jellyfin.name" . }}
+spec:
+  capacity:
+    storage: {{ .Values.media.capacity }}
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: ""
+  local:
+    path: {{ .Values.media.hostPath }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - {{ .Values.nodeName }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ .Values.media.claimName }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/part-of: {{ include "jellyfin.name" . }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  volumeName: {{ .Values.media.persistentVolumeName }}
+  resources:
+    requests:
+      storage: {{ .Values.media.capacity }}

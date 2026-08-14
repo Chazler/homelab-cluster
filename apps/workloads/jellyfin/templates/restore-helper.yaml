@@ -15,6 +15,8 @@ spec:
       labels:
         app.kubernetes.io/name: {{ include "jellyfin.name" . }}-restore-helper
     spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.nodeName | quote }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -26,8 +28,32 @@ spec:
           volumeMounts:
             - name: config
               mountPath: /config
+            {{- range $name, $_ := .Values.supportingServices.applications }}
+            - name: {{ $name }}-config
+              mountPath: /restore/{{ $name }}
+            {{- end }}
+            - name: jellystat-config
+              mountPath: /restore/jellystat
+            - name: deluge-config
+              mountPath: /restore/deluge
+            - name: vpn-config
+              mountPath: /restore/vpn
       volumes:
         - name: config
           persistentVolumeClaim:
             claimName: {{ include "jellyfin.fullname" . }}-config
+        {{- range $name, $_ := .Values.supportingServices.applications }}
+        - name: {{ $name }}-config
+          persistentVolumeClaim:
+            claimName: {{ $name }}-config
+        {{- end }}
+        - name: jellystat-config
+          persistentVolumeClaim:
+            claimName: jellystat-config
+        - name: deluge-config
+          persistentVolumeClaim:
+            claimName: deluge-config
+        - name: vpn-config
+          persistentVolumeClaim:
+            claimName: vpn-config
 {{- end }}

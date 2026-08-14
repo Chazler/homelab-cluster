@@ -1,6 +1,6 @@
 apiVersion: v2
 name: jellyfin
-description: Jellyfin recovery workload
+description: Jellyfin and supporting media services restored from downloadbox
 type: application
-version: 0.1.0
-appVersion: "latest"
+version: 0.2.0
+appVersion: "2026.08.13"

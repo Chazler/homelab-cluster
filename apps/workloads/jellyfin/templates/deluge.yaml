@@ -1,0 +1,127 @@
+{{- if .Values.deluge.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: deluge-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.deluge.configSize }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: vpn-config
+  namespace: {{ .Release.Namespace }}
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: {{ .Values.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ .Values.deluge.vpnConfigSize }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deluge
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: deluge
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: deluge
+        app.kubernetes.io/part-of: {{ include "jellyfin.name" . }}
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: {{ .Values.nodeName | quote }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-restore
+          image: alpine:3.21
+          command: ["sh", "-c", "until test -f /config/.restore-complete && test -f /vpn/.restore-complete; do sleep 5; done"]
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: vpn-config
+              mountPath: /vpn
+      containers:
+        - name: vpn
+          image: {{ .Values.deluge.vpnImage | quote }}
+          imagePullPolicy: IfNotPresent
+          args: ["-f", "", "-r", "10.0.0.0/16", "-r", "10.244.0.0/16", "-r", "10.96.0.0/12"]
+          securityContext:
+            capabilities:
+              add: [NET_ADMIN]
+          volumeMounts:
+            - name: vpn-config
+              mountPath: /vpn
+            - name: dev-net
+              mountPath: /dev/net
+        - name: deluge
+          image: {{ .Values.deluge.image | quote }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PUID
+              value: "1000"
+            - name: PGID
+              value: "1000"
+            - name: TZ
+              value: Europe/Amsterdam
+          ports:
+            - name: http
+              containerPort: {{ .Values.deluge.port }}
+          volumeMounts:
+            - name: config
+              mountPath: /config
+            - name: media
+              mountPath: /data
+              readOnly: {{ .Values.media.readOnly }}
+      volumes:
+        - name: config
+          persistentVolumeClaim:
+            claimName: deluge-config
+        - name: vpn-config
+          persistentVolumeClaim:
+            claimName: vpn-config
+        - name: media
+          persistentVolumeClaim:
+            claimName: {{ .Values.media.claimName }}
+        - name: dev-net
+          hostPath:
+            path: /dev/net
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: deluge
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app.kubernetes.io/name: deluge
+  ports:
+    - name: http
+      port: {{ .Values.deluge.port }}
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: vpn
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app.kubernetes.io/name: deluge
+  ports:
+    - name: http
+      port: {{ .Values.deluge.port }}
+      targetPort: http
+{{- end }}

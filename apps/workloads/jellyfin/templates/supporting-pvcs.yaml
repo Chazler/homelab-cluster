@@ -1,0 +1,20 @@
+{{- if .Values.supportingServices.enabled }}
+{{- range $name, $app := .Values.supportingServices.applications }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}-config
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: {{ $name }}
+    app.kubernetes.io/part-of: {{ include "jellyfin.name" $ }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ $.Values.persistence.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ $app.configSize }}
+---
+{{- end }}
+{{- end }}
