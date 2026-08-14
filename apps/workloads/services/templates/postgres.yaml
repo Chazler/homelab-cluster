@@ -11,10 +11,14 @@ data:
       --set=umami_password="$UMAMI_DB_PASSWORD" \
       --set=idea_password="$IDEA_DB_PASSWORD" \
       --username "$POSTGRES_USER" --dbname postgres <<'SQL'
-    CREATE ROLE joeri LOGIN PASSWORD :'umami_password';
-    CREATE DATABASE umami OWNER joeri;
+    CREATE ROLE umami LOGIN PASSWORD :'umami_password';
+    CREATE DATABASE umami OWNER umami;
     CREATE ROLE idea_triage LOGIN PASSWORD :'idea_password';
     CREATE DATABASE idea_triage OWNER idea_triage;
+    REVOKE CONNECT ON DATABASE umami FROM PUBLIC;
+    GRANT CONNECT ON DATABASE umami TO umami;
+    REVOKE CONNECT ON DATABASE idea_triage FROM PUBLIC;
+    GRANT CONNECT ON DATABASE idea_triage TO idea_triage;
     SQL
 ---
 apiVersion: apps/v1
