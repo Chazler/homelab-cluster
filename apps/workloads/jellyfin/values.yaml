@@ -55,7 +55,7 @@ adminRoutes:
     hostname: sabnzbd.joeriberman.nl
     port: 8080
 
-# The helper remains enabled until every PVC has been restored and checked.
+# Optional maintenance helper for importing or repairing PVC contents.
 restoreHelper:
   enabled: false
 

@@ -1,6 +1,6 @@
 apiVersion: v2
 name: homeassistant
-description: Home Assistant restored from the downloadbox
+description: Home Assistant with host networking and persistent configuration
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "2026.8.1"

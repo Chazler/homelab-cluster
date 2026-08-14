@@ -1,18 +1,19 @@
 # Homelab Kubernetes Cluster
 
-Two-node Talos Linux cluster managed declaratively with Argo CD.
+Three-node Talos Linux cluster managed declaratively with Argo CD.
 
 ## Current state
 
-Last verified: 2026-08-10.
+Last verified: 2026-08-14.
 
 | Role | Name | Address |
 | --- | --- | --- |
 | Control plane and storage | `k8s-controlplane-1` | `10.0.0.10` |
 | Worker and storage | `k8s-worker-1` | `10.0.0.20` |
+| Worker, storage, media and home automation | `k8s-worker-2` | `10.0.0.30` |
 | Envoy Gateway | `envoy-gateway` | `10.0.0.242` |
 
-- Talos Linux 1.12.0
+- Talos Linux 1.13.7
 - Kubernetes 1.35.0
 - Cilium 1.18.5 with full kube-proxy replacement, LB-IPAM and L2 announcements
 - Argo CD with automated pruning and self-healing
@@ -22,6 +23,10 @@ Last verified: 2026-08-10.
 - Sealed Secrets
 - Kyverno-generated Envoy OIDC policies
 - Vault Community Edition with integrated Raft storage
+
+The workload layer includes Home Assistant and a media stack built around
+Jellyfin, Jellyseerr, Jellystat, Sonarr, Radarr, Prowlarr, Bazarr, SABnzbd and
+Deluge. Container images are pinned by digest.
 
 Metrics Server, Prometheus, Grafana, Alertmanager and external-dns are not currently installed.
 
@@ -53,21 +58,34 @@ talos/
 
 Every directory selected by an ApplicationSet must be a valid Helm chart. Argo CD tracks `main` and applies changes with automated prune and self-heal.
 
+## Ingress and authentication
+
+Public DNS points the application hostnames at the home connection, where TCP
+443 is forwarded to the Envoy Gateway address. cert-manager obtains the apex
+and wildcard certificates with Cloudflare DNS-01 challenges.
+
+Administrative HTTPRoutes opt into Google OIDC with the `oidc: "true"` label.
+Kyverno clones the sealed OAuth client credentials into the route namespace
+and generates an Envoy `SecurityPolicy` with an email allowlist. Public-facing
+services such as Jellyfin do not carry this label. Deluge has no public route
+and is reachable only by the other media services through its VPN pod.
+
 ## Bootstrap order
 
 For a new cluster, follow [SETUP.md](SETUP.md). The required order is:
 
-1. Generate and apply Talos machine configurations with Cilium CNI and kube-proxy patches.
-2. Bootstrap etcd and retrieve kubeconfig.
-3. Install Cilium directly from `apps/networking/cilium`.
-4. Install Argo CD directly from `apps/core/argocd`.
-5. Apply the four resources in `apps/app-of-apps/`.
-6. Confirm every Argo CD application is synced and healthy.
+1. Replace the example addresses, hostnames, storage paths and secret material.
+2. Generate and apply Talos machine configurations with Cilium CNI and kube-proxy patches.
+3. Bootstrap etcd and retrieve kubeconfig.
+4. Install Cilium directly from `apps/networking/cilium`.
+5. Install Argo CD directly from `apps/core/argocd`.
+6. Apply the four resources in `apps/app-of-apps/`.
+7. Confirm every Argo CD application is synced and healthy.
 
 ## Routine health checks
 
 ```bash
-talosctl -n 10.0.0.10,10.0.0.20 health
+talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
 kubectl get nodes
 kubectl get pods -A
 cilium status
@@ -86,7 +104,7 @@ kubectl exec -it -n vault vault-1 -- vault operator unseal
 kubectl get pods -n vault
 ```
 
-Google Cloud KMS auto-unseal is planned but not configured. Migrating the seal requires a maintenance window and `vault operator unseal -migrate`; do not add a KMS seal block and restart Vault without following the migration procedure.
+Google Cloud KMS auto-unseal is not configured in the current state.
 
 ## Secrets
 
@@ -111,10 +129,18 @@ kubeseal \
 
 Never pass unseal keys, root tokens, cloud credentials or plaintext application secrets on a command line that will be retained in shell history.
 
+The Google OAuth client used by Envoy is represented in Git only by
+`apps/platform/envoy-gateway/templates/sealed-secret.yaml`. A replacement
+deployment must create its own Web application client, register every
+`https://<hostname>/oauth2/callback` URI, seal both credentials for the
+`envoy-gateway` namespace, and replace the encrypted values in that manifest.
+
 ## Current limitations
 
 - A single control-plane node means the Kubernetes API and etcd are not highly available.
-- Two-node Longhorn replication tolerates one replica failure but does not replace an external backup.
+- Longhorn uses two replicas per volume. The third node adds placement options,
+  but two replicas do not replace an external backup.
 - The two-member Vault Raft cluster cannot maintain quorum after losing either member.
-- A third node is planned; after it joins, expand Vault to three members and reconsider three Longhorn replicas.
-- Vault must be manually unsealed after restarts until Google Cloud KMS migration is completed.
+- The media library is a retained local PV on `k8s-worker-2`; it is node-bound
+  and is not replicated by Longhorn.
+- Vault must be manually unsealed after restarts.

@@ -1,19 +1,17 @@
-# Home Assistant migration
+# Home Assistant
 
-This chart restores Home Assistant 2026.8.1 from the downloadbox backup dated
-2026-08-13. It is pinned to `k8s-worker-2` and uses host networking so local
-discovery protocols and HomeKit retain their former network behavior.
-
-The application waits for `/config/.restore-complete`, then validates the
-restored YAML before starting. Keep the HTTPRoute disabled until the database,
-integrations, and local port 8123 have been checked. Remove transient lock,
-log, PID, macOS metadata, and already-corrupt database files during restore.
+This chart runs Home Assistant on `k8s-worker-2` with a Longhorn-backed
+configuration volume. The pod uses host networking so discovery protocols,
+HomeKit and integrations that expect the LAN can work without additional
+multicast forwarding. Envoy Gateway publishes the service through a dedicated
+HTTPRoute.
 
 The Envoy pod subnet `10.244.0.0/16` must be included in Home Assistant's
-trusted proxies before enabling the route. In Home Assistant 2026.8 this value
-is persisted in `.storage/http` after the one-time YAML migration, so changing
-only `configuration.yaml` no longer updates the active HTTP server settings.
+trusted proxies. In Home Assistant 2026.8 this value can be persisted in
+`.storage/http`, so verify the active HTTP server settings as well as
+`configuration.yaml` when changing the proxy configuration.
 
-After restoring this backup, change the UniFi Network integration host from the
-old Docker alias `unifi` to `10.0.0.1`. The custom Tado Hijack integration may
-require reauthentication when its archived token has expired.
+To reproduce this deployment, change `nodeName`, the public hostname, storage
+size and resource limits in `values.yaml`. Integration endpoints must be LAN
+addresses or resolvable DNS names; Docker-only aliases are not available in
+Kubernetes.

@@ -12,6 +12,18 @@ Install:
 - Cilium CLI
 - `kubeseal`
 
+You also need:
+
+- a domain whose DNS you control;
+- Cloudflare API credentials for cert-manager DNS-01 challenges;
+- a Google Cloud project and Web application OAuth client for protected routes;
+- suitable disks for Talos, Longhorn and any local media volume.
+
+Fork or clone the repository and replace the example `joeriberman.nl`
+hostnames, node addresses, email allowlist, local storage path and node names.
+Do not reuse the encrypted secrets: Sealed Secrets ciphertext is bound to the
+controller key of the cluster that created it.
+
 Boot each target node from a Talos installer image and confirm it is reachable in maintenance mode. Verify installation disk and interface names on each machine rather than assuming `/dev/sdb` and `enp1s0` are correct:
 
 ```bash
@@ -35,6 +47,11 @@ talosctl gen config homelab-cluster https://10.0.0.10:6443 \
 
 Review both generated files before applying them. Configure the correct installation disk, static address or DHCP reservation, interface, routes and certificate SANs. Generated machine configurations contain private keys and must remain outside Git.
 
+Generate or patch a separate worker configuration for each physical worker when
+their disks, interfaces, addresses or machine-specific mounts differ. The
+media worker additionally needs the local filesystem mounted at the path used
+by the `jellyfin-media` PV.
+
 Validate them:
 
 ```bash
@@ -54,6 +71,10 @@ talosctl apply-config --insecure \
 talosctl apply-config --insecure \
   --nodes 10.0.0.20 \
   --file talos/worker.yaml
+
+talosctl apply-config --insecure \
+  --nodes 10.0.0.30 \
+  --file talos/worker-2.yaml
 ```
 
 Remove the installer media after installation and wait for both machines to reboot.
@@ -127,7 +148,35 @@ kubectl get applications,applicationsets -n argocd
 kubectl get pods -A
 ```
 
-## 7. Validate networking, TLS and storage
+## 7. Configure DNS, TLS and Google OIDC
+
+Create the Cloudflare API token and Google OAuth client outside the cluster,
+then create namespace-scoped plaintext Secret manifests locally and seal them
+with your cluster's Sealed Secrets controller. Never commit the plaintext
+files.
+
+For the Google client, choose **Web application** and register one exact
+redirect URI for every protected hostname:
+
+```text
+https://<hostname>/oauth2/callback
+```
+
+Store the client ID under the `client-id` key and the client secret under the
+`client-secret` key. Seal both Secrets for the `envoy-gateway` namespace and
+replace the example ciphertext in
+`apps/platform/envoy-gateway/templates/sealed-secret.yaml`.
+
+Kyverno watches HTTPRoutes labeled `oidc: "true"`. For each matching route it
+clones the two credentials into the workload namespace and generates an Envoy
+OIDC `SecurityPolicy`. Configure your own allowed email addresses in
+`apps/platform/kyverno/values.yaml`.
+
+Point the application DNS records at your public address and forward TCP 443
+to the Envoy Gateway LoadBalancer address. Split DNS or NAT loopback is needed
+to use the same names from the LAN.
+
+## 8. Validate networking, TLS, authentication and storage
 
 ```bash
 cilium status
@@ -135,6 +184,7 @@ kubectl get ciliumloadbalancerippool,ciliuml2announcementpolicy
 kubectl get gateway,httproute -A
 kubectl get clusterissuer
 kubectl get certificate -n envoy-gateway
+kubectl get securitypolicy -A
 kubectl get storageclass
 kubectl -n longhorn get volumes.longhorn.io
 ```
@@ -145,8 +195,10 @@ Expected results:
 - Apex and wildcard certificates are Ready.
 - `platform-rwo` is the only default StorageClass.
 - Active Longhorn volumes have two healthy replicas.
+- Unauthenticated requests to protected routes redirect to
+  `accounts.google.com`.
 
-## 8. Initialize Vault only on a new empty cluster
+## 9. Initialize Vault only on a new empty cluster
 
 Do not initialize Vault if it already contains data.
 
@@ -167,17 +219,22 @@ kubectl get pods -n vault
 
 ### Upgrade Talos
 
-Upgrade one node at a time. Start with the worker and verify cluster and storage health before upgrading the control plane:
+Upgrade one node at a time. Upgrade and verify each worker before upgrading the
+control plane:
 
 ```bash
 talosctl upgrade --nodes 10.0.0.20 --image <installer-image>
-talosctl -n 10.0.0.10,10.0.0.20 health
+talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
+
+talosctl upgrade --nodes 10.0.0.30 --image <installer-image>
+talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
 
 talosctl upgrade --nodes 10.0.0.10 --image <installer-image>
-talosctl -n 10.0.0.10,10.0.0.20 health
+talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
 ```
 
-Vault must be manually unsealed after either Vault pod restarts until Google Cloud KMS auto-unseal is configured.
+Vault must be manually unsealed after either Vault pod restarts in the current
+configuration.
 
 ### Diagnose certificate issuance
 
