@@ -1,0 +1,43 @@
+machine:
+  certSANs:
+    - 10.0.0.30
+  network:
+    interfaces:
+      - interface: enp2s0
+        dhcp: false
+        addresses:
+          - 10.0.0.30/16
+        routes:
+          - network: 0.0.0.0/0
+            gateway: 10.0.0.1
+  install:
+    disk:
+      $patch: delete
+    diskSelector:
+      model: KPART512GBC2DVT
+      busPath: /pci0000:00/0000:00:1c.0/0000:01:00.0/nvme
+    image: factory.talos.dev/metal-installer/249d9135de54962744e917cfe654117000cba369f9152fbab9d055a00aa3664f:v1.13.7
+    wipe: true
+  sysctls:
+    net.ipv4.conf.enp2s0.rp_filter: "0"
+    net.ipv4.conf.all.rp_filter: "0"
+    net.ipv4.conf.enp2s0.arp_ignore: "1"
+    net.ipv4.conf.enp2s0.arp_announce: "2"
+cluster:
+  proxy:
+    disabled: true
+---
+apiVersion: v1alpha1
+kind: HostnameConfig
+auto: off
+hostname: k8s-worker-2
+---
+apiVersion: v1alpha1
+kind: ExistingVolumeConfig
+name: vault
+discovery:
+  volumeSelector:
+    match: volume.uuid == "e37ffe77-a30e-431f-92ee-9c5568a8c2c8"
+mount:
+  readOnly: false
+  disableAccessTime: true

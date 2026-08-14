@@ -3,6 +3,7 @@ kind: Namespace
 metadata:
   name: {{ .Release.Namespace }}
   labels:
+    oidc-secrets: "true"
     # Jellyfin needs /dev/dri and the VPN sidecar needs NET_ADMIN plus /dev/net/tun.
     pod-security.kubernetes.io/enforce: privileged
     pod-security.kubernetes.io/audit: privileged

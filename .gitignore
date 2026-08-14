@@ -7,6 +7,7 @@ talos/secrets.yml
 talos/talosconfig
 talos/controlplane.yaml
 talos/worker.yaml
+talos/worker-2.yaml
 
 # Certificate and key files
 *.key
@@ -45,3 +46,6 @@ secret.yaml
 **/charts/
 Chart.lock
 cheatsheet-secret.md
+
+# Local restore data
+.restore/

@@ -64,11 +64,12 @@ Public DNS points the application hostnames at the home connection, where TCP
 443 is forwarded to the Envoy Gateway address. cert-manager obtains the apex
 and wildcard certificates with Cloudflare DNS-01 challenges.
 
-Administrative HTTPRoutes opt into Google OIDC with the `oidc: "true"` label.
-Kyverno clones the sealed OAuth client credentials into the route namespace
-and generates an Envoy `SecurityPolicy` with an email allowlist. Public-facing
-services such as Jellyfin do not carry this label. Deluge has no public route
-and is reachable only by the other media services through its VPN pod.
+Namespaces opt into a synchronized copy of the sealed OAuth credentials with
+the `oidc-secrets: "true"` label. Administrative HTTPRoutes opt into Google
+OIDC with the `oidc: "true"` label, which makes Kyverno generate an Envoy
+`SecurityPolicy` with an email allowlist. Public-facing services such as
+Jellyfin do not carry this route label. Deluge has no public route and is
+reachable only by the other media services through its VPN pod.
 
 ## Bootstrap order
 

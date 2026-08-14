@@ -67,7 +67,11 @@ policies:
     labelKey: oidc
     labelValue: "true"
 
-    # Source namespace for cloning the OIDC secrets into target namespaces.
+    # Namespaces with this label receive one synchronized copy of the OIDC credentials.
+    namespaceLabelKey: oidc-secrets
+    namespaceLabelValue: "true"
+
+    # Source namespace for cloning the OIDC secrets into opted-in namespaces.
     secretNamespace: envoy-gateway
     clientSecretName: oidc-client-secret
     clientIDSecretName: oidc-client-id
@@ -87,4 +91,3 @@ policies:
 
     emailWhitelist:
       - joeriberman@gmail.com
-

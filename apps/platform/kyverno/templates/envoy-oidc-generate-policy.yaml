@@ -7,46 +7,6 @@ spec:
   validationFailureAction: Enforce
   background: true
   rules:
-    - name: clone-oidc-client-id
-      skipBackgroundRequests: true
-      match:
-        any:
-          - resources:
-              kinds:
-                - gateway.networking.k8s.io/v1/HTTPRoute
-              selector:
-                matchLabels:
-                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
-      generate:
-        apiVersion: v1
-        kind: Secret
-        name: {{ required "policies.envoyOidc.clientIDSecretName is required when enabled" .Values.policies.envoyOidc.clientIDSecretName | quote }}
-        namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
-        synchronize: true
-        clone:
-          namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
-          name: {{ required "policies.envoyOidc.clientIDSecretName is required when enabled" .Values.policies.envoyOidc.clientIDSecretName | quote }}
-
-    - name: clone-oidc-client-secret
-      skipBackgroundRequests: true
-      match:
-        any:
-          - resources:
-              kinds:
-                - gateway.networking.k8s.io/v1/HTTPRoute
-              selector:
-                matchLabels:
-                  {{ .Values.policies.envoyOidc.labelKey }}: {{ .Values.policies.envoyOidc.labelValue | quote }}
-      generate:
-        apiVersion: v1
-        kind: Secret
-        name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
-        namespace: {{ "{{request.object.metadata.namespace}}" | quote }}
-        synchronize: true
-        clone:
-          namespace: {{ required "policies.envoyOidc.secretNamespace is required when enabled" .Values.policies.envoyOidc.secretNamespace | quote }}
-          name: {{ required "policies.envoyOidc.clientSecretName is required when enabled" .Values.policies.envoyOidc.clientSecretName | quote }}
-
     - name: generate-securitypolicy-protected
       match:
         any:

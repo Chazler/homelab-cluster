@@ -1,4 +1,5 @@
 replicaCount: 1
+revisionHistoryLimit: 3
 
 nodeName: k8s-worker-2
 
@@ -20,9 +21,6 @@ route:
     name: envoy-gateway
     namespace: envoy-gateway
     sectionName: web-https
-
-restoreHelper:
-  enabled: false
 
 resources:
   requests:

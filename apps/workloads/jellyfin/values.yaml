@@ -1,4 +1,5 @@
 replicaCount: 1
+revisionHistoryLimit: 3
 
 nodeName: k8s-worker-2
 
@@ -55,17 +56,9 @@ adminRoutes:
     hostname: sabnzbd.joeriberman.nl
     port: 8080
 
-# Optional maintenance helper for importing or repairing PVC contents.
-restoreHelper:
-  enabled: false
-
 podSecurityContext:
   fsGroup: 1000
   fsGroupChangePolicy: OnRootMismatch
-
-restoreHelperSecurityContext:
-  runAsUser: 0
-  runAsGroup: 0
 
 resources:
   requests:

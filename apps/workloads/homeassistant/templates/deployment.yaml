@@ -7,6 +7,7 @@ metadata:
     {{- include "homeassistant.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
   strategy:
     type: Recreate
   selector:
@@ -24,12 +25,6 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       initContainers:
-        - name: wait-for-restore
-          image: alpine:3.21
-          command: ["sh", "-c", "until test -f /config/.restore-complete; do sleep 5; done"]
-          volumeMounts:
-            - name: config
-              mountPath: /config
         - name: check-config
           image: {{ .Values.image.ref | quote }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}

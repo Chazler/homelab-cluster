@@ -2,5 +2,5 @@ apiVersion: v2
 name: homeassistant
 description: Home Assistant with host networking and persistent configuration
 type: application
-version: 0.1.1
+version: 0.2.0
 appVersion: "2026.8.1"

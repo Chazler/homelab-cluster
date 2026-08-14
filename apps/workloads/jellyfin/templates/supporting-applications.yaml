@@ -10,6 +10,7 @@ metadata:
     app.kubernetes.io/part-of: {{ include "jellyfin.name" $ }}
 spec:
   replicas: 1
+  revisionHistoryLimit: {{ $.Values.revisionHistoryLimit }}
   selector:
     matchLabels:
       app.kubernetes.io/name: {{ $name }}
@@ -23,13 +24,6 @@ spec:
         kubernetes.io/hostname: {{ $.Values.nodeName | quote }}
       securityContext:
         {{- toYaml $.Values.podSecurityContext | nindent 8 }}
-      initContainers:
-        - name: wait-for-restore
-          image: alpine:3.21
-          command: ["sh", "-c", "until test -f /config/.restore-complete; do sleep 5; done"]
-          volumeMounts:
-            - name: config
-              mountPath: /config
       containers:
         - name: {{ $name }}
           image: {{ $app.image | quote }}

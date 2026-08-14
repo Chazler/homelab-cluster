@@ -167,10 +167,10 @@ Store the client ID under the `client-id` key and the client secret under the
 replace the example ciphertext in
 `apps/platform/envoy-gateway/templates/sealed-secret.yaml`.
 
-Kyverno watches HTTPRoutes labeled `oidc: "true"`. For each matching route it
-clones the two credentials into the workload namespace and generates an Envoy
-OIDC `SecurityPolicy`. Configure your own allowed email addresses in
-`apps/platform/kyverno/values.yaml`.
+Kyverno clones the credentials once into each namespace labeled
+`oidc-secrets: "true"`. It separately watches HTTPRoutes labeled `oidc: "true"`
+and generates an Envoy OIDC `SecurityPolicy` for each matching route. Configure
+your own allowed email addresses in `apps/platform/kyverno/values.yaml`.
 
 Point the application DNS records at your public address and forward TCP 443
 to the Envoy Gateway LoadBalancer address. Split DNS or NAT loopback is needed
