@@ -29,8 +29,9 @@ and `/dev/net/tun`. Images are digest-pinned and only Jellyfin is public.
    after validation. This enables downloads, imports, renames, and subtitles.
 7. Disable `restoreHelper` after the migration is complete.
 
-Only Jellyfin is published through Envoy Gateway. Administrative services stay
-cluster-internal until equivalent authentication is configured.
+Jellyfin, Jellyseerr, and Jellystat are published through Envoy Gateway as they
+were on the old server. Administrative services stay cluster-internal until
+equivalent authentication is configured.
 
 The PV uses the `Retain` policy. Never delete or reformat the underlying LVM
 volume as part of Kubernetes cleanup.

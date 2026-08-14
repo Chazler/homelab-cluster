@@ -27,6 +27,14 @@ route:
     namespace: envoy-gateway
     sectionName: web-https
 
+publicRoutes:
+  jellyseerr:
+    hostname: jellyseerr.joeriberman.nl
+    port: 5055
+  jellystat:
+    hostname: jellystat.joeriberman.nl
+    port: 3000
+
 # The helper remains enabled until every PVC has been restored and checked.
 restoreHelper:
   enabled: true
