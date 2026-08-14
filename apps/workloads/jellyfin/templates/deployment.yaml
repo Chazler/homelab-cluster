@@ -48,7 +48,7 @@ spec:
               mountPath: /data
               readOnly: {{ .Values.media.readOnly }}
             - name: transcode
-              mountPath: /data/transcode
+              mountPath: /config/data/transcodes
             - name: dri
               mountPath: /dev/dri
           startupProbe:
