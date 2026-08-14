@@ -11,3 +11,7 @@ log, PID, macOS metadata, and already-corrupt database files during restore.
 
 The Envoy pod subnet `10.244.0.0/16` must be included in Home Assistant's
 `http.trusted_proxies` before enabling the route.
+
+After restoring this backup, change the UniFi Network integration host from the
+old Docker alias `unifi` to `10.0.0.1`. The custom Tado Hijack integration may
+require reauthentication when its archived token has expired.

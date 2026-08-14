@@ -14,7 +14,7 @@ service:
   port: 8123
 
 route:
-  enabled: false
+  enabled: true
   hostname: homeassistant.joeriberman.nl
   parentGateway:
     name: envoy-gateway
@@ -22,7 +22,7 @@ route:
     sectionName: web-https
 
 restoreHelper:
-  enabled: true
+  enabled: false
 
 resources:
   requests:
