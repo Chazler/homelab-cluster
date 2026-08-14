@@ -19,7 +19,8 @@ and `/dev/net/tun`. Images are digest-pinned and only Jellyfin is public.
 1. Sync the chart. Application containers wait for `.restore-complete` files,
    while `jellyfin-restore-helper` mounts every configuration PVC.
 2. Restore the contents of each archived application directory into its PVC,
-   excluding transient PID and Jellyfin transcode files.
+   excluding transient PID files, Jellyfin transcodes, and macOS `._*` or
+   `.DS_Store` metadata.
 3. Restore the Jellystat PostgreSQL dump and verify its row counts.
 4. Write a `.restore-complete` marker to each checked configuration PVC.
 5. Verify Jellyfin users, watch/resume state, libraries, and readable media;

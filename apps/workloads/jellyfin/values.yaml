@@ -15,7 +15,7 @@ media:
   claimName: media-data
   capacity: 23Ti
   hostPath: /var/mnt/vault/media/downloadbox/data
-  readOnly: true
+  readOnly: false
 
 service:
   port: 8096
