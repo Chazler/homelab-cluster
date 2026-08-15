@@ -45,7 +45,7 @@ vault:
     extraVolumes:
       - type: secret
         name: vault-auto-unseal-gcp
-        path: gcp
+        path: /vault/userconfig/gcp
 
     dataStorage:
       enabled: true
