@@ -32,3 +32,11 @@ significant configuration change and at regular intervals.
 
 Keep the snapshot, recovery keys, and KMS project/key identifiers in separate
 recovery records outside the cluster and this repository.
+
+## Runtime secret access
+
+Vault Secrets Operator synchronizes the runtime secrets declared by the
+`vault-secret-sync` platform chart. Each namespace has a dedicated
+`vault-secrets` service account and can read only its own `kv/<namespace>/`
+paths. Keep application credentials in Vault KV v2; do not recreate runtime
+SealedSecrets.

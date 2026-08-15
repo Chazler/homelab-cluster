@@ -31,6 +31,6 @@ authentication.
 
 To reproduce the stack, change `nodeName`, the local PV path and capacity,
 hostnames, images and resource requests in `values.yaml`. Create your own
-application secrets as Sealed Secrets and configure the service-to-service
+application secrets through Vault Secrets Operator and configure the service-to-service
 URLs above in each application's UI. Never delete or reformat the underlying
 filesystem as part of Kubernetes cleanup.

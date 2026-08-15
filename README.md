@@ -122,7 +122,10 @@ planned outage and an interactive use of the existing Shamir key.
 
 ## Secrets
 
-Only encrypted `SealedSecret` resources belong in Git. The following local files are intentionally ignored:
+Runtime application credentials are stored in Vault KV v2 and synchronized into
+Kubernetes Secrets by Vault Secrets Operator. Only encrypted bootstrap
+`SealedSecret` resources, such as Vault's Google Cloud KMS credential, belong
+in Git. The following local files are intentionally ignored:
 
 - `kubeconfig`
 - `talos/secrets.yml`
@@ -131,7 +134,7 @@ Only encrypted `SealedSecret` resources belong in Git. The following local files
 - `talos/worker.yaml`
 - plaintext `secret.yaml` files
 
-Create or update a sealed secret with:
+Create or update a bootstrap sealed secret with:
 
 ```bash
 kubeseal \
