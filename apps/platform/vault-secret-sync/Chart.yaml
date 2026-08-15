@@ -1,0 +1,4 @@
+apiVersion: v2
+name: vault-secret-sync
+version: 1.0.0
+description: Synchronizes runtime Kubernetes Secrets from Vault KV v2.

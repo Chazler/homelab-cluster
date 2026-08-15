@@ -1,0 +1,21 @@
+namespaces:
+  services:
+    secrets:
+      services-secrets: {}
+      idea-triage-api-env: {}
+      ghcr-image-pull-secret:
+        type: kubernetes.io/dockerconfigjson
+  jellyfin:
+    secrets:
+      jellystat-secrets: {}
+  portfolio:
+    secrets:
+      ghcr-image-pull-secret:
+        type: kubernetes.io/dockerconfigjson
+  envoy-gateway:
+    secrets:
+      oidc-client-id: {}
+      oidc-client-secret: {}
+  cert-manager:
+    secrets:
+      cloudflare-api-token: {}
