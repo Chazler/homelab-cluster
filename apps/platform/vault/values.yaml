@@ -2,10 +2,50 @@ vault:
   server:
     ha:
       enabled: true
-      replicas: 2
+      replicas: 3
       raft:
         enabled: true
         setNodeId: true
+        config: |
+          ui = true
+          disable_mlock = true
+
+          listener "tcp" {
+            tls_disable = 1
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+          }
+
+          storage "raft" {
+            path = "/vault/data"
+
+            retry_join {
+              leader_api_addr = "http://vault-0.vault-internal:8200"
+            }
+
+            retry_join {
+              leader_api_addr = "http://vault-1.vault-internal:8200"
+            }
+          }
+
+          service_registration "kubernetes" {}
+
+          # The credentials file is a SealedSecret so the GCP service-account
+          # key remains encrypted in Git.
+          seal "gcpckms" {
+            project     = "festive-flame-505120-b4"
+            region      = "europe-west4"
+            key_ring    = "vault-auto-unseal"
+            crypto_key  = "vault-auto-unseal"
+          }
+
+    extraEnvironmentVars:
+      GOOGLE_APPLICATION_CREDENTIALS: /vault/userconfig/gcp/vault-auto-unseal-gcp/credentials.json
+
+    extraVolumes:
+      - type: secret
+        name: vault-auto-unseal-gcp
+        path: gcp
 
     dataStorage:
       enabled: true

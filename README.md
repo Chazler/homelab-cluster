@@ -116,6 +116,10 @@ kubectl get pods -n vault
 
 Google Cloud KMS auto-unseal is not configured in the current state.
 
+The in-progress auto-unseal migration runbook is in
+[`apps/platform/vault/README.md`](apps/platform/vault/README.md). It requires a
+planned outage and an interactive use of the existing Shamir key.
+
 ## Secrets
 
 Only encrypted `SealedSecret` resources belong in Git. The following local files are intentionally ignored:

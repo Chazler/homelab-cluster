@@ -1,0 +1,7 @@
+vault-secrets-operator:
+  controller:
+    replicas: 1
+    manager:
+      globalTransformationOptions:
+        # Do not retain the source Vault payload alongside the generated keys.
+        excludeRaw: true
