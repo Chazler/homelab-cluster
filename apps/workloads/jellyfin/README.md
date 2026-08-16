@@ -28,9 +28,3 @@ generates an Envoy Google OIDC `SecurityPolicy` and enforces the configured
 email allowlist before forwarding requests to those administrative services.
 Jellyfin, Jellyseerr and Jellystat use their own application-level
 authentication.
-
-To reproduce the stack, change `nodeName`, the local PV path and capacity,
-hostnames, images and resource requests in `values.yaml`. Create your own
-application secrets through Vault Secrets Operator and configure the service-to-service
-URLs above in each application's UI. Never delete or reformat the underlying
-filesystem as part of Kubernetes cleanup.

@@ -79,7 +79,7 @@ policies:
     issuer: https://accounts.google.com
     cookieDomain: joeriberman.nl
 
-    # - store idToken as plaintext so the JWT filter can read claims
+    # The JWT filter reads claims from this cookie.
     scopes:
       - email
     idTokenCookieName: id-token

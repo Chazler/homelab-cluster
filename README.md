@@ -80,46 +80,6 @@ AdGuard Home, Umami, Idea Triage and n8n use the same OIDC protection.
 Polylearn is intentionally public. AdGuard's DNS listener is a separate Cilium
 LoadBalancer service and does not pass through Envoy.
 
-## Bootstrap order
-
-For a new cluster, follow [SETUP.md](SETUP.md). The required order is:
-
-1. Replace the example addresses, hostnames, storage paths and secret material.
-2. Generate and apply Talos machine configurations with Cilium CNI and kube-proxy patches.
-3. Bootstrap etcd and retrieve kubeconfig.
-4. Install Cilium directly from `apps/networking/cilium`.
-5. Install Argo CD directly from `apps/core/argocd`.
-6. Apply the four resources in `apps/app-of-apps/`.
-7. Confirm every Argo CD application is synced and healthy.
-
-## Routine health checks
-
-```bash
-talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
-kubectl get nodes
-kubectl get pods -A
-cilium status
-kubectl get applications -n argocd
-kubectl get certificate -n envoy-gateway
-kubectl -n longhorn get volumes.longhorn.io
-```
-
-## Vault after a restart
-
-Vault currently uses manual Shamir unseal. Enter the key interactively so it is not recorded in shell history:
-
-```bash
-kubectl exec -it -n vault vault-0 -- vault operator unseal
-kubectl exec -it -n vault vault-1 -- vault operator unseal
-kubectl get pods -n vault
-```
-
-Google Cloud KMS auto-unseal is not configured in the current state.
-
-The in-progress auto-unseal migration runbook is in
-[`apps/platform/vault/README.md`](apps/platform/vault/README.md). It requires a
-planned outage and an interactive use of the existing Shamir key.
-
 ## Secrets
 
 Runtime application credentials are stored in Vault KV v2 and synchronized into
@@ -134,33 +94,17 @@ in Git. The following local files are intentionally ignored:
 - `talos/worker.yaml`
 - plaintext `secret.yaml` files
 
-Create or update a bootstrap sealed secret with:
-
-```bash
-kubeseal \
-  --controller-namespace sealed-secrets \
-  --controller-name sealed-secrets \
-  --format yaml \
-  < secret.yaml > sealed-secret.yaml
-```
-
-Never pass unseal keys, root tokens, cloud credentials or plaintext application secrets on a command line that will be retained in shell history.
-
-The Google OAuth client used by Envoy is represented in Git only by
-`apps/platform/envoy-gateway/templates/sealed-secret.yaml`. A replacement
-deployment must create its own Web application client, register every
-`https://<hostname>/oauth2/callback` URI, seal both credentials for the
-`envoy-gateway` namespace, and replace the encrypted values in that manifest.
+The Google OAuth client used by Envoy is represented in Git only by the
+encrypted Secret manifests in the `envoy-gateway` chart. Operational procedures
+are in [SETUP.md](SETUP.md) and [cheatsheet.md](cheatsheet.md).
 
 ## Current limitations
 
 - A single control-plane node means the Kubernetes API and etcd are not highly available.
 - Longhorn uses two replicas per volume. The third node adds placement options,
   but two replicas do not replace an external backup.
-- The two-member Vault Raft cluster cannot maintain quorum after losing either member.
 - The media library is a retained local PV on `k8s-worker-2`; it is node-bound
   and is not replicated by Longhorn.
 - Umami and Idea Triage share one PostgreSQL instance. Their databases and
   roles are isolated, but the database pod and volume remain a shared failure
   domain.
-- Vault must be manually unsealed after restarts.

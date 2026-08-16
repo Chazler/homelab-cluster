@@ -46,6 +46,21 @@ kubectl -n longhorn get replicas.longhorn.io
 kubectl get pv,pvc -A
 ```
 
+## PostgreSQL logical database backup and restore
+
+Back up and restore `umami` and `idea_triage` independently. Substitute the
+other database name where appropriate.
+
+```bash
+kubectl exec -n services postgres-0 -- \
+  pg_dump -U umami -Fc -f /tmp/umami.dump umami
+kubectl cp services/postgres-0:/tmp/umami.dump ./umami.dump
+
+kubectl cp ./umami.dump services/postgres-0:/tmp/umami.dump
+kubectl exec -n services postgres-0 -- \
+  pg_restore -U postgres -d umami --clean --if-exists /tmp/umami.dump
+```
+
 ## Create a sealed secret
 
 Keep `secret.yaml` local; it is ignored by Git.

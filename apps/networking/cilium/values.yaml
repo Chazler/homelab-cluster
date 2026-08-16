@@ -40,7 +40,7 @@ cilium:
   socketLB:
     hostNamespaceOnly: true
 
-  # Pod rollout - Zero-downtime upgrades
+  # Pod rollout configuration
   rollOutCiliumPods: true
 
   # Envoy Proxy Configuration
@@ -50,7 +50,7 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false # Disabled until prometheus is installed
+        enabled: false # Prometheus ServiceMonitor disabled
 
   # Monitoring Configuration
   monitor:
@@ -59,7 +59,7 @@ cilium:
   prometheus:
     enabled: true
     serviceMonitor:
-      enabled: false # Disabled until prometheus is installed
+      enabled: false # Prometheus ServiceMonitor disabled
 
   dashboards:
     enabled: true
@@ -78,7 +78,7 @@ cilium:
         - icmp
         - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
       serviceMonitor:
-        enabled: false # Disabled until prometheus is installed
+        enabled: false # Prometheus ServiceMonitor disabled
       dashboards:
         enabled: true
         annotations:
@@ -96,7 +96,7 @@ cilium:
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false # Disabled until prometheus is installed
+          enabled: false # Prometheus ServiceMonitor disabled
     
     ui:
       enabled: true
@@ -109,7 +109,7 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false # Disabled until prometheus is installed
+        enabled: false # Prometheus ServiceMonitor disabled
     dashboards:
       enabled: true
       annotations:

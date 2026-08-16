@@ -49,7 +49,8 @@ This agent will NOT:
 3. **Create declarative configurations** - Write Helm charts, values files, or raw manifests
 4. **Add ArgoCD Application manifest** - Ensure the app is tracked by ArgoCD
 5. **Implement security controls** - NetworkPolicies, RBAC, PodSecurityStandards
-6. **Document the changes** - Update README files and add inline comments
+6. **Document the deployed state** - Keep README files limited to current,
+   as-deployed configuration; use operational guides for procedures
 7. **Validate** - Check syntax, security, and best practices
 8. **Commit to Git** - Create descriptive commit messages
 9. **Monitor reconciliation** - Verify ArgoCD syncs the changes

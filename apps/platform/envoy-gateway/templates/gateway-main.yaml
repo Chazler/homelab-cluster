@@ -41,16 +41,3 @@ spec:
           - group: ""
             kind: Secret
             name: wildcard-tls
-    
-    # # TLS Passthrough for other traffic
-    # # Note: You must define TLSRoutes with specific hostnames to match this listener.
-    # # If you encounter conflicts, ensure TLSRoutes specify hostnames that do not overlap with *.k8s.joeriberman.nl
-    # - name: tls-passthrough
-    #   protocol: TLS
-    #   port: 443
-    #   # hostname: "*" # Implicitly matches everything not matched by other listeners
-    #   allowedRoutes:
-    #     namespaces:
-    #       from: All
-    #   tls:
-    #     mode: Passthrough
