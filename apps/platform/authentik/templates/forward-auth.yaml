@@ -57,6 +57,8 @@ data:
           external_host: https://{{ $app.hostname }}
           mode: forward_single
           intercept_header_auth: false
+          authorization_flow: !Find [authentik_flows.flow, [slug, default-provider-authorization-implicit-consent]]
+          invalidation_flow: !Find [authentik_flows.flow, [slug, default-provider-invalidation-flow]]
       - model: authentik_core.application
         identifiers:
           slug: {{ $app.slug }}
@@ -66,19 +68,19 @@ data:
           provider: !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]
           meta_launch_url: https://{{ $app.hostname }}
 {{- end }}
-      - model: authentik_outposts.kubernetesserviceconnection
-        identifiers:
-          name: homelab-cluster
-        attrs:
-          name: homelab-cluster
-          local: true
       - model: authentik_outposts.outpost
         identifiers:
-          name: homelab Forward Auth Outpost
+          name: homelab-forward-auth
         attrs:
-          name: homelab Forward Auth Outpost
+          name: homelab-forward-auth
           type: proxy
-          service_connection: !Find [authentik_outposts.kubernetesserviceconnection, [name, homelab-cluster]]
+          service_connection: !Find [authentik_outposts.kubernetesserviceconnection, [name, Local Kubernetes Cluster]]
+          config:
+            authentik_host: https://auth.joeriberman.nl
+            kubernetes_namespace: authentik
+            kubernetes_replicas: 2
+            kubernetes_service_type: ClusterIP
+            object_naming_template: ak-outpost-%(name)s
           providers:
 {{- range $app := $apps }}
             - !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]
