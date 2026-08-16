@@ -148,29 +148,29 @@ kubectl get applications,applicationsets -n argocd
 kubectl get pods -A
 ```
 
-## 7. Configure DNS, TLS and Google OIDC
+## 7. Configure DNS, TLS and Google sign-in
 
 Create the Cloudflare API token and Google OAuth client outside the cluster,
 then create namespace-scoped plaintext Secret manifests locally and seal them
 with your cluster's Sealed Secrets controller. Never commit the plaintext
 files.
 
-For the Google client, choose **Web application** and register one exact
-redirect URI for every protected hostname:
+For the Google client, choose **Web application** and register only the
+Authentik callback URL:
 
 ```text
-https://<hostname>/oauth2/callback
+https://auth.joeriberman.nl/source/oauth/callback/google/
 ```
 
 Store the client ID under the `client-id` key and the client secret under the
-`client-secret` key. Seal both Secrets for the `envoy-gateway` namespace and
-replace the example ciphertext in
-`apps/platform/envoy-gateway/templates/sealed-secret.yaml`.
+`client-secret` key in Vault at `authentik/google-oauth`. The Vault secret sync
+creates the `authentik-google-oauth` Secret for the Authentik server and worker.
 
-Kyverno clones the credentials once into each namespace labeled
-`oidc-secrets: "true"`. It separately watches HTTPRoutes labeled `oidc: "true"`
-and generates an Envoy OIDC `SecurityPolicy` for each matching route. Configure
-your own allowed email addresses in `apps/platform/kyverno/values.yaml`.
+Kyverno watches HTTPRoutes labeled `authentik-forward-auth: "true"` and
+generates a fail-closed Envoy external-auth `SecurityPolicy` plus a public
+`/outpost.goauthentik.io` route for each hostname. Each private hostname has a
+separate Authentik forward-auth provider and application; manage authorization
+policies on that Authentik application.
 
 Point the application DNS records at your public address and forward TCP 443
 to the Envoy Gateway LoadBalancer address. Split DNS or NAT loopback is needed
@@ -195,8 +195,7 @@ Expected results:
 - Apex and wildcard certificates are Ready.
 - `platform-rwo` is the only default StorageClass.
 - Active Longhorn volumes have two healthy replicas.
-- Unauthenticated requests to protected routes redirect to
-  `accounts.google.com`.
+- Unauthenticated requests to protected routes redirect through Authentik.
 
 ## 9. Initialize Vault only on a new empty cluster
 

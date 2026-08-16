@@ -21,7 +21,7 @@ Last verified: 2026-08-14.
 - cert-manager with Cloudflare DNS-01 validation
 - Longhorn with two replicas per active volume
 - Sealed Secrets
-- Kyverno-generated Envoy OIDC policies
+- Authentik forward-auth for private application routes
 - Vault Community Edition with integrated Raft storage
 
 The workload layer includes Home Assistant; a media stack built around
@@ -69,16 +69,17 @@ Public DNS points the application hostnames at the home connection, where TCP
 443 is forwarded to the Envoy Gateway address. cert-manager obtains the apex
 and wildcard certificates with Cloudflare DNS-01 challenges.
 
-Namespaces opt into a synchronized copy of the sealed OAuth credentials with
-the `oidc-secrets: "true"` label. Administrative HTTPRoutes opt into Google
-OIDC with the `oidc: "true"` label, which makes Kyverno generate an Envoy
-`SecurityPolicy` with an email allowlist. Public-facing services such as
-Jellyfin do not carry this route label. Deluge has no public route and is
-reachable only by the other media services through its VPN pod.
+Private HTTPRoutes use the `authentik-forward-auth: "true"` label. Kyverno
+generates a fail-closed Envoy external-auth `SecurityPolicy` and an unprotected
+`/outpost.goauthentik.io` route for each labeled hostname. Authentik has a
+separate forward-auth provider and application for every private hostname, so
+application policies remain isolated. Google sign-in is configured only as an
+Authentik source and uses the `auth.joeriberman.nl` callback.
 
-AdGuard Home, Umami, Idea Triage and n8n use the same OIDC protection.
-Polylearn is intentionally public. AdGuard's DNS listener is a separate Cilium
-LoadBalancer service and does not pass through Envoy.
+Jellyfin, Jellyseerr and Polylearn are intentionally public. Deluge has no
+public route and is reachable only by the other media services through its VPN
+pod. AdGuard's DNS listener is a separate Cilium LoadBalancer service and does
+not pass through Envoy.
 
 ## Secrets
 
@@ -94,9 +95,9 @@ in Git. The following local files are intentionally ignored:
 - `talos/worker.yaml`
 - plaintext `secret.yaml` files
 
-The Google OAuth client used by Envoy is represented in Git only by the
-encrypted Secret manifests in the `envoy-gateway` chart. Operational procedures
-are in [SETUP.md](SETUP.md) and [cheatsheet.md](cheatsheet.md).
+The Google OAuth client used by Authentik is synchronized from Vault only into
+the Authentik namespace. Operational procedures are in [SETUP.md](SETUP.md)
+and [cheatsheet.md](cheatsheet.md).
 
 ## Current limitations
 

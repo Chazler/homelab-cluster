@@ -23,7 +23,7 @@ argo-cd:
   server:
     replicas: 1
     httproute:
-      labels: { "oidc": "true" }
+      labels: { "authentik-forward-auth": "true" }
       enabled: true
       hostnames:
         - argocd.joeriberman.nl
@@ -48,4 +48,3 @@ argo-cd:
   
   applicationSet:
     enabled: true
-

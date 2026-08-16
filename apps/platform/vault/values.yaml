@@ -69,11 +69,8 @@ vault:
 route:
   enabled: true
   hostname: vault.joeriberman.nl
-  labels: {}
-  oidc:
-    enabled: true
-    labelKey: oidc
-    labelValue: "true"
+  labels:
+    authentik-forward-auth: "true"
   parentGateway:
     group: gateway.networking.k8s.io
     kind: Gateway

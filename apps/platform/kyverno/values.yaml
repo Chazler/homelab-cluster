@@ -6,18 +6,6 @@ kyverno:
       clusterRole:
         extraResources:
           - apiGroups:
-              - ""
-            resources:
-              - secrets
-            verbs:
-              - get
-              - list
-              - watch
-              - create
-              - update
-              - patch
-              - delete
-          - apiGroups:
               - gateway.envoyproxy.io
             resources:
               - securitypolicies
@@ -35,18 +23,6 @@ kyverno:
       clusterRole:
         extraResources:
           - apiGroups:
-              - ""
-            resources:
-              - secrets
-            verbs:
-              - get
-              - list
-              - watch
-              - create
-              - update
-              - patch
-              - delete
-          - apiGroups:
               - gateway.envoyproxy.io
             resources:
               - securitypolicies
@@ -60,34 +36,12 @@ kyverno:
               - delete
 
 policies:
-  envoyOidc:
+  authentikForwardAuth:
     enabled: true
-
-    # HTTPRoutes with this label will get an OIDC SecurityPolicy generated.
-    labelKey: oidc
+    # HTTPRoutes with this label receive an Authentik external-auth policy and
+    # a public route for the provider's outpost endpoints.
+    labelKey: authentik-forward-auth
     labelValue: "true"
-
-    # Namespaces with this label receive one synchronized copy of the OIDC credentials.
-    namespaceLabelKey: oidc-secrets
-    namespaceLabelValue: "true"
-
-    # Source namespace for cloning the OIDC secrets into opted-in namespaces.
-    secretNamespace: envoy-gateway
-    clientSecretName: oidc-client-secret
-    clientIDSecretName: oidc-client-id
-
-    issuer: https://accounts.google.com
-    cookieDomain: joeriberman.nl
-
-    # The JWT filter reads claims from this cookie.
-    scopes:
-      - email
-    idTokenCookieName: id-token
-
-    jwtProviderName: google
-    remoteJWKS:
-      uri: https://www.googleapis.com/oauth2/v3/certs
-      cacheDuration: 300s
-
-    emailWhitelist:
-      - joeriberman@gmail.com
+    authentikNamespace: authentik
+    authentikServiceName: authentik-server
+    authentikServicePort: 80

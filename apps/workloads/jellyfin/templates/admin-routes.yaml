@@ -5,7 +5,7 @@ metadata:
   name: {{ $name }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    oidc: "true"
+    authentik-forward-auth: "true"
 spec:
   parentRefs:
     - group: gateway.networking.k8s.io

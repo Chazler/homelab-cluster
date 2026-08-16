@@ -5,9 +5,6 @@ metadata:
   name: vault
   namespace: {{ .Release.Namespace }}
   {{- $labels := .Values.route.labels | default dict -}}
-  {{- if .Values.route.oidc.enabled }}
-    {{- $_ := set $labels (.Values.route.oidc.labelKey | default "oidc") (.Values.route.oidc.labelValue | default "true") -}}
-  {{- end }}
   {{- if $labels }}
   labels:
   {{- range $k, $v := $labels }}

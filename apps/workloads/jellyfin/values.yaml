@@ -32,11 +32,11 @@ publicRoutes:
   jellyseerr:
     hostname: jellyseerr.joeriberman.nl
     port: 5055
+
+adminRoutes:
   jellystat:
     hostname: jellystat.joeriberman.nl
     port: 3000
-
-adminRoutes:
   sonarr:
     hostname: sonarr.joeriberman.nl
     port: 8989

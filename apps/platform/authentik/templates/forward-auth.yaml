@@ -1,0 +1,78 @@
+{{- $namespaces := list "argocd" "vault" "services" "jellyfin" }}
+{{- range $namespace := $namespaces }}
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-{{ $namespace }}-forward-auth
+  namespace: {{ $.Release.Namespace }}
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: {{ $namespace }}
+    - group: gateway.envoyproxy.io
+      kind: SecurityPolicy
+      namespace: {{ $namespace }}
+  to:
+    - group: ""
+      kind: Service
+      name: authentik-server
+{{- end }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authentik-forward-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    goauthentik.io/blueprint: "true"
+data:
+  forward-auth.yaml: |
+    version: 1
+    metadata:
+      name: Homelab forward-auth applications
+      labels:
+        blueprints.goauthentik.io/instantiate: "true"
+    entries:
+{{- $apps := list
+  (dict "slug" "argocd" "name" "Argo CD" "hostname" "argocd.joeriberman.nl")
+  (dict "slug" "vault" "name" "Vault" "hostname" "vault.joeriberman.nl")
+  (dict "slug" "adguard" "name" "AdGuard Home" "hostname" "adguard.joeriberman.nl")
+  (dict "slug" "umami" "name" "Umami" "hostname" "umami.joeriberman.nl")
+  (dict "slug" "n8n" "name" "n8n" "hostname" "n8n.joeriberman.nl")
+  (dict "slug" "idea-triage" "name" "Idea Triage" "hostname" "idea-triage.joeriberman.nl")
+  (dict "slug" "jellystat" "name" "Jellystat" "hostname" "jellystat.joeriberman.nl")
+  (dict "slug" "sonarr" "name" "Sonarr" "hostname" "sonarr.joeriberman.nl")
+  (dict "slug" "sonarr-anime" "name" "Sonarr Anime" "hostname" "sonarr-anime.joeriberman.nl")
+  (dict "slug" "radarr" "name" "Radarr" "hostname" "radarr.joeriberman.nl")
+  (dict "slug" "prowlarr" "name" "Prowlarr" "hostname" "prowlarr.joeriberman.nl")
+  (dict "slug" "bazarr" "name" "Bazarr" "hostname" "bazarr.joeriberman.nl")
+  (dict "slug" "sabnzbd" "name" "SABnzbd" "hostname" "sabnzbd.joeriberman.nl")
+}}
+{{- range $app := $apps }}
+      - model: authentik_providers_proxy.proxyprovider
+        identifiers:
+          name: forward-auth-{{ $app.slug }}
+        attrs:
+          name: forward-auth-{{ $app.slug }}
+          external_host: https://{{ $app.hostname }}
+          mode: forward_single
+          intercept_header_auth: false
+      - model: authentik_core.application
+        identifiers:
+          slug: {{ $app.slug }}
+        attrs:
+          name: {{ $app.name }}
+          slug: {{ $app.slug }}
+          provider: !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]
+          meta_launch_url: https://{{ $app.hostname }}
+{{- end }}
+      - model: authentik_outposts.outpost
+        identifiers:
+          name: authentik Embedded Outpost
+        attrs:
+          providers:
+{{- range $app := $apps }}
+            - !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]
+{{- end }}

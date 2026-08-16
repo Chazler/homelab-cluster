@@ -25,6 +25,7 @@ authentik:
   blueprints:
     configMaps:
       - authentik-google-source
+      - authentik-forward-auth
 
   server:
     replicas: 2
