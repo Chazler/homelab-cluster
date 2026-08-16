@@ -24,12 +24,23 @@ namespaces:
     secrets:
       authentik-runtime:
         path: authentik/runtime
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: authentik-server
+          - kind: Deployment
+            name: authentik-worker
         transformation:
           templates:
             AUTHENTIK_SECRET_KEY:
               text: '{{ get .Secrets "authentik-secret-key" }}'
+            AUTHENTIK_POSTGRESQL__HOST:
+              text: authentik-postgresql
+            AUTHENTIK_POSTGRESQL__NAME:
+              text: authentik
             AUTHENTIK_POSTGRESQL__PASSWORD:
               text: '{{ get .Secrets "postgres-password" }}'
+            AUTHENTIK_POSTGRESQL__USER:
+              text: authentik
             AUTHENTIK_BOOTSTRAP_TOKEN:
               text: '{{ get .Secrets "bootstrap-token" }}'
             password:
