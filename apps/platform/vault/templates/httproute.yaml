@@ -61,4 +61,5 @@ spec:
           name: ak-outpost-homelab-forward-auth
           namespace: authentik
           port: 9000
+          weight: 1
 {{- end }}
