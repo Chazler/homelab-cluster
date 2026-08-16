@@ -21,7 +21,7 @@ data:
           consumer_key: !Env AUTHENTIK_GOOGLE_CLIENT_ID
           consumer_secret: !Env AUTHENTIK_GOOGLE_CLIENT_SECRET
           authentication_flow: !Find [authentik_flows.flow, [slug, default-source-authentication]]
-          enrollment_flow: !Find [authentik_flows.flow, [slug, default-source-enrollment]]
+          enrollment_flow: null
           user_matching_mode: email_link
       - model: authentik_stages_identification.identificationstage
         identifiers:
