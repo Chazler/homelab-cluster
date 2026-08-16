@@ -32,8 +32,6 @@ data:
     version: 1
     metadata:
       name: Homelab forward-auth applications
-      labels:
-        blueprints.goauthentik.io/instantiate: "true"
     entries:
 {{- $apps := list
   (dict "slug" "argocd" "name" "Argo CD" "hostname" "argocd.joeriberman.nl")
