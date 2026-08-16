@@ -6,7 +6,9 @@ sealed-secrets:
     name: sealed-secrets-controller
 
   secretName: "sealed-secrets-key"
-  keyrenewperiod: "0"
+  # Renew the sealing certificate every 30 days. Existing private keys remain
+  # available to decrypt existing SealedSecrets during the transition.
+  keyrenewperiod: "720h"
 
   podSecurityContext:
     enabled: true
