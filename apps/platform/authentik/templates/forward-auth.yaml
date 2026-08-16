@@ -78,7 +78,7 @@ data:
           config:
             authentik_host: https://auth.joeriberman.nl
             kubernetes_namespace: authentik
-            kubernetes_replicas: 2
+            kubernetes_replicas: 1
             kubernetes_service_type: ClusterIP
             object_naming_template: ak-outpost-%(name)s
           providers:
