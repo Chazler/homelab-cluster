@@ -19,3 +19,33 @@ namespaces:
   cert-manager:
     secrets:
       cloudflare-api-token: {}
+  authentik:
+    createNamespace: true
+    secrets:
+      authentik-runtime:
+        path: authentik/runtime
+        transformation:
+          templates:
+            AUTHENTIK_SECRET_KEY:
+              text: '{{ get .Secrets "authentik-secret-key" }}'
+            AUTHENTIK_POSTGRESQL__PASSWORD:
+              text: '{{ get .Secrets "postgres-password" }}'
+            AUTHENTIK_BOOTSTRAP_TOKEN:
+              text: '{{ get .Secrets "bootstrap-token" }}'
+            password:
+              text: '{{ get .Secrets "postgres-password" }}'
+            postgres-password:
+              text: '{{ get .Secrets "postgres-password" }}'
+      authentik-google-oauth:
+        path: authentik/google-oauth
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: authentik-server
+          - kind: Deployment
+            name: authentik-worker
+        transformation:
+          templates:
+            AUTHENTIK_GOOGLE_CLIENT_ID:
+              text: '{{ get .Secrets "client-id" }}'
+            AUTHENTIK_GOOGLE_CLIENT_SECRET:
+              text: '{{ get .Secrets "client-secret" }}'

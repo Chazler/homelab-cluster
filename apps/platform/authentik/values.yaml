@@ -1,0 +1,80 @@
+authentik:
+  fullnameOverride: authentik
+
+  global:
+    revisionHistoryLimit: 3
+    env:
+      - name: AUTHENTIK_BOOTSTRAP_EMAIL
+        value: joeriberman@gmail.com
+    envFrom:
+      - secretRef:
+          name: authentik-google-oauth
+    affinity:
+      podAntiAffinity: hard
+
+  authentik:
+    existingSecret:
+      secretName: authentik-runtime
+    error_reporting:
+      enabled: false
+    postgresql:
+      host: authentik-postgresql
+      name: authentik
+      user: authentik
+
+  blueprints:
+    configMaps:
+      - authentik-google-source
+
+  server:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    pdb:
+      enabled: true
+      minAvailable: 1
+
+  worker:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        memory: 512Mi
+    pdb:
+      enabled: true
+      minAvailable: 1
+
+  postgresql:
+    enabled: true
+    auth:
+      existingSecret: authentik-runtime
+      secretKeys:
+        adminPasswordKey: postgres-password
+        userPasswordKey: password
+    primary:
+      persistence:
+        enabled: true
+        storageClass: platform-rwo
+        size: 5Gi
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          memory: 512Mi
+      podAntiAffinityPreset: hard
+
+route:
+  hostname: auth.joeriberman.nl
+  parentGateway:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: web-https

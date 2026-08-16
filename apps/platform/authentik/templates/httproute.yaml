@@ -1,0 +1,22 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: authentik
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+    - group: {{ .Values.route.parentGateway.group | quote }}
+      kind: {{ .Values.route.parentGateway.kind | quote }}
+      name: {{ .Values.route.parentGateway.name | quote }}
+      namespace: {{ .Values.route.parentGateway.namespace | quote }}
+      sectionName: {{ .Values.route.parentGateway.sectionName | quote }}
+  hostnames:
+    - {{ .Values.route.hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: authentik-server
+          port: 80
