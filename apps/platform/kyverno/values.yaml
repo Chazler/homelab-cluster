@@ -17,6 +17,14 @@ kyverno:
               - update
               - patch
               - delete
+          - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - httproutes
+            verbs:
+              - get
+              - list
+              - watch
 
   backgroundController:
     rbac:
@@ -34,6 +42,14 @@ kyverno:
               - update
               - patch
               - delete
+          - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - httproutes
+            verbs:
+              - get
+              - list
+              - watch
 
 policies:
   authentikForwardAuth:
