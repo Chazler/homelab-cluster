@@ -70,11 +70,12 @@ Public DNS points the application hostnames at the home connection, where TCP
 and wildcard certificates with Cloudflare DNS-01 challenges.
 
 Private HTTPRoutes use the `authentik-forward-auth: "true"` label. Kyverno
-generates a fail-closed Envoy external-auth `SecurityPolicy` and an unprotected
-`/outpost.goauthentik.io` route for each labeled hostname. Authentik has a
-separate forward-auth provider and application for every private hostname, so
-application policies remain isolated. Google sign-in is configured only as an
-Authentik source and uses the `auth.joeriberman.nl` callback.
+generates a fail-closed Envoy external-auth `SecurityPolicy`; each application
+chart also exposes an unprotected `/outpost.goauthentik.io` route to the managed
+Authentik proxy outpost. Authentik has a separate forward-auth provider and
+application for every private hostname, so application policies remain isolated.
+Google sign-in is configured only as an Authentik source and uses the
+`auth.joeriberman.nl` callback.
 
 Jellyfin, Jellyseerr and Polylearn are intentionally public. Deluge has no
 public route and is reachable only by the other media services through its VPN

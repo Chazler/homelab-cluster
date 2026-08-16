@@ -44,4 +44,4 @@ policies:
     labelValue: "true"
     authentikNamespace: authentik
     authentikServiceName: ak-outpost-homelab-forward-auth
-    authentikServicePort: 80
+    authentikServicePort: 9000

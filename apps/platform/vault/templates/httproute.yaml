@@ -60,5 +60,5 @@ spec:
           kind: Service
           name: ak-outpost-homelab-forward-auth
           namespace: authentik
-          port: 80
+          port: 9000
 {{- end }}
