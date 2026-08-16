@@ -33,4 +33,32 @@ spec:
           name: {{ .Values.route.backend.serviceName | quote }}
           port: {{ .Values.route.backend.port }}
           weight: {{ .Values.route.backend.weight }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: authentik-outpost-vault
+  namespace: {{ .Release.Namespace }}
+spec:
+  parentRefs:
+    - group: {{ .Values.route.parentGateway.group | quote }}
+      kind: {{ .Values.route.parentGateway.kind | quote }}
+      name: {{ .Values.route.parentGateway.name | quote }}
+      namespace: {{ .Values.route.parentGateway.namespace | quote }}
+      {{- if .Values.route.parentGateway.sectionName }}
+      sectionName: {{ .Values.route.parentGateway.sectionName | quote }}
+      {{- end }}
+  hostnames:
+    - {{ .Values.route.hostname | quote }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /outpost.goauthentik.io
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: authentik-server
+          namespace: authentik
+          port: 80
 {{- end }}
