@@ -17,7 +17,7 @@ spec:
   to:
     - group: ""
       kind: Service
-      name: authentik-server
+      name: ak-outpost-homelab-forward-auth
 {{- end }}
 ---
 apiVersion: v1
@@ -68,10 +68,19 @@ data:
           provider: !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]
           meta_launch_url: https://{{ $app.hostname }}
 {{- end }}
+      - model: authentik_outposts.kubernetesserviceconnection
+        identifiers:
+          name: homelab-cluster
+        attrs:
+          name: homelab-cluster
+          local: true
       - model: authentik_outposts.outpost
         identifiers:
-          name: authentik Embedded Outpost
+          name: homelab Forward Auth Outpost
         attrs:
+          name: homelab Forward Auth Outpost
+          type: proxy
+          service_connection: !Find [authentik_outposts.kubernetesserviceconnection, [name, homelab-cluster]]
           providers:
 {{- range $app := $apps }}
             - !Find [authentik_providers_proxy.proxyprovider, [name, forward-auth-{{ $app.slug }}]]

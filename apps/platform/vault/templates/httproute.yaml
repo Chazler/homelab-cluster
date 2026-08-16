@@ -58,7 +58,7 @@ spec:
       backendRefs:
         - group: ""
           kind: Service
-          name: authentik-server
+          name: ak-outpost-homelab-forward-auth
           namespace: authentik
           port: 80
 {{- end }}
