@@ -1,4 +1,16 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.nodeMetricsNamespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    # Node and SMART exporters require host mounts and privileged device access.
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+---
+apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: smartctl-exporter
