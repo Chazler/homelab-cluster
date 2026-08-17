@@ -20,7 +20,7 @@
       // matching how these images were originally pinned.
       customType: 'regex',
       description: 'Digest-pinned container images in workload values.yaml files',
-      fileMatch: ['^apps/.*values\\.ya?ml$'],
+      managerFilePatterns: ['/^apps/.*values\\.ya?ml$/'],
       matchStrings: [
         "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)@sha256:(?<currentDigest>[a-f0-9]{64})",
       ],
@@ -36,7 +36,7 @@
       // up in the dashboard.
       customType: 'regex',
       description: 'Talos Linux version',
-      fileMatch: ['^talos/versions\\.yaml$'],
+      managerFilePatterns: ['/^talos/versions\\.yaml$/'],
       matchStrings: ["talos:\\s*(?<currentValue>v?[0-9.]+)"],
       depNameTemplate: 'siderolabs/talos',
       datasourceTemplate: 'github-releases',
@@ -44,7 +44,7 @@
     {
       customType: 'regex',
       description: 'Kubernetes version running on Talos',
-      fileMatch: ['^talos/versions\\.yaml$'],
+      managerFilePatterns: ['/^talos/versions\\.yaml$/'],
       matchStrings: ["kubernetes:\\s*(?<currentValue>v?[0-9.]+)"],
       depNameTemplate: 'kubernetes/kubernetes',
       datasourceTemplate: 'github-releases',
