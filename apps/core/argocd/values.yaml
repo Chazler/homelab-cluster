@@ -27,7 +27,7 @@ argo-cd:
     rbac:
       policy.default: role:readonly
       policy.csv: |
-        g, joeriberman@gmail.com, role:admin
+        g, authentik Admins, role:admin
 
     params:
       server.insecure: true
