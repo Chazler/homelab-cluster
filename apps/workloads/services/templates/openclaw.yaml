@@ -22,6 +22,7 @@ data:
         "trustedProxies": ["10.244.0.0/16"],
         "controlUi": {
           "enabled": true,
+          "dangerouslyDisableDeviceAuth": true,
           "allowedOrigins": ["https://{{ .Values.openclaw.hostname }}"]
         }
       },

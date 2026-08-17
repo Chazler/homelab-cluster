@@ -33,6 +33,18 @@ verified trusted-proxy identity is granted the Control UI operator
 role, so there's currently no per-user allowlist. Revisit once the
 pinned digest is bumped past a release that ships identityScopes.
 
+`gateway.controlUi.dangerouslyDisableDeviceAuth` is also set. Without
+it, a brand-new browser session needs one-time device pairing approved
+via a privileged, already-paired caller — a bootstrap that the
+gateway's own WS RPC auth model has no way to satisfy for a trusted-proxy
+connection with no prior paired device (approving requires the
+`operator.pairing` scope on an *existing* paired connection, which
+none exists yet for a fresh deploy). Since every connection is already
+identity-verified by Authentik before Envoy ever forwards it to the
+gateway (see `x-authentik-email` above), the extra per-device pairing
+ceremony is redundant here; disabling it accepts that trade-off
+explicitly rather than working around the bootstrap deadlock.
+
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
 the PVC copy is authoritative, so config edits made through OpenClaw
