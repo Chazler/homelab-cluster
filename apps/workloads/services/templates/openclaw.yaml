@@ -15,7 +15,13 @@ data:
         "auth": {
           "mode": "trusted-proxy",
           "trustedProxy": {
-            "userHeader": "x-authentik-username"
+            "userHeader": "x-authentik-email"
+          },
+          "identityScopes": {
+            {{- range $i, $email := .Values.openclaw.operatorEmails }}
+            {{- if $i }},{{ end }}
+            {{ $email | quote }}: ["operator.admin"]
+            {{- end }}
           }
         },
         "trustedProxies": ["10.244.0.0/16"],
