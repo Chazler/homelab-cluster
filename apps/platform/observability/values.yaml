@@ -4,6 +4,9 @@ kube-prometheus-stack:
   defaultRules:
     create: true
 
+  prometheus-node-exporter:
+    namespaceOverride: node-observability
+
   grafana:
     admin:
       existingSecret: observability-grafana
@@ -83,3 +86,5 @@ route:
     name: envoy-gateway
     namespace: envoy-gateway
     sectionName: web-https
+
+nodeMetricsNamespace: node-observability
