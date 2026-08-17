@@ -14,36 +14,56 @@ Vault by Vault Secrets Operator.
 | Polylearn | `polylearn.joeriberman.nl` | Public |
 | Idea Triage | `idea-triage.joeriberman.nl` | Authentik forward-auth |
 | n8n | `n8n.joeriberman.nl` | Authentik forward-auth |
-| OpenClaw | `openclaw.joeriberman.nl` | Authentik forward-auth |
+| OpenClaw | `openclaw.joeriberman.nl` | OpenClaw gateway token |
 
-OpenClaw (https://docs.openclaw.ai) needs one model provider API key in
-Vault at `services/openclaw-env`: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`,
-`OPENAI_API_KEY` or `OPENROUTER_API_KEY`. Vault Secrets Operator syncs it
-into the `openclaw-env` secret and each key is wired in individually
-(`optional: true`) rather than via `envFrom`, since `gateway.auth.mode`
-is `trusted-proxy` and the gateway refuses to start if a
-`OPENCLAW_GATEWAY_TOKEN` is present alongside it — trusted-proxy and
-shared-token auth are mutually exclusive. The gateway instead trusts the
-`x-authentik-email` header injected by the Authentik forward-auth
-outpost (see `apps/platform/kyverno/templates/authentik-forward-auth.yaml`),
-scoped to `gateway.trustedProxies: ["10.244.0.0/16"]` (the cluster pod
-CIDR) so only in-cluster proxies can set it. The pinned image
-(`2026.7.1`) predates `gateway.auth.identityScopes` — any request with a
-verified trusted-proxy identity is granted the Control UI operator
-role, so there's currently no per-user allowlist. Revisit once the
-pinned digest is bumped past a release that ships identityScopes.
+OpenClaw (https://docs.openclaw.ai) is the one service here **not**
+behind Authentik forward-auth. It authenticates natively with
+`gateway.auth.mode: "token"`, because the OpenClaw iOS app pairs by
+scanning a setup code (`openclaw qr`) that embeds a bearer token — a
+native client has no way to complete Authentik's browser SSO redirect,
+and `trusted-proxy` mode is mutually exclusive with any shared token
+(the gateway refuses to start with both). Delegating to Authentik and
+supporting the mobile app are therefore incompatible; the gateway token
+is the single authentication boundary for both browser and app.
 
-`gateway.controlUi.dangerouslyDisableDeviceAuth` is also set. Without
-it, a brand-new browser session needs one-time device pairing approved
-via a privileged, already-paired caller — a bootstrap that the
-gateway's own WS RPC auth model has no way to satisfy for a trusted-proxy
-connection with no prior paired device (approving requires the
-`operator.pairing` scope on an *existing* paired connection, which
-none exists yet for a fresh deploy). Since every connection is already
-identity-verified by Authentik before Envoy ever forwards it to the
-gateway (see `x-authentik-email` above), the extra per-device pairing
-ceremony is redundant here; disabling it accepts that trade-off
-explicitly rather than working around the bootstrap deadlock.
+Required secrets in Vault at `services/openclaw-env`:
+
+- `OPENCLAW_GATEWAY_TOKEN` — the gateway credential. The pod will not
+  start without it. Generate with `openssl rand -hex 32`.
+- One model provider API key: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`,
+  `OPENAI_API_KEY` or `OPENROUTER_API_KEY`.
+
+Vault Secrets Operator syncs these into the `openclaw-env` secret; each
+is wired in as an individual `secretKeyRef` (provider keys
+`optional: true`) rather than via `envFrom`.
+
+To reach the Control UI in a browser, paste the token into the
+connection page:
+
+    kubectl get secret openclaw-env -n services \
+      -o jsonpath='{.data.OPENCLAW_GATEWAY_TOKEN}' | base64 -d && echo
+
+Device pairing is enforced. A new browser raises a pairing request that
+an operator approves from inside the pod, which works because the token
+authenticates the CLI itself:
+
+    kubectl exec -n services deploy/openclaw -c openclaw -- sh -c \
+      'node /app/openclaw.mjs devices list --token "$OPENCLAW_GATEWAY_TOKEN"'
+    kubectl exec -n services deploy/openclaw -c openclaw -- sh -c \
+      'node /app/openclaw.mjs devices approve <requestId> --token "$OPENCLAW_GATEWAY_TOKEN"'
+
+The iOS app self-enrols instead: `openclaw qr` mints a short-lived
+bootstrap token, so it needs no manual approval.
+
+`gateway.controlUi.dangerouslyDisableDeviceAuth` was previously set and
+is now removed. It was only ever needed under `trusted-proxy`, where
+approving the first device was impossible — approval requires the
+`operator.pairing` scope on an already-paired connection, which cannot
+exist on a fresh deploy. Token auth breaks that deadlock, so pairing is
+enforced again. Note the pinned image (`2026.7.1`) also predates
+`gateway.auth.identityScopes` and `trustedProxy.deviceAutoApprove`,
+both of which the online docs describe; verify any new auth field
+against the image before using it.
 
 `agents.defaults.model`/`agents.list[0].model` are pinned to
 `openrouter/auto` so the agent actually routes through OpenRouter (and

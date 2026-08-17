@@ -13,16 +13,11 @@ data:
         "bind": "lan",
         "port": 18789,
         "auth": {
-          "mode": "trusted-proxy",
-          "trustedProxy": {
-            "userHeader": "x-authentik-email",
-            "allowLoopback": true
-          }
+          "mode": "token"
         },
         "trustedProxies": ["10.244.0.0/16"],
         "controlUi": {
           "enabled": true,
-          "dangerouslyDisableDeviceAuth": true,
           "allowedOrigins": ["https://{{ .Values.openclaw.hostname }}"]
         }
       },
@@ -110,6 +105,14 @@ spec:
           image: {{ .Values.openclaw.image | quote }}
           imagePullPolicy: IfNotPresent
           env:
+            # Required: gateway.auth.mode is "token", so the gateway refuses to
+            # start without this. Also the credential the mobile setup code
+            # (openclaw qr) hands to the iOS app.
+            - name: OPENCLAW_GATEWAY_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-env
+                  key: OPENCLAW_GATEWAY_TOKEN
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:

@@ -40,7 +40,6 @@ data:
   (dict "slug" "umami" "name" "Umami" "hostname" "umami.joeriberman.nl")
   (dict "slug" "n8n" "name" "n8n" "hostname" "n8n.joeriberman.nl")
   (dict "slug" "idea-triage" "name" "Idea Triage" "hostname" "idea-triage.joeriberman.nl")
-  (dict "slug" "openclaw" "name" "OpenClaw" "hostname" "openclaw.joeriberman.nl")
   (dict "slug" "jellystat" "name" "Jellystat" "hostname" "jellystat.joeriberman.nl")
   (dict "slug" "sonarr" "name" "Sonarr" "hostname" "sonarr.joeriberman.nl")
   (dict "slug" "sonarr-anime" "name" "Sonarr Anime" "hostname" "sonarr-anime.joeriberman.nl")

@@ -1,9 +1,13 @@
+{{- /* openclaw has forwardAuth false on purpose: its gateway authenticates
+       natively via gateway.auth.mode=token so the iOS app can pair. A native
+       client cannot complete Authentik's browser SSO redirect, and
+       trusted-proxy mode is mutually exclusive with a shared token. */}}
 {{- $routes := list
   (dict "name" "adguard" "hostname" .Values.adguard.hostname "service" "adguard" "port" 80 "forwardAuth" true)
   (dict "name" "umami" "hostname" .Values.umami.hostname "service" "umami" "port" 3000 "forwardAuth" true)
   (dict "name" "polylearn" "hostname" .Values.polylearn.hostname "service" "polylearn" "port" 80 "forwardAuth" false)
   (dict "name" "n8n" "hostname" .Values.n8n.hostname "service" "n8n" "port" 5678 "forwardAuth" true)
-  (dict "name" "openclaw" "hostname" .Values.openclaw.hostname "service" "openclaw" "port" 18789 "forwardAuth" true)
+  (dict "name" "openclaw" "hostname" .Values.openclaw.hostname "service" "openclaw" "port" 18789 "forwardAuth" false)
 -}}
 {{- range $route := $routes }}
 apiVersion: gateway.networking.k8s.io/v1
