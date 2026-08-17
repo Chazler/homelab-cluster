@@ -9,6 +9,8 @@ authentik:
     envFrom:
       - secretRef:
           name: authentik-google-oauth
+      - secretRef:
+          name: authentik-grafana-oauth
     affinity:
       podAntiAffinity: hard
 
@@ -26,6 +28,7 @@ authentik:
     configMaps:
       - authentik-google-source
       - authentik-forward-auth
+      - authentik-grafana-provider
 
   server:
     replicas: 2

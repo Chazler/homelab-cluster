@@ -21,6 +21,24 @@ kube-prometheus-stack:
       existingSecret: observability-grafana
       userKey: admin-user
       passwordKey: admin-password
+    envFromSecret: observability-grafana-oauth
+    grafana.ini:
+      server:
+        root_url: https://grafana.joeriberman.nl
+      auth:
+        disable_login_form: false
+        oauth_auto_login: false
+      auth.generic_oauth:
+        enabled: true
+        name: authentik
+        scopes: openid profile email
+        auth_url: https://auth.joeriberman.nl/application/o/authorize/
+        token_url: https://auth.joeriberman.nl/application/o/token/
+        api_url: https://auth.joeriberman.nl/application/o/userinfo/
+        redirect_uri: https://grafana.joeriberman.nl/login/generic_oauth
+        use_pkce: true
+        allow_sign_up: true
+        role_attribute_path: "'Admin'"
     persistence:
       enabled: true
       type: sts

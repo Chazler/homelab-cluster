@@ -3,8 +3,6 @@ kind: HTTPRoute
 metadata:
   name: grafana
   namespace: {{ .Release.Namespace }}
-  labels:
-    authentik-forward-auth: "true"
 spec:
   parentRefs:
     - group: {{ .Values.route.parentGateway.group | quote }}

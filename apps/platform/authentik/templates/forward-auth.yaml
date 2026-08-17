@@ -1,4 +1,4 @@
-{{- $namespaces := list "argocd" "vault" "services" "jellyfin" "observability" }}
+{{- $namespaces := list "argocd" "vault" "services" "jellyfin" }}
 {{- range $namespace := $namespaces }}
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
@@ -35,7 +35,6 @@ data:
     entries:
 {{- $apps := list
   (dict "slug" "argocd" "name" "Argo CD" "hostname" "argocd.joeriberman.nl")
-  (dict "slug" "grafana" "name" "Grafana" "hostname" "grafana.joeriberman.nl")
   (dict "slug" "vault" "name" "Vault" "hostname" "vault.joeriberman.nl")
   (dict "slug" "adguard" "name" "AdGuard Home" "hostname" "adguard.joeriberman.nl")
   (dict "slug" "umami" "name" "Umami" "hostname" "umami.joeriberman.nl")
