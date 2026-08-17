@@ -54,7 +54,6 @@ vault:
         path: /vault/userconfig/gcp
       - type: secret
         name: vault-server-tls
-        path: /vault/userconfig/vault-server-tls
 
     dataStorage:
       enabled: true
