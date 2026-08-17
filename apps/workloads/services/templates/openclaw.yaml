@@ -15,7 +15,8 @@ data:
         "auth": {
           "mode": "trusted-proxy",
           "trustedProxy": {
-            "userHeader": "x-authentik-email"
+            "userHeader": "x-authentik-email",
+            "allowLoopback": true
           }
         },
         "trustedProxies": ["10.244.0.0/16"],
