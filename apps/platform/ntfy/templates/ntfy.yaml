@@ -64,17 +64,9 @@ spec:
               value: "true"
             - name: NTFY_UPSTREAM_BASE_URL
               value: https://ntfy.sh
-            - name: NTFY_AUTH_OIDC_ISSUER
-              value: https://auth.joeriberman.nl/application/o/ntfy-oidc/
-            - name: NTFY_AUTH_OIDC_REDIRECT_URL
-              value: https://{{ .Values.hostname }}/oidc/callback
-            - name: NTFY_AUTH_OIDC_SCOPES
-              value: openid profile email
           envFrom:
             - secretRef:
                 name: ntfy-runtime
-            - secretRef:
-                name: ntfy-oidc
           ports:
             - name: http
               containerPort: 8080
@@ -141,6 +133,59 @@ spec:
         - path:
             type: PathPrefix
             value: /
+      backendRefs:
+        - group: ""
+          kind: Service
+          name: ntfy
+          port: 80
+          weight: 1
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: ntfy-ui
+  namespace: {{ .Release.Namespace }}
+  labels:
+    authentik-forward-auth: "true"
+spec:
+  parentRefs:
+    - group: {{ .Values.route.parentGateway.group | quote }}
+      kind: {{ .Values.route.parentGateway.kind | quote }}
+      name: {{ .Values.route.parentGateway.name | quote }}
+      namespace: {{ .Values.route.parentGateway.namespace | quote }}
+      sectionName: {{ .Values.route.parentGateway.sectionName | quote }}
+  hostnames:
+    - {{ .Values.hostname | quote }}
+  rules:
+    # Only the browser-facing web app/dashboard is gated here. ntfy has no
+    # native OIDC support, and its hostname also serves the pub/sub API
+    # (topic publish/subscribe) used by the mobile app, curl, and webhook
+    # integrations -- those must stay reachable without an interactive
+    # SSO redirect, so only these reserved, non-topic paths are matched
+    # (ntfy refuses to let a topic be named any of these, so there's no
+    # overlap with pub/sub traffic).
+    - matches:
+        - path:
+            type: Exact
+            value: /
+        - path:
+            type: PathPrefix
+            value: /app
+        - path:
+            type: PathPrefix
+            value: /account
+        - path:
+            type: PathPrefix
+            value: /settings
+        - path:
+            type: PathPrefix
+            value: /static
+        - path:
+            type: Exact
+            value: /manifest.webmanifest
+        - path:
+            type: Exact
+            value: /config.js
       backendRefs:
         - group: ""
           kind: Service
