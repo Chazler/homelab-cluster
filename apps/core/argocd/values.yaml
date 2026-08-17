@@ -13,6 +13,7 @@ argo-cd:
   configs:
     cm:
       create: true
+      url: https://argocd.joeriberman.nl
       oidc.config: |
         name: Authentik
         issuer: https://auth.joeriberman.nl/application/o/argocd-oidc/
