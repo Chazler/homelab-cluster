@@ -20,6 +20,9 @@ spec:
         app.kubernetes.io/name: openclaw
         app.kubernetes.io/part-of: services
     spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: openclaw
           image: {{ .Values.openclaw.image | quote }}
