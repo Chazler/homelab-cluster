@@ -45,6 +45,13 @@ gateway (see `x-authentik-email` above), the extra per-device pairing
 ceremony is redundant here; disabling it accepts that trade-off
 explicitly rather than working around the bootstrap deadlock.
 
+`agents.defaults.model`/`agents.list[0].model` are pinned to
+`openrouter/auto` so the agent actually routes through OpenRouter (and
+therefore `OPENROUTER_API_KEY`) — without an explicit model, OpenClaw
+falls back to its own hardcoded default (`openai/gpt-5.5`), which
+silently fails without an `OPENAI_API_KEY`. Change this if you add a
+different provider key to `services/openclaw-env`.
+
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
 the PVC copy is authoritative, so config edits made through OpenClaw
