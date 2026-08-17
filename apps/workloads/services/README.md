@@ -75,10 +75,29 @@ different provider key to `services/openclaw-env`.
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
 the PVC copy is authoritative, so config edits made through OpenClaw
-(onboard, `doctor --fix`, Control UI) survive restarts, and ConfigMap
-changes need a manual reseed (`kubectl exec deploy/openclaw -n services
--- rm /home/node/.openclaw/openclaw.json && kubectl rollout restart
-deployment/openclaw -n services`) to take effect.
+(onboard, `doctor --fix`, Control UI) survive restarts and ConfigMap
+changes need a manual reseed.
+
+**Reseeding is not just `rm openclaw.json`.** OpenClaw keeps its own
+restore chain (`openclaw.json.last-good`, `.bak*`) and treats a config
+it did not write itself as an external overwrite: it quarantines the
+incoming file as `openclaw.json.clobbered.<timestamp>` and silently
+reverts to `.last-good`. Deleting only `openclaw.json` therefore
+appears to work but the old config comes back on the next boot. Clear
+the whole restore chain, then recreate the pod so the init container
+reseeds:
+
+    kubectl exec -n services deploy/openclaw -c openclaw -- sh -c \
+      'rm -f /home/node/.openclaw/openclaw.json \
+             /home/node/.openclaw/openclaw.json.bak* \
+             /home/node/.openclaw/openclaw.json.last-good \
+             /home/node/.openclaw/openclaw.json.clobbered.*'
+    kubectl delete pod -n services -l app.kubernetes.io/name=openclaw
+
+If the gateway is already crashlooping on bad config the exec window is
+short; loop the command until it lands. Confirm the result with
+`grep -A3 '"auth"' /home/node/.openclaw/openclaw.json` rather than
+assuming the reseed took.
 
 AdGuard DNS is advertised on `10.0.0.243` over TCP and UDP port 53. Configure
 the router or individual clients to use that address only after the
