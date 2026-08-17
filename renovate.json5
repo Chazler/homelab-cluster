@@ -53,6 +53,16 @@
 
   packageRules: [
     {
+      // The built-in helm-values manager scans every values.yaml by default and was
+      // independently (mis)parsing the same digest-pinned image fields the custom
+      // regex manager above already handles correctly, producing duplicate entries
+      // and updates to an undefined version. The custom manager is the sole source
+      // of truth for these images.
+      description: 'Disable the built-in helm-values manager; the custom regex manager above already covers digest-pinned images.',
+      matchManagers: ['helm-values'],
+      enabled: false,
+    },
+    {
       description: 'Major updates require explicit review: keep them out of the dashboard until requested.',
       matchUpdateTypes: ['major'],
       dependencyDashboardApproval: true,
