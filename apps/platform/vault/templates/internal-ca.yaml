@@ -33,3 +33,45 @@ metadata:
 spec:
   ca:
     secretName: vault-ca-tls
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: vault-server-tls
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: vault-server-tls
+  duration: 2160h  # 90d
+  renewBefore: 720h  # 30d
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - vault
+    - vault.{{ .Release.Namespace }}
+    - vault.{{ .Release.Namespace }}.svc
+    - vault.{{ .Release.Namespace }}.svc.cluster.local
+    - vault-active
+    - vault-active.{{ .Release.Namespace }}
+    - vault-active.{{ .Release.Namespace }}.svc
+    - vault-active.{{ .Release.Namespace }}.svc.cluster.local
+    - vault-standby
+    - vault-standby.{{ .Release.Namespace }}
+    - vault-standby.{{ .Release.Namespace }}.svc
+    - vault-standby.{{ .Release.Namespace }}.svc.cluster.local
+    - vault-0.vault-internal
+    - vault-0.vault-internal.{{ .Release.Namespace }}.svc.cluster.local
+    - vault-1.vault-internal
+    - vault-1.vault-internal.{{ .Release.Namespace }}.svc.cluster.local
+    - vault-2.vault-internal
+    - vault-2.vault-internal.{{ .Release.Namespace }}.svc.cluster.local
+    - localhost
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: vault-ca-issuer
+    kind: Issuer
+    group: cert-manager.io
