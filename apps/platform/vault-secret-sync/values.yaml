@@ -179,6 +179,9 @@ namespaces:
     secrets:
       ntfy-runtime:
         path: ntfy/runtime
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: ntfy
         transformation:
           templates:
             NTFY_AUTH_USERS:
