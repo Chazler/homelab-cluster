@@ -111,6 +111,19 @@ namespaces:
               text: '{{ get .Secrets "client-id" }}'
             AUTHENTIK_ARGOCD_CLIENT_SECRET:
               text: '{{ get .Secrets "client-secret" }}'
+      authentik-ntfy-oauth:
+        path: authentik/ntfy-oauth
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: authentik-server
+          - kind: Deployment
+            name: authentik-worker
+        transformation:
+          templates:
+            AUTHENTIK_NTFY_CLIENT_ID:
+              text: '{{ get .Secrets "client-id" }}'
+            AUTHENTIK_NTFY_CLIENT_SECRET:
+              text: '{{ get .Secrets "client-secret" }}'
   argocd:
     secrets:
       argocd-oidc:
@@ -176,7 +189,6 @@ namespaces:
             NTFY_PASSWORD:
               text: '{{ get .Secrets "alertmanager-password" }}'
   ntfy:
-    createNamespace: true
     secrets:
       ntfy-runtime:
         path: ntfy/runtime
@@ -186,3 +198,14 @@ namespaces:
               text: '{{ get .Secrets "auth-users" }}'
             NTFY_AUTH_ACCESS:
               text: '{{ get .Secrets "auth-access" }}'
+      ntfy-oidc:
+        path: ntfy/oidc
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: ntfy
+        transformation:
+          templates:
+            NTFY_AUTH_OIDC_CLIENT_ID:
+              text: '{{ get .Secrets "client-id" }}'
+            NTFY_AUTH_OIDC_CLIENT_SECRET:
+              text: '{{ get .Secrets "client-secret" }}'
