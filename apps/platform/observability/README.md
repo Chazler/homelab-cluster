@@ -17,5 +17,5 @@ Runtime secrets are synchronized from Vault:
 | `kv/observability/grafana` | `admin-user`, `admin-password` |
 | `kv/observability/alertmanager` | `alertmanager-username`, `alertmanager-password`, `webhook-username`, `webhook-password` |
 
-The Alertmanager user is configured by ntfy's standalone service. Its webhook
-credentials protect the relay's cluster-internal HTTP endpoint.
+The Alertmanager user is configured by ntfy's standalone service. A NetworkPolicy
+limits the relay's cluster-internal HTTP endpoint to Alertmanager pods.

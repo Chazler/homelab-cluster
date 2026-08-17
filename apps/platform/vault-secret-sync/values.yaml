@@ -84,42 +84,16 @@ namespaces:
                 receivers:
                   - name: ntfy
                     webhook_configs:
-                      - url: http://alertmanager-ntfy.observability.svc:8000
+                      - url: http://alertmanager-ntfy.observability.svc:8080/alerts
                         send_resolved: true
                         http_config:
                           basic_auth:
                             username: '{{ get .Secrets "webhook-username" }}'
                             password: '{{ get .Secrets "webhook-password" }}'
-      observability-alertmanager-ntfy:
-        path: observability/alertmanager
-        transformation:
-          templates:
-            config.yml:
-              text: |
-                http:
-                  addr: :8000
-                  auth:
-                    username: '{{ get .Secrets "webhook-username" }}'
-                    password: '{{ get .Secrets "webhook-password" }}'
-                ntfy:
-                  baseurl: http://ntfy.ntfy.svc
-                  auth:
-                    basic:
-                      username: '{{ get .Secrets "alertmanager-username" }}'
-                      password: '{{ get .Secrets "alertmanager-password" }}'
-                  notification:
-                    topic: alerts
-                    priority: 'status == "firing" ? "high" : "default"'
-                    tags:
-                      - tag: rotating_light
-                        condition: 'status == "firing"'
-                      - tag: white_check_mark
-                        condition: 'status == "resolved"'
-                    templates:
-                      title: '{{ "{{" }} if eq .Status "resolved" {{ "}}" }}Resolved: {{ "{{" }} end {{ "}}" }}{{ "{{" }} index .Annotations "summary" {{ "}}" }}'
-                      description: '{{ "{{" }} index .Annotations "description" {{ "}}" }}'
-                      headers:
-                        X-Click: '{{ "{{" }} .GeneratorURL {{ "}}" }}'
+            NTFY_USER:
+              text: '{{ get .Secrets "alertmanager-username" }}'
+            NTFY_PASSWORD:
+              text: '{{ get .Secrets "alertmanager-password" }}'
   ntfy:
     createNamespace: true
     secrets:

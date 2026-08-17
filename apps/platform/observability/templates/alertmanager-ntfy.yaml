@@ -23,10 +23,40 @@ spec:
       containers:
         - name: alertmanager-ntfy
           image: {{ .Values.alertmanagerNtfy.image }}
-          args: [--configs=/etc/alertmanager-ntfy/config.yml]
+          env:
+            - name: LISTEN_ADDRESS
+              value: 0.0.0.0
+            - name: LISTEN_PORT
+              value: "8080"
+            - name: NOTIFIER_TYPE
+              value: ntfy
+            - name: NTFY_URL
+              value: http://ntfy.ntfy.svc
+            - name: NTFY_TOPIC
+              value: alerts
+            - name: NTFY_DEFAULT_PRIORITY
+              value: "3"
+            - name: NTFY_USER
+              valueFrom:
+                secretKeyRef:
+                  name: observability-alertmanager
+                  key: NTFY_USER
+            - name: NTFY_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: observability-alertmanager
+                  key: NTFY_PASSWORD
           ports:
             - name: http
-              containerPort: 8000
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
           resources:
             requests:
               cpu: 10m
@@ -38,14 +68,6 @@ spec:
             capabilities:
               drop: [ALL]
             readOnlyRootFilesystem: true
-          volumeMounts:
-            - name: config
-              mountPath: /etc/alertmanager-ntfy
-              readOnly: true
-      volumes:
-        - name: config
-          secret:
-            secretName: observability-alertmanager-ntfy
 ---
 apiVersion: v1
 kind: Service
@@ -59,5 +81,24 @@ spec:
     app.kubernetes.io/name: alertmanager-ntfy
   ports:
     - name: http
-      port: 8000
+      port: 8080
       targetPort: http
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alertmanager-ntfy
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: alertmanager-ntfy
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              alertmanager: monitoring-alertmanager
+      ports:
+        - protocol: TCP
+          port: 8080
