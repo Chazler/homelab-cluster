@@ -216,8 +216,8 @@ and unseal on their own:
 
 ```bash
 kubectl get pods -n vault
-kubectl exec -n vault vault-1 -- vault status -tls-skip-verify
-kubectl exec -n vault vault-2 -- vault status -tls-skip-verify
+kubectl exec -n vault vault-1 -- sh -c 'VAULT_CACERT=/vault/userconfig/vault-server-tls/ca.crt vault status'
+kubectl exec -n vault vault-2 -- sh -c 'VAULT_CACERT=/vault/userconfig/vault-server-tls/ca.crt vault status'
 ```
 
 ## Operations

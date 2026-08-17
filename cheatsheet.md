@@ -14,9 +14,10 @@ cilium status
 
 ```bash
 kubectl get pods -n vault
-kubectl exec -n vault vault-0 -- vault status -tls-skip-verify
-kubectl exec -n vault vault-1 -- vault status -tls-skip-verify
-kubectl exec -n vault vault-2 -- vault status -tls-skip-verify
+VAULT_CACERT=/vault/userconfig/vault-server-tls/ca.crt
+kubectl exec -n vault vault-0 -- sh -c "VAULT_CACERT=$VAULT_CACERT vault status"
+kubectl exec -n vault vault-1 -- sh -c "VAULT_CACERT=$VAULT_CACERT vault status"
+kubectl exec -n vault vault-2 -- sh -c "VAULT_CACERT=$VAULT_CACERT vault status"
 
 # Vault auto-unseals via GCP KMS; no manual unseal is needed. Restart one
 # pod at a time (standbys first, active last) since the StatefulSet uses
