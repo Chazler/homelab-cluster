@@ -16,20 +16,26 @@ Vault by Vault Secrets Operator.
 | n8n | `n8n.joeriberman.nl` | Authentik forward-auth |
 | OpenClaw | `openclaw.joeriberman.nl` | Authentik forward-auth |
 
-OpenClaw (https://docs.openclaw.ai) needs, in Vault at `services/openclaw-env`:
+OpenClaw (https://docs.openclaw.ai) needs one model provider API key in
+Vault at `services/openclaw-env`: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`,
+`OPENAI_API_KEY` or `OPENROUTER_API_KEY`. Vault Secrets Operator syncs it
+into the `openclaw-env` secret and each key is wired in individually
+(`optional: true`) rather than via `envFrom`, since `gateway.auth.mode`
+is `trusted-proxy` and the gateway refuses to start if a
+`OPENCLAW_GATEWAY_TOKEN` is present alongside it — trusted-proxy and
+shared-token auth are mutually exclusive. The gateway instead trusts the
+`x-authentik-username` header injected by the Authentik forward-auth
+outpost (see `apps/platform/kyverno/templates/authentik-forward-auth.yaml`),
+scoped to `gateway.trustedProxies: ["10.244.0.0/16"]` (the cluster pod
+CIDR) so only in-cluster proxies can set it.
 
-- One model provider API key: `ANTHROPIC_API_KEY`, `GEMINI_API_KEY`,
-  `OPENAI_API_KEY` or `OPENROUTER_API_KEY`.
-- `OPENCLAW_GATEWAY_TOKEN`, a random token the Control UI uses to
-  authenticate (generate with `openssl rand -hex 32`).
-
-Vault Secrets Operator syncs both into the `openclaw-env` secret consumed
-via `envFrom`; the Deployment won't come up healthy without them. An
-init container seeds `openclaw.json`/`AGENTS.md` from the
+An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
 the PVC copy is authoritative, so config edits made through OpenClaw
 (onboard, `doctor --fix`, Control UI) survive restarts, and ConfigMap
-changes need a manual reseed to take effect.
+changes need a manual reseed (`kubectl exec deploy/openclaw -n services
+-- rm /home/node/.openclaw/openclaw.json && kubectl rollout restart
+deployment/openclaw -n services`) to take effect.
 
 AdGuard DNS is advertised on `10.0.0.243` over TCP and UDP port 53. Configure
 the router or individual clients to use that address only after the

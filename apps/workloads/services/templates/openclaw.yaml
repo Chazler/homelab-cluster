@@ -105,10 +105,31 @@ spec:
         - name: openclaw
           image: {{ .Values.openclaw.image | quote }}
           imagePullPolicy: IfNotPresent
-          envFrom:
-            - secretRef:
-                name: openclaw-env
           env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-env
+                  key: ANTHROPIC_API_KEY
+                  optional: true
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-env
+                  key: GEMINI_API_KEY
+                  optional: true
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-env
+                  key: OPENAI_API_KEY
+                  optional: true
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: openclaw-env
+                  key: OPENROUTER_API_KEY
+                  optional: true
             - name: TZ
               value: Europe/Amsterdam
             - name: HOME
