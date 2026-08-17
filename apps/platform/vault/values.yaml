@@ -74,6 +74,22 @@ vault:
   injector:
     enabled: true
 
+# Public certificate of the Vault internal CA issued by the vault-selfsigned
+# Issuer in this chart (see templates/internal-ca.yaml). Not sensitive; used
+# to let the gateway verify Vault's server certificate.
+caCertificate: |
+  -----BEGIN CERTIFICATE-----
+  MIIBfTCCASKgAwIBAgIUPgBCwiDTopoaiinYOLJnhQBUo/IwCgYIKoZIzj0EAwIw
+  HDEaMBgGA1UEAxMRVmF1bHQgSW50ZXJuYWwgQ0EwHhcNMjYwODE3MTUxMjQyWhcN
+  MzEwODE2MTUxMjQyWjAcMRowGAYDVQQDExFWYXVsdCBJbnRlcm5hbCBDQTBZMBMG
+  ByqGSM49AgEGCCqGSM49AwEHA0IABCENhhZzTGDHFEEvAZ6b19atE2qNrPK4UZUO
+  jZs8B4PNZxzOPI5kp/pbm+zZHbUX5L60BSynVpvRWluHl2tkxIijQjBAMA4GA1Ud
+  DwEB/wQEAwICpDAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBTpbHvdNEEWfUyU
+  5A75XqSZhbiSczAKBggqhkjOPQQDAgNJADBGAiEAqaWCNR4OtqBUeLb/IMkCjrn4
+  Luo4ufHNQyqQeXv0QHwCIQDRifi5LaJc29LL5/NuXs0/CFNa/w37J6WZ4ekOOKAa
+  tQ==
+  -----END CERTIFICATE-----
+
 route:
   enabled: true
   hostname: vault.joeriberman.nl
