@@ -85,8 +85,6 @@ n8n:
 openclaw:
   image: ghcr.io/openclaw/openclaw@sha256:2f5ce8848a1a69b3c460622e566cb9395da9fd18d7ef7b038cd8e2c4f195decf
   hostname: openclaw.joeriberman.nl
-  operatorEmails:
-    - joeriberman@gmail.com
   storage: 10Gi
   resources:
     requests:

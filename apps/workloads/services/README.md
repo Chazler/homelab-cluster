@@ -24,10 +24,14 @@ into the `openclaw-env` secret and each key is wired in individually
 is `trusted-proxy` and the gateway refuses to start if a
 `OPENCLAW_GATEWAY_TOKEN` is present alongside it — trusted-proxy and
 shared-token auth are mutually exclusive. The gateway instead trusts the
-`x-authentik-username` header injected by the Authentik forward-auth
+`x-authentik-email` header injected by the Authentik forward-auth
 outpost (see `apps/platform/kyverno/templates/authentik-forward-auth.yaml`),
 scoped to `gateway.trustedProxies: ["10.244.0.0/16"]` (the cluster pod
-CIDR) so only in-cluster proxies can set it.
+CIDR) so only in-cluster proxies can set it. The pinned image
+(`2026.7.1`) predates `gateway.auth.identityScopes` — any request with a
+verified trusted-proxy identity is granted the Control UI operator
+role, so there's currently no per-user allowlist. Revisit once the
+pinned digest is bumped past a release that ships identityScopes.
 
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
