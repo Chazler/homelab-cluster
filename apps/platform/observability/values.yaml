@@ -4,6 +4,12 @@ kube-prometheus-stack:
   defaultRules:
     create: true
 
+  # Talos does not expose these control-plane metrics on node IPs.
+  kubeControllerManager:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+
   prometheus-node-exporter:
     namespaceOverride: node-observability
 
