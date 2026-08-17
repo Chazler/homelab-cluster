@@ -1,0 +1,73 @@
+{
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: ['config:recommended'],
+  timezone: 'Europe/Amsterdam',
+  // Weekly batch keeps PR noise low for a homelab; adjust if faster turnaround is wanted.
+  schedule: ['before 6am on monday'],
+  dependencyDashboard: true,
+  dependencyDashboardTitle: 'Dependency updates',
+  labels: ['renovate'],
+  commitMessagePrefix: 'chore(deps):',
+  prConcurrentLimit: 5,
+
+  // Helm chart dependencies (Chart.yaml under apps/**) are picked up automatically by
+  // the built-in helmv3 manager since every app directory is a real Helm chart.
+
+  customManagers: [
+    {
+      // Workload images are pinned by digest only (repo@sha256:...), with no floating
+      // tag in Git. Renovate treats an untagged digest reference as tracking "latest",
+      // matching how these images were originally pinned.
+      customType: 'regex',
+      description: 'Digest-pinned container images in workload values.yaml files',
+      fileMatch: ['^apps/.*values\\.ya?ml$'],
+      matchStrings: [
+        "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)@sha256:(?<currentDigest>[a-f0-9]{64})",
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+      currentValueTemplate: 'latest',
+    },
+    {
+      // talos/controlplane.yaml and worker*.yaml are gitignored (they carry cluster
+      // credentials) and regenerated locally with talosctl, so Renovate can't read
+      // the live Talos/Kubernetes version from them directly. talos/versions.yaml is
+      // a small tracked file that stands in for that version so upgrades still show
+      // up in the dashboard.
+      customType: 'regex',
+      description: 'Talos Linux version',
+      fileMatch: ['^talos/versions\\.yaml$'],
+      matchStrings: ["talos:\\s*(?<currentValue>v?[0-9.]+)"],
+      depNameTemplate: 'siderolabs/talos',
+      datasourceTemplate: 'github-releases',
+    },
+    {
+      customType: 'regex',
+      description: 'Kubernetes version running on Talos',
+      fileMatch: ['^talos/versions\\.yaml$'],
+      matchStrings: ["kubernetes:\\s*(?<currentValue>v?[0-9.]+)"],
+      depNameTemplate: 'kubernetes/kubernetes',
+      datasourceTemplate: 'github-releases',
+    },
+  ],
+
+  packageRules: [
+    {
+      description: 'Major updates require explicit review: keep them out of the dashboard until requested.',
+      matchUpdateTypes: ['major'],
+      dependencyDashboardApproval: true,
+      labels: ['renovate', 'major-update'],
+    },
+    {
+      description: 'Cilium, Kubernetes, and Talos are versioned together; group them so a compatibility review covers the whole set at once.',
+      matchFileNames: ['apps/networking/**', 'talos/versions.yaml'],
+      groupName: 'cluster networking (Cilium/Kubernetes/Talos)',
+      dependencyDashboardApproval: true,
+    },
+    {
+      description: 'No update type auto-merges yet: this repo has no CI that validates rendered manifests before Argo CD applies them.',
+      matchPackageNames: ['*'],
+      automerge: false,
+    },
+  ],
+}

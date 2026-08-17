@@ -1,0 +1,6 @@
+# Tracked by Renovate so Talos and Kubernetes upgrades appear in the Dependency
+# Dashboard. The actual cluster config (talos/controlplane.yaml, talos/worker*.yaml)
+# is gitignored and regenerated locally with talosctl, so it can't be tracked
+# directly; bump this file and regenerate/apply the config to match.
+talos: v1.13.7
+kubernetes: v1.35.0
