@@ -13,8 +13,12 @@ data:
         "bind": "lan",
         "port": 18789,
         "auth": {
-          "mode": "token"
+          "mode": "trusted-proxy",
+          "trustedProxy": {
+            "userHeader": "x-authentik-username"
+          }
         },
+        "trustedProxies": ["10.244.0.0/16"],
         "controlUi": {
           "enabled": true,
           "allowedOrigins": ["https://{{ .Values.openclaw.hostname }}"]
