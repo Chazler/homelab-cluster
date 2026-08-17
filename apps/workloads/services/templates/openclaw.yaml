@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: openclaw
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: openclaw
+    {{- include "services.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: openclaw
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: openclaw
+        app.kubernetes.io/part-of: services
+    spec:
+      containers:
+        - name: openclaw
+          image: {{ .Values.openclaw.image | quote }}
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - secretRef:
+                name: openclaw-env
+          env:
+            - name: TZ
+              value: Europe/Amsterdam
+          ports:
+            - name: http
+              containerPort: 18789
+          startupProbe:
+            httpGet:
+              path: /startupz
+              port: http
+            failureThreshold: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.openclaw.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /home/node/.openclaw
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: openclaw-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: openclaw
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app.kubernetes.io/name: openclaw
+  ports:
+    - name: http
+      port: 18789
+      targetPort: http

@@ -18,6 +18,7 @@ namespaces:
     secrets:
       services-secrets: {}
       idea-triage-api-env: {}
+      openclaw-env: {}
       ghcr-image-pull-secret:
         type: kubernetes.io/dockerconfigjson
   jellyfin:

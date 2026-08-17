@@ -3,6 +3,7 @@
   (dict "name" "umami" "hostname" .Values.umami.hostname)
   (dict "name" "n8n" "hostname" .Values.n8n.hostname)
   (dict "name" "idea-triage" "hostname" .Values.ideaTriage.hostname)
+  (dict "name" "openclaw" "hostname" .Values.openclaw.hostname)
 }}
 {{- range $route := $routes }}
 apiVersion: gateway.networking.k8s.io/v1

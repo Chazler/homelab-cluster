@@ -3,6 +3,7 @@
   (dict "name" "umami" "hostname" .Values.umami.hostname "service" "umami" "port" 3000 "forwardAuth" true)
   (dict "name" "polylearn" "hostname" .Values.polylearn.hostname "service" "polylearn" "port" 80 "forwardAuth" false)
   (dict "name" "n8n" "hostname" .Values.n8n.hostname "service" "n8n" "port" 5678 "forwardAuth" true)
+  (dict "name" "openclaw" "hostname" .Values.openclaw.hostname "service" "openclaw" "port" 18789 "forwardAuth" true)
 -}}
 {{- range $route := $routes }}
 apiVersion: gateway.networking.k8s.io/v1
