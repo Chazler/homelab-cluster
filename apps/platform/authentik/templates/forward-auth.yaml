@@ -1,4 +1,4 @@
-{{- $namespaces := list "argocd" "vault" "services" "jellyfin" "ntfy" }}
+{{- $namespaces := list "argocd" "vault" "services" "jellyfin" }}
 {{- range $namespace := $namespaces }}
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
@@ -47,7 +47,6 @@ data:
   (dict "slug" "prowlarr" "name" "Prowlarr" "hostname" "prowlarr.joeriberman.nl")
   (dict "slug" "bazarr" "name" "Bazarr" "hostname" "bazarr.joeriberman.nl")
   (dict "slug" "sabnzbd" "name" "SABnzbd" "hostname" "sabnzbd.joeriberman.nl")
-  (dict "slug" "ntfy" "name" "ntfy" "hostname" "ntfy.joeriberman.nl")
 }}
 {{- range $app := $apps }}
       - model: authentik_providers_proxy.proxyprovider
