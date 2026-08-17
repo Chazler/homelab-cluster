@@ -98,6 +98,34 @@ namespaces:
               text: '{{ get .Secrets "client-id" }}'
             AUTHENTIK_VAULT_CLIENT_SECRET:
               text: '{{ get .Secrets "client-secret" }}'
+      authentik-argocd-oauth:
+        path: authentik/argocd-oauth
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: authentik-server
+          - kind: Deployment
+            name: authentik-worker
+        transformation:
+          templates:
+            AUTHENTIK_ARGOCD_CLIENT_ID:
+              text: '{{ get .Secrets "client-id" }}'
+            AUTHENTIK_ARGOCD_CLIENT_SECRET:
+              text: '{{ get .Secrets "client-secret" }}'
+  argocd:
+    secrets:
+      argocd-oidc:
+        path: argocd/oidc
+        labels:
+          app.kubernetes.io/part-of: argocd
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: argocd-server
+        transformation:
+          templates:
+            client-id:
+              text: '{{ get .Secrets "client-id" }}'
+            client-secret:
+              text: '{{ get .Secrets "client-secret" }}'
   observability:
     createNamespace: true
     secrets:

@@ -13,7 +13,21 @@ argo-cd:
   configs:
     cm:
       create: true
-    
+      oidc.config: |
+        name: Authentik
+        issuer: https://auth.joeriberman.nl/application/o/argocd-oidc/
+        clientID: $argocd-oidc:client-id
+        clientSecret: $argocd-oidc:client-secret
+        requestedScopes:
+          - openid
+          - profile
+          - email
+
+    rbac:
+      policy.default: role:readonly
+      policy.csv: |
+        g, joeriberman@gmail.com, role:admin
+
     params:
       server.insecure: true
   

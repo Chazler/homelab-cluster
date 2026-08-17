@@ -13,6 +13,8 @@ authentik:
           name: authentik-grafana-oauth
       - secretRef:
           name: authentik-vault-oauth
+      - secretRef:
+          name: authentik-argocd-oauth
     affinity:
       podAntiAffinity: hard
 
@@ -32,6 +34,7 @@ authentik:
       - authentik-forward-auth
       - authentik-grafana-provider
       - authentik-vault-provider
+      - authentik-argocd-provider
 
   server:
     replicas: 2
