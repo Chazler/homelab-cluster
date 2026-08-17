@@ -132,8 +132,11 @@ spec:
             type: PathPrefix
             value: /
       backendRefs:
-        - name: ntfy
+        - group: ""
+          kind: Service
+          name: ntfy
           port: 80
+          weight: 1
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
