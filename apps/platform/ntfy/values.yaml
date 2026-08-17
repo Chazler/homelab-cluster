@@ -1,0 +1,12 @@
+image: binwiederhier/ntfy:v2.26.3
+hostname: ntfy.joeriberman.nl
+storageClassName: observability-rwo
+storageSize: 1Gi
+
+route:
+  parentGateway:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: web-https

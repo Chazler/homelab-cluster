@@ -1,0 +1,10 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.observabilityStorageClass.name }}
+provisioner: {{ .Values.observabilityStorageClass.provisioner }}
+reclaimPolicy: {{ .Values.observabilityStorageClass.reclaimPolicy }}
+allowVolumeExpansion: {{ .Values.observabilityStorageClass.allowVolumeExpansion }}
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  numberOfReplicas: {{ .Values.observabilityStorageClass.numberOfReplicas | quote }}

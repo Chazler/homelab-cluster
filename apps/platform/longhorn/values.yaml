@@ -12,3 +12,10 @@ storageClass:
   reclaimPolicy: Retain
   allowVolumeExpansion: true
   isDefault: true
+
+observabilityStorageClass:
+  name: observability-rwo
+  provisioner: driver.longhorn.io
+  reclaimPolicy: Retain
+  allowVolumeExpansion: true
+  numberOfReplicas: "1"

@@ -1,0 +1,33 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: observability
+  namespace: {{ .Release.Namespace }}
+spec:
+  groups:
+    - name: observability
+      rules:
+        - alert: SmartDeviceFailing
+          expr: smartctl_device_smart_status != 1
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: SMART health check failed
+            description: '{{ "{{" }} $labels.node {{ "}}" }} reports a SMART failure for {{ "{{" }} $labels.device {{ "}}" }}.'
+        - alert: SmartDeviceMediaErrors
+          expr: smartctl_device_media_errors > 0
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: SMART media errors detected
+            description: '{{ "{{" }} $labels.node {{ "}}" }} reports media errors for {{ "{{" }} $labels.device {{ "}}" }}.'
+        - alert: SmartDeviceTemperatureHigh
+          expr: smartctl_device_temperature{temperature_type="current"} > 60
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: SMART device temperature is high
+            description: '{{ "{{" }} $labels.node {{ "}}" }} has a device above 60°C.'

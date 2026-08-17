@@ -50,7 +50,8 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false # Prometheus ServiceMonitor disabled
+        enabled: true
+        interval: 60s
 
   # Monitoring Configuration
   monitor:
@@ -59,7 +60,9 @@ cilium:
   prometheus:
     enabled: true
     serviceMonitor:
-      enabled: false # Prometheus ServiceMonitor disabled
+      enabled: true
+      trustCRDsExist: true
+      interval: 60s
 
   dashboards:
     enabled: true
@@ -78,7 +81,8 @@ cilium:
         - icmp
         - httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction
       serviceMonitor:
-        enabled: false # Prometheus ServiceMonitor disabled
+        enabled: true
+        interval: 60s
       dashboards:
         enabled: true
         annotations:
@@ -96,7 +100,8 @@ cilium:
       prometheus:
         enabled: true
         serviceMonitor:
-          enabled: false # Prometheus ServiceMonitor disabled
+          enabled: true
+          interval: 60s
     
     ui:
       enabled: true
@@ -109,7 +114,8 @@ cilium:
     prometheus:
       enabled: true
       serviceMonitor:
-        enabled: false # Prometheus ServiceMonitor disabled
+        enabled: true
+        interval: 60s
     dashboards:
       enabled: true
       annotations:

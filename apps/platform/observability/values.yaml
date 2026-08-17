@@ -1,0 +1,85 @@
+kube-prometheus-stack:
+  fullnameOverride: monitoring
+
+  defaultRules:
+    create: true
+
+  grafana:
+    admin:
+      existingSecret: observability-grafana
+      userKey: admin-user
+      passwordKey: admin-password
+    persistence:
+      enabled: true
+      type: sts
+      storageClassName: observability-rwo
+      accessModes:
+        - ReadWriteOnce
+      size: 2Gi
+    resources:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+      limits:
+        memory: 256Mi
+
+  alertmanager:
+    alertmanagerSpec:
+      replicas: 1
+      configSecret: observability-alertmanager
+      storage:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: observability-rwo
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 2Gi
+      resources:
+        requests:
+          cpu: 25m
+          memory: 64Mi
+        limits:
+          memory: 128Mi
+
+  prometheus:
+    prometheusSpec:
+      replicas: 1
+      scrapeInterval: 60s
+      evaluationInterval: 60s
+      retention: 10d
+      # Leave capacity for WAL and compaction while keeping all metric data below 25 GiB.
+      retentionSize: 20GiB
+      serviceMonitorSelectorNilUsesHelmValues: false
+      serviceMonitorSelector: {}
+      podMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelector: {}
+      ruleSelectorNilUsesHelmValues: false
+      ruleSelector: {}
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: observability-rwo
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 25Gi
+      resources:
+        requests:
+          cpu: 250m
+          memory: 1Gi
+        limits:
+          memory: 2Gi
+
+alertmanagerNtfy:
+  image: ghcr.io/alexbakker/alertmanager-ntfy:v1.2.1
+
+route:
+  parentGateway:
+    group: gateway.networking.k8s.io
+    kind: Gateway
+    name: envoy-gateway
+    namespace: envoy-gateway
+    sectionName: web-https
