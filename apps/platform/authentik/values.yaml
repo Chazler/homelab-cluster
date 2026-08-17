@@ -11,6 +11,8 @@ authentik:
           name: authentik-google-oauth
       - secretRef:
           name: authentik-grafana-oauth
+      - secretRef:
+          name: authentik-vault-oauth
     affinity:
       podAntiAffinity: hard
 
@@ -29,6 +31,7 @@ authentik:
       - authentik-google-source
       - authentik-forward-auth
       - authentik-grafana-provider
+      - authentik-vault-provider
 
   server:
     replicas: 2
