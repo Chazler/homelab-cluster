@@ -9,6 +9,9 @@ kube-prometheus-stack:
     enabled: false
   kubeScheduler:
     enabled: false
+  # Cilium runs in kube-proxy replacement mode; no kube-proxy exists to scrape.
+  kubeProxy:
+    enabled: false
 
   prometheus-node-exporter:
     namespaceOverride: node-observability
