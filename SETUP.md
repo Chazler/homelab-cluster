@@ -199,19 +199,25 @@ Expected results:
 
 ## 9. Initialize Vault only on a new empty cluster
 
-Do not initialize Vault if it already contains data.
+Do not initialize Vault if it already contains data. Vault auto-unseals with
+GCP KMS (`apps/platform/vault/values.yaml`), so init produces recovery keys
+rather than unseal keys:
 
 ```bash
 kubectl exec -it -n vault vault-0 -- \
-  vault operator init -key-shares=1 -key-threshold=1
+  vault operator init -recovery-shares=1 -recovery-threshold=1
 ```
 
-Store the unseal key and initial root token in a secure password manager. Unseal the first member, join the second member to Raft if required, then unseal it:
+Store the recovery key and initial root token in a secure password manager.
+Vault unseals itself automatically via GCP KMS; the recovery key is only
+needed for break-glass operations such as seal migration, so no manual
+`vault operator unseal` step is required. Confirm the other Raft members join
+and unseal on their own:
 
 ```bash
-kubectl exec -it -n vault vault-0 -- vault operator unseal
-kubectl exec -it -n vault vault-1 -- vault operator unseal
 kubectl get pods -n vault
+kubectl exec -n vault vault-1 -- vault status -tls-skip-verify
+kubectl exec -n vault vault-2 -- vault status -tls-skip-verify
 ```
 
 ## Operations
@@ -232,8 +238,46 @@ talosctl upgrade --nodes 10.0.0.10 --image <installer-image>
 talosctl -n 10.0.0.10,10.0.0.20,10.0.0.30 health
 ```
 
-Vault must be manually unsealed after either Vault pod restarts in the current
-configuration.
+Vault auto-unseals via GCP KMS after a pod restart; no manual unseal step is
+required. If GCP KMS is unreachable, affected pods stay sealed until KMS
+access is restored — the stored recovery key is only needed for break-glass
+operations such as seal migration, not for routine restarts. See
+"Vault TLS and recovery" below for the certificate chain and restart order.
+
+### Vault TLS and recovery
+
+Vault's client listener is TLS-only. `apps/platform/vault/templates/internal-ca.yaml`
+defines a self-signed `vault-selfsigned` Issuer, a 5-year `vault-ca`
+Certificate, and a `vault-ca-issuer` CA Issuer that signs the 90-day
+`vault-server-tls` server certificate mounted into every Vault pod. Raft
+request forwarding on the cluster port (8201) is always encrypted with
+Vault's own internally managed cluster TLS, independent of this listener
+certificate.
+
+The CA's public certificate (not sensitive) is duplicated as a literal value
+in `apps/platform/vault/values.yaml` (for the gateway's `BackendTLSPolicy`)
+and `apps/platform/vault-secret-sync/values.yaml` (for every Vault Secrets
+Operator `VaultConnection`). If the root CA is ever rotated, re-fetch it and
+update both files:
+
+```bash
+kubectl get secret vault-ca-tls -n vault -o jsonpath='{.data.tls\.crt}' | base64 -d
+```
+
+`vault-server-tls` renews automatically 30 days before expiry, but Vault does
+not hot-reload listener certificates, so each pod needs a rolling restart
+after renewal to pick up the new certificate. The Vault StatefulSet uses the
+`OnDelete` update strategy, so restarts are always deliberate:
+
+```bash
+kubectl delete pod vault-2 -n vault   # verify Sealed=false, HA Mode=standby before continuing
+kubectl delete pod vault-1 -n vault
+kubectl delete pod vault-0 -n vault   # restart the active/leader node last
+```
+
+Each pod auto-unseals via GCP KMS and rejoins Raft on its own; no `vault
+operator unseal` step is needed. Deleting the active node causes a brief,
+automatic Raft leader election to one of the standbys.
 
 ### Diagnose certificate issuance
 

@@ -14,12 +14,14 @@ cilium status
 
 ```bash
 kubectl get pods -n vault
-kubectl exec -n vault vault-0 -- vault status
-kubectl exec -n vault vault-1 -- vault status
+kubectl exec -n vault vault-0 -- vault status -tls-skip-verify
+kubectl exec -n vault vault-1 -- vault status -tls-skip-verify
+kubectl exec -n vault vault-2 -- vault status -tls-skip-verify
 
-# Interactive: do not put the unseal key in shell history.
-kubectl exec -it -n vault vault-0 -- vault operator unseal
-kubectl exec -it -n vault vault-1 -- vault operator unseal
+# Vault auto-unseals via GCP KMS; no manual unseal is needed. Restart one
+# pod at a time (standbys first, active last) since the StatefulSet uses
+# OnDelete. See SETUP.md "Vault TLS and recovery" for the full procedure.
+kubectl delete pod vault-2 -n vault
 ```
 
 ## Certificates and routes

@@ -10,3 +10,8 @@ Vault Secrets Operator synchronizes the runtime secrets declared by the
 `vault-secrets` service account with access only to its own
 `kv/<namespace>/` paths. Application credentials are stored in Vault KV v2;
 runtime SealedSecrets are not used.
+
+The client listener is TLS-only, served by a certificate issued by an
+in-cluster CA (`templates/internal-ca.yaml`). See SETUP.md's "Vault TLS and
+recovery" section for the certificate chain, rotation, and restart
+procedure.
