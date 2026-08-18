@@ -162,6 +162,14 @@ namespaces:
                   group_wait: 30s
                   group_interval: 5m
                   repeat_interval: 4h
+                  routes:
+                    # Watchdog and InfoInhibitor are kube-prometheus-stack's
+                    # internal meta-alerts (a permanently-firing dead-man's-switch
+                    # heartbeat, and the inhibition-rule marker), not things a
+                    # human should be paged about.
+                    - receiver: 'null'
+                      matchers:
+                        - alertname =~ "Watchdog|InfoInhibitor"
                 receivers:
                   - name: ntfy
                     webhook_configs:
@@ -171,6 +179,7 @@ namespaces:
                           basic_auth:
                             username: '{{ get .Secrets "webhook-username" }}'
                             password: '{{ get .Secrets "webhook-password" }}'
+                  - name: 'null'
             NTFY_USER:
               text: '{{ get .Secrets "alertmanager-username" }}'
             NTFY_PASSWORD:
