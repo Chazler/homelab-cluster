@@ -31,12 +31,15 @@
     {
       // Workload images are pinned by digest only (repo@sha256:...), with no floating
       // tag in Git. Renovate treats an untagged digest reference as tracking "latest",
-      // matching how these images were originally pinned.
+      // matching how these images were originally pinned. currentDigest must include
+      // the "sha256:" prefix to match the format the docker datasource returns for
+      // newDigest -- without it, every dependency looked perpetually out-of-date since
+      // the string comparison could never match, even against its own current value.
       customType: 'regex',
       description: 'Digest-pinned container images in workload values.yaml files',
       managerFilePatterns: ['/^apps/.*values\\.ya?ml$/'],
       matchStrings: [
-        "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)@sha256:(?<currentDigest>[a-f0-9]{64})",
+        "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
       ],
       datasourceTemplate: 'docker',
       versioningTemplate: 'docker',
