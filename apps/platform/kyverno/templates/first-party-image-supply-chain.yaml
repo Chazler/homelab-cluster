@@ -70,11 +70,11 @@ spec:
           verifyDigest: false
           required: true
           useCache: true
-          signatureAlgorithm: sha256
           attestors:
             - entries:
                 - keyless:
                     issuer: "https://token.actions.githubusercontent.com"
                     subject: "https://github.com/Chazler/*"
+                    signatureAlgorithm: sha256
                     rekor:
                       url: https://rekor.sigstore.dev
