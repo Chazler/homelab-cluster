@@ -1,0 +1,70 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: trivy-operator
+  namespace: trivy-operator
+spec:
+  groups:
+    - name: trivy-operator-realtime
+      rules:
+        # Critical exposed secrets are rare and worth paging on immediately.
+        # High severity is deliberately excluded here: several Debian-based
+        # images (authentik-postgresql, jellystat-db) ship the distro's
+        # well-known dummy /etc/ssl/private/ssl-cert-snakeoil.key, which
+        # Trivy always flags as a HIGH "exposed" private key even though
+        # it's not a real secret. That noise flows through the weekly
+        # digest instead, where it gets triaged rather than paged.
+        - alert: TrivyExposedSecretDetected
+          expr: sum(trivy_image_exposedsecrets{severity="Critical"}) by (namespace, resource_name, container_name, severity) > 0
+          for: 10m
+          labels:
+            severity: critical
+          annotations:
+            summary: Trivy found an exposed secret in a container image
+            description: '{{ "{{" }} $labels.namespace {{ "}}" }}/{{ "{{" }} $labels.resource_name {{ "}}" }} container {{ "{{" }} $labels.container_name {{ "}}" }} has a {{ "{{" }} $labels.severity {{ "}}" }} severity exposed secret.'
+    - name: trivy-operator-weekly-digest
+      rules:
+        # Vulnerability/config-audit/RBAC/infra/compliance findings need a
+        # human triage pass to separate real risk from noise (see
+        # .tasks/09-trivy-visibility-and-remediation.md), so they aren't
+        # wired as real-time alerts yet. Instead, each rule fires once during
+        # a weekly window shortly after Renovate opens its Monday update PRs,
+        # giving a standing count of what's still unresolved. hour() is UTC,
+        # so the ~08:00 window drifts by an hour across DST relative to the
+        # cluster's Europe/Amsterdam schedule; that's an acceptable
+        # imprecision for a weekly digest.
+        - alert: TrivyWeeklyDigestVulnerabilities
+          expr: (day_of_week() == 1) and (hour() == 8) and (sum(trivy_image_vulnerabilities{severity=~"Critical|High"}) > 0)
+          labels:
+            severity: info
+          annotations:
+            summary: 'Weekly Trivy digest: {{ "{{" }} $value | humanize {{ "}}" }} critical/high vulnerabilities outstanding'
+            description: Review VulnerabilityReports across the cluster and check whether an open Renovate PR already fixes them.
+        - alert: TrivyWeeklyDigestExposedSecrets
+          expr: (day_of_week() == 1) and (hour() == 8) and (sum(trivy_image_exposedsecrets{severity=~"Critical|High"}) > 0)
+          labels:
+            severity: info
+          annotations:
+            summary: 'Weekly Trivy digest: {{ "{{" }} $value | humanize {{ "}}" }} critical/high exposed secrets outstanding'
+            description: Critical severity also pages in real time via TrivyExposedSecretDetected. Includes known-benign findings like Debian's ssl-cert-snakeoil.key until they're formally excepted.
+        - alert: TrivyWeeklyDigestRbac
+          expr: (day_of_week() == 1) and (hour() == 8) and ((sum(trivy_role_rbacassessments{severity="Critical"}) or vector(0)) + (sum(trivy_clusterrole_clusterrbacassessments{severity="Critical"}) or vector(0)) > 0)
+          labels:
+            severity: info
+          annotations:
+            summary: 'Weekly Trivy digest: {{ "{{" }} $value | humanize {{ "}}" }} critical RBAC findings outstanding'
+            description: Many of these are expected (operators legitimately need broad permissions); triage before treating as actionable.
+        - alert: TrivyWeeklyDigestInfraAssessment
+          expr: (day_of_week() == 1) and (hour() == 8) and (sum(trivy_resource_infraassessments{severity="Critical"}) > 0)
+          labels:
+            severity: info
+          annotations:
+            summary: 'Weekly Trivy digest: {{ "{{" }} $value | humanize {{ "}}" }} critical infrastructure-assessment findings outstanding'
+            description: Review InfraAssessmentReports for cluster-level misconfigurations.
+        - alert: TrivyWeeklyDigestCompliance
+          expr: (day_of_week() == 1) and (hour() == 8) and (sum(trivy_cluster_compliance{status="Fail"}) > 0)
+          labels:
+            severity: info
+          annotations:
+            summary: 'Weekly Trivy digest: {{ "{{" }} $value | humanize {{ "}}" }} failing cluster-compliance checks (CIS/NSA/PSS)'
+            description: Review the ClusterComplianceReport resources for the failing controls.
