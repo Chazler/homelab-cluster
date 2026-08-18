@@ -8,9 +8,18 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyDeployment:
-        replicas: 2
+        replicas: 3
+        pod:
+          topologySpreadConstraints:
+            - maxSkew: 1
+              topologyKey: kubernetes.io/hostname
+              whenUnsatisfiable: DoNotSchedule
+              labelSelector:
+                matchLabels:
+                  gateway.envoyproxy.io/owning-gateway-name: envoy-gateway
+                  gateway.envoyproxy.io/owning-gateway-namespace: envoy-gateway
       envoyService:
-        externalTrafficPolicy: Cluster
+        externalTrafficPolicy: Local
         type: LoadBalancer
         annotations:
           io.cilium/lb-ipam-ips: "10.0.0.242"
