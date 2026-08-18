@@ -12,7 +12,11 @@
        server endpoints are called by external services/clients that can't
        complete a browser SSO redirect, so they get their own unauthenticated
        route. Each n8n Webhook/MCP Server Trigger node must set its own
-       auth (header/bearer) since it bypasses the Authentik gate. */}}
+       auth (header/bearer) since it bypasses the Authentik gate. The
+       /mcp-oauth and /.well-known/oauth-* paths are n8n's own native OAuth2
+       authorization server for MCP clients (discovery, DCR, authorize,
+       token) and must stay public for that flow to work — auth there is
+       n8n's own login, not Authentik's. */}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -38,6 +42,15 @@ spec:
         - path:
             type: PathPrefix
             value: /mcp-server
+        - path:
+            type: PathPrefix
+            value: /mcp-oauth
+        - path:
+            type: PathPrefix
+            value: /.well-known/oauth-protected-resource
+        - path:
+            type: PathPrefix
+            value: /.well-known/oauth-authorization-server
       backendRefs:
         - group: ""
           kind: Service
