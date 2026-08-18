@@ -55,15 +55,9 @@ authenticates the CLI itself:
 The iOS app self-enrols instead: `openclaw qr` mints a short-lived
 bootstrap token, so it needs no manual approval.
 
-`gateway.controlUi.dangerouslyDisableDeviceAuth` was previously set and
-is now removed. It was only ever needed under `trusted-proxy`, where
-approving the first device was impossible — approval requires the
-`operator.pairing` scope on an already-paired connection, which cannot
-exist on a fresh deploy. Token auth breaks that deadlock, so pairing is
-enforced again. Note the pinned image (`2026.7.1`) also predates
-`gateway.auth.identityScopes` and `trustedProxy.deviceAutoApprove`,
-both of which the online docs describe; verify any new auth field
-against the image before using it.
+The pinned image (`2026.7.1`) predates `gateway.auth.identityScopes` and
+`trustedProxy.deviceAutoApprove`, both of which the online docs
+describe; verify any new auth field against the image before using it.
 
 `agents.defaults.model`/`agents.list[0].model` are pinned to
 `openrouter/auto` so the agent actually routes through OpenRouter (and
