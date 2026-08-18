@@ -39,6 +39,8 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: observability
     - server: https://kubernetes.default.svc
+      namespace: node-observability
+    - server: https://kubernetes.default.svc
       namespace: sealed-secrets
     - server: https://kubernetes.default.svc
       namespace: trivy-operator
@@ -48,6 +50,14 @@ spec:
       namespace: vault-secret-sync
     - server: https://kubernetes.default.svc
       namespace: vault-secrets-operator
+    # vault-secret-sync also syncs Secrets/VaultAuth/VaultConnection into
+    # these workload namespaces (see apps/platform/vault-secret-sync/values.yaml).
+    - server: https://kubernetes.default.svc
+      namespace: jellyfin
+    - server: https://kubernetes.default.svc
+      namespace: portfolio
+    - server: https://kubernetes.default.svc
+      namespace: services
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
