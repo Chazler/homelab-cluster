@@ -1,6 +1,12 @@
 kyverno:
   fullnameOverride: kyverno
 
+  kyverno-api:
+    labels:
+      app.kubernetes.io/managed-by: argocd
+    annotations:
+      app.kubernetes.io/managed-by: argocd
+
   admissionController:
     rbac:
       clusterRole:
