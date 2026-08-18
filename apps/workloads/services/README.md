@@ -75,12 +75,23 @@ different provider key to `services/openclaw-env`.
 `agents.defaults.models` is the picker allowlist — without it the
 Control UI model switcher only ever showed `openrouter/auto`, since an
 unset allowlist falls back to a tiny built-in catalog rather than every
-model OpenRouter serves. It's set to six current OpenRouter model IDs
-(one flagship per major lab plus `auto`), verified live against
-`GET https://openrouter.ai/api/v1/models` and confirmed `available:
-true` via `openclaw models list` against the pinned image — model
-naming and availability drift over time, so re-check both before
-editing this list.
+model OpenRouter serves. It's set to `auto` plus 5 models picked for
+being current-generation and cheap rather than the priciest flagship
+per lab (list price per 1M tokens, in/out, at time of writing):
+
+| Model | In | Out | Context |
+| --- | --- | --- | --- |
+| `anthropic/claude-haiku-4.5` | $1.00 | $5.00 | 200K |
+| `openai/gpt-5.6-luna-pro` | $0.20 | $1.20 | 1.05M |
+| `google/gemini-3.7-flash` | $0.38 | $1.88 | 1.05M |
+| `deepseek/deepseek-v3.2` | $0.27 | $0.40 | 164K |
+| `qwen/qwen3.7-flash` | $0.03 | $0.13 | 1M |
+
+All verified live against `GET https://openrouter.ai/api/v1/models`
+and confirmed `available: true` via `openclaw models list` against the
+pinned image. Model naming, pricing, and availability drift constantly
+— re-check both before editing this list rather than trusting an LLM's
+training-data knowledge of what OpenRouter currently serves.
 
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
