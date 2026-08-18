@@ -58,7 +58,7 @@ spec:
             readOnlyRootFilesystem: true
           volumeMounts:
             - name: host-dev
-              mountPath: /hostdev
+              mountPath: /dev
               readOnly: true
       volumes:
         - name: host-dev
