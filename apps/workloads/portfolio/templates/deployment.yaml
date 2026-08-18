@@ -4,6 +4,8 @@ metadata:
   name: {{ include "portfolio.fullname" . }}
   labels:
     {{- include "portfolio.labels" . | nindent 4 }}
+  annotations:
+    homelab.joeriberman.nl/image-digest: {{ .Values.image.digest | quote }}
 spec:
   replicas: {{ .Values.replicaCount }}
   revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
@@ -23,7 +25,7 @@ spec:
       {{- end }}
       containers:
         - name: portfolio
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: http

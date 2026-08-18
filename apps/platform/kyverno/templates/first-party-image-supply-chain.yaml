@@ -1,0 +1,70 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: audit-first-party-image-digest-pin
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-digest-for-chazler-images
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        message: >-
+          First-party ghcr.io/chazler images must be pinned by digest
+          (@sha256:...), not a mutable tag.
+        foreach:
+          - list: "request.object.spec.containers[]"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ "{{" }} regex_match('^ghcr\\.io/chazler/.*', element.image) {{ "}}" }}"
+                    operator: Equals
+                    value: true
+                  - key: "{{ "{{" }} regex_match('.*@sha256:[a-f0-9]{64}$', element.image) {{ "}}" }}"
+                    operator: Equals
+                    value: false
+          - list: "request.object.spec.initContainers[] || `[]`"
+            deny:
+              conditions:
+                all:
+                  - key: "{{ "{{" }} regex_match('^ghcr\\.io/chazler/.*', element.image) {{ "}}" }}"
+                    operator: Equals
+                    value: true
+                  - key: "{{ "{{" }} regex_match('.*@sha256:[a-f0-9]{64}$', element.image) {{ "}}" }}"
+                    operator: Equals
+                    value: false
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: audit-first-party-image-cosign-signature
+spec:
+  # Audit mode: no ghcr.io/chazler image is signed yet. This documents the
+  # gap for evaluation before enforcing; signing has to be added in the
+  # upstream image-build repos (portfolio, polylearn, idea-triage, openclaw).
+  background: false
+  rules:
+    - name: verify-chazler-image-signature
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/chazler/*"
+          failureAction: Audit
+          mutateDigest: false
+          verifyDigest: false
+          required: true
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/Chazler/*"
+                    rekor:
+                      url: https://rekor.sigstore.dev

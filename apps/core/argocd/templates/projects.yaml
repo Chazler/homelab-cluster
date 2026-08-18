@@ -1,0 +1,109 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: default
+  namespace: argocd
+spec:
+  description: Deny-by-default. No Application should use this project.
+  sourceRepos: []
+  destinations: []
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: platform
+  namespace: argocd
+spec:
+  description: Platform/infrastructure Applications (apps/platform/*, argocd, cilium).
+  sourceRepos:
+    - https://github.com/Chazler/homelab-cluster.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: argocd
+    - server: https://kubernetes.default.svc
+      namespace: kube-system
+    - server: https://kubernetes.default.svc
+      namespace: authentik
+    - server: https://kubernetes.default.svc
+      namespace: cert-manager
+    - server: https://kubernetes.default.svc
+      namespace: envoy-gateway
+    - server: https://kubernetes.default.svc
+      namespace: kyverno
+    - server: https://kubernetes.default.svc
+      namespace: longhorn
+    - server: https://kubernetes.default.svc
+      namespace: ntfy
+    - server: https://kubernetes.default.svc
+      namespace: observability
+    - server: https://kubernetes.default.svc
+      namespace: sealed-secrets
+    - server: https://kubernetes.default.svc
+      namespace: trivy-operator
+    - server: https://kubernetes.default.svc
+      namespace: vault
+    - server: https://kubernetes.default.svc
+      namespace: vault-secret-sync
+    - server: https://kubernetes.default.svc
+      namespace: vault-secrets-operator
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: apiextensions.k8s.io
+      kind: CustomResourceDefinition
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+    - group: admissionregistration.k8s.io
+      kind: MutatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: ValidatingWebhookConfiguration
+    - group: admissionregistration.k8s.io
+      kind: ValidatingAdmissionPolicy
+    - group: admissionregistration.k8s.io
+      kind: ValidatingAdmissionPolicyBinding
+    - group: storage.k8s.io
+      kind: StorageClass
+    - group: scheduling.k8s.io
+      kind: PriorityClass
+    - group: kyverno.io
+      kind: ClusterPolicy
+    - group: cert-manager.io
+      kind: ClusterIssuer
+    - group: gateway.networking.k8s.io
+      kind: GatewayClass
+    - group: aquasecurity.github.io
+      kind: ClusterComplianceReport
+    - group: cilium.io
+      kind: CiliumL2AnnouncementPolicy
+    - group: cilium.io
+      kind: CiliumLoadBalancerIPPool
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: workloads
+  namespace: argocd
+spec:
+  description: User-facing Applications (apps/workloads/*).
+  sourceRepos:
+    - https://github.com/Chazler/homelab-cluster.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: homeassistant
+    - server: https://kubernetes.default.svc
+      namespace: jellyfin
+    - server: https://kubernetes.default.svc
+      namespace: portfolio
+    - server: https://kubernetes.default.svc
+      namespace: services
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"
