@@ -46,6 +46,22 @@
       currentValueTemplate: 'latest',
     },
     {
+      // Images pinned to an explicit major-version tag plus digest (e.g.
+      // postgres:16@sha256:...), used where floating on ":latest" risks a breaking
+      // major-version jump (see postgres, which broke both databases when
+      // "latest" silently moved from 15/16 to 18). Digest updates within the pinned
+      // tag surface as normal digest bumps; a change to a different tag (e.g. 16 ->
+      // 17) is typed as a major update and gated by the packageRule below.
+      customType: 'regex',
+      description: 'Explicitly tagged, digest-pinned container images',
+      managerFilePatterns: ['/^apps/.*values\\.ya?ml$/'],
+      matchStrings: [
+        "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+):(?<currentValue>[a-zA-Z0-9.\\-_]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
       // talos/controlplane.yaml and worker*.yaml are gitignored (they carry cluster
       // credentials) and regenerated locally with talosctl, so Renovate can't read
       // the live Talos/Kubernetes version from them directly. talos/versions.yaml is
