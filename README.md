@@ -81,7 +81,13 @@ Jellyfin, Jellyseerr, Polylearn, Home Assistant and OpenClaw are
 intentionally public (Home Assistant's companion apps require direct,
 unauthenticated access to its own login; OpenClaw authenticates its iOS
 client natively via a shared token, since a native client cannot complete
-Authentik's browser SSO redirect). Deluge has no
+Authentik's browser SSO redirect). n8n splits its hostname across two
+HTTPRoutes: the editor UI stays behind Authentik forward-auth, while
+`/webhook`, `/webhook-waiting`, `/mcp-server`, `/mcp-oauth` and the
+`/.well-known/oauth-*` discovery paths are public and unauthenticated at
+the gateway, since webhook senders and MCP clients can't complete a
+browser SSO redirect; those paths rely on n8n's own per-node auth and
+its native MCP OAuth2 authorization server instead. Deluge has no
 public route and is reachable only by the other media services through its VPN
 pod. AdGuard's DNS listener is a separate Cilium LoadBalancer service and does
 not pass through Envoy.
