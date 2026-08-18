@@ -52,3 +52,7 @@ cheatsheet-secret.md
 
 # Local task planning
 .tasks/
+
+# Local Claude Code config (not shared via repo)
+CLAUDE.md
+.claude/
