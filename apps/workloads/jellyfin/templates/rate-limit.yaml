@@ -18,6 +18,7 @@ spec:
       rules:
         - clientSelectors:
             - sourceCIDR:
+                invert: false
                 type: Distinct
                 value: 0.0.0.0/0
           limit:
@@ -25,6 +26,7 @@ spec:
             unit: Minute
         - clientSelectors:
             - sourceCIDR:
+                invert: false
                 type: Distinct
                 value: ::/0
           limit:
@@ -48,6 +50,7 @@ spec:
       rules:
         - clientSelectors:
             - sourceCIDR:
+                invert: false
                 type: Distinct
                 value: 0.0.0.0/0
           limit:
@@ -55,6 +58,7 @@ spec:
             unit: Minute
         - clientSelectors:
             - sourceCIDR:
+                invert: false
                 type: Distinct
                 value: ::/0
           limit:
