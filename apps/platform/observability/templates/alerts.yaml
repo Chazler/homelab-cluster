@@ -31,3 +31,24 @@ spec:
           annotations:
             summary: SMART device temperature is high
             description: '{{ "{{" }} $labels.node {{ "}}" }} has a device above 60°C.'
+        # ATA disks (SATA/SAS) report sector errors as numbered SMART attributes,
+        # not via smartctl_device_media_errors (NVMe-only, so it never fires for
+        # our spinning disks).
+        - alert: SmartDeviceSectorErrors
+          expr: >-
+            smartctl_device_attribute{attribute_value_type="raw",attribute_id=~"5|187|197|198"} > 0
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: SMART sector error count is nonzero
+            description: '{{ "{{" }} $labels.device {{ "}}" }} reports {{ "{{" }} $value {{ "}}" }} for {{ "{{" }} $labels.attribute_name {{ "}}" }} (id {{ "{{" }} $labels.attribute_id {{ "}}" }}).'
+        - alert: LonghornNodeStorageAlmostFull
+          expr: >-
+            100 * longhorn_node_storage_usage_bytes / longhorn_node_storage_capacity_bytes > 80
+          for: 15m
+          labels:
+            severity: warning
+          annotations:
+            summary: Longhorn node storage is filling up
+            description: '{{ "{{" }} $labels.node {{ "}}" }} has used {{ "{{" }} $value {{ "}}" }}% of the storage Longhorn schedules onto it.'
