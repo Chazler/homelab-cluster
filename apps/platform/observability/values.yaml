@@ -49,9 +49,9 @@ kube-prometheus-stack:
     resources:
       requests:
         cpu: 50m
-        memory: 128Mi
+        memory: 192Mi
       limits:
-        memory: 256Mi
+        memory: 384Mi
 
   alertmanager:
     alertmanagerSpec:
