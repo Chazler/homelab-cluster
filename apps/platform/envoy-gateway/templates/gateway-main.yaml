@@ -19,7 +19,21 @@ spec:
       hostname: "joeriberman.nl"
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - argocd
+                  - authentik
+                  - homeassistant
+                  - jellyfin
+                  - ntfy
+                  - observability
+                  - portfolio
+                  - services
+                  - vault
       tls:
         mode: Terminate
         certificateRefs:
@@ -34,7 +48,21 @@ spec:
       hostname: "*.joeriberman.nl"
       allowedRoutes:
         namespaces:
-          from: All
+          from: Selector
+          selector:
+            matchExpressions:
+              - key: kubernetes.io/metadata.name
+                operator: In
+                values:
+                  - argocd
+                  - authentik
+                  - homeassistant
+                  - jellyfin
+                  - ntfy
+                  - observability
+                  - portfolio
+                  - services
+                  - vault
       tls:
         mode: Terminate
         certificateRefs:
