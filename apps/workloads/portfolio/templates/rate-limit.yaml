@@ -1,0 +1,32 @@
+{{- if .Values.route.enabled }}
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata:
+  name: {{ include "portfolio.fullname" . }}-rate-limit
+  namespace: {{ .Release.Namespace }}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      name: {{ include "portfolio.fullname" . }}
+  rateLimit:
+    type: Local
+    local:
+      # Per-Envoy-replica counters (no shared global store), so the effective
+      # ceiling per client is roughly limit * replica count.
+      rules:
+        - clientSelectors:
+            - sourceCIDR:
+                type: Distinct
+                value: 0.0.0.0/0
+          limit:
+            requests: 120
+            unit: Minute
+        - clientSelectors:
+            - sourceCIDR:
+                type: Distinct
+                value: ::/0
+          limit:
+            requests: 120
+            unit: Minute
+{{- end }}

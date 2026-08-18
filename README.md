@@ -77,9 +77,11 @@ application for every private hostname, so application policies remain isolated.
 Google sign-in is configured only as an Authentik source and uses the
 `auth.joeriberman.nl` callback.
 
-Jellyfin, Jellyseerr, Polylearn and Home Assistant are intentionally public
-(Home Assistant's companion apps require direct, unauthenticated access to
-its own login). Deluge has no
+Jellyfin, Jellyseerr, Polylearn, Home Assistant and OpenClaw are
+intentionally public (Home Assistant's companion apps require direct,
+unauthenticated access to its own login; OpenClaw authenticates its iOS
+client natively via a shared token, since a native client cannot complete
+Authentik's browser SSO redirect). Deluge has no
 public route and is reachable only by the other media services through its VPN
 pod. AdGuard's DNS listener is a separate Cilium LoadBalancer service and does
 not pass through Envoy.
