@@ -1,0 +1,189 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: smartctl-disk-health-dashboard
+  namespace: {{ .Values.nodeMetricsNamespace }}
+  labels:
+    grafana_dashboard: "1"
+data:
+  smartctl-disk-health.json: |
+    {
+      "title": "Disk Health: k8s-worker-2 /dev/sdb (Seagate ST4000DM005)",
+      "uid": "smartctl-worker2-sdb",
+      "tags": ["smart", "storage", "worker-2"],
+      "timezone": "browser",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "5m",
+      "time": { "from": "now-7d", "to": "now" },
+      "panels": [
+        {
+          "id": 1,
+          "type": "text",
+          "title": "",
+          "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+          "options": {
+            "mode": "markdown",
+            "content": "Tracks the failing 4 TB Seagate BarraCuda (`ST4000DM005-2DP166`, serial `WDH2336K`) on `k8s-worker-2`, member of the `e-vault` LVM filesystem. See `.tasks/07-rebuild-media-storage-with-22tb.md`. Reallocated/pending/uncorrectable counts trending up over time is the signal to stop deferring the rebuild."
+          }
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "SMART Overall Health",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 3 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_smart_status and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "SMART status"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [
+                { "type": "value", "options": { "1": { "text": "PASSED", "color": "green" } } },
+                { "type": "value", "options": { "0": { "text": "FAILED", "color": "red" } } }
+              ],
+              "thresholds": { "mode": "absolute", "steps": [{ "value": null, "color": "green" }] }
+            }
+          }
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "smartctl Exit Status",
+          "description": "0 = clean. Bit 6 (64) = device error log contains records of errors.",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 3 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_smartctl_exit_status and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "exit status"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "value": null, "color": "green" },
+                  { "value": 1, "color": "orange" },
+                  { "value": 8, "color": "red" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 4,
+          "type": "stat",
+          "title": "Current Temperature",
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 3 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_temperature{temperature_type=\"current\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "temperature"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "celsius" } }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Reallocated Sectors",
+          "description": "Sectors actually remapped to spares. 0 with nonzero pending/offline-uncorrectable means bad sectors exist but haven't been rewritten yet.",
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 3 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"5\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "Reallocated_Sector_Ct"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "value": null, "color": "green" },
+                  { "value": 1, "color": "red" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Sector Error Counts Over Time",
+          "description": "The core decision-driving trend: pending/offline-uncorrectable/reported-uncorrect sectors climbing means active, worsening media degradation.",
+          "gridPos": { "h": 9, "w": 24, "x": 0, "y": 7 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"197\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "Current_Pending_Sector"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"198\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "Offline_Uncorrectable"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"187\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "Reported_Uncorrect"
+            },
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"5\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "Reallocated_Sector_Ct"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "custom": { "drawStyle": "line", "spanNulls": true, "fillOpacity": 0 },
+              "min": 0
+            }
+          }
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "UDMA CRC Error Count",
+          "description": "Interface/cable errors. Should stay flat at 0; if this climbs, the cause may be the SATA cable/connector, not the platters.",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_attribute{attribute_id=\"199\",attribute_value_type=\"raw\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "UDMA_CRC_Error_Count"
+            }
+          ],
+          "fieldConfig": { "defaults": { "min": 0 } }
+        },
+        {
+          "id": 8,
+          "type": "timeseries",
+          "title": "Temperature Over Time",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "smartctl_device_temperature{temperature_type=\"current\"} and on(instance,device) smartctl_device{serial_number=\"WDH2336K\"}",
+              "legendFormat": "temperature"
+            }
+          ],
+          "fieldConfig": { "defaults": { "unit": "celsius", "min": 0 } }
+        }
+      ]
+    }
