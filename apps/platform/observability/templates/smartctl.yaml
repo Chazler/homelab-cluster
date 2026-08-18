@@ -54,7 +54,11 @@ spec:
           securityContext:
             # SMART ioctls require privileged device access. The only host mount
             # is /dev and it is read-only; the pod has no API credentials.
+            # Host device nodes are root:root mode 0600, so the container must
+            # actually run as root to open them (privileged alone isn't enough
+            # against the image's default non-root UID).
             privileged: true
+            runAsUser: 0
             readOnlyRootFilesystem: true
           volumeMounts:
             - name: host-dev
