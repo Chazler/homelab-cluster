@@ -10,6 +10,17 @@
   commitMessagePrefix: 'chore(deps):',
   prConcurrentLimit: 5,
 
+  // ghcr.io/chazler/* images (polylearn, idea-triage-frontend, idea-triage-api) are
+  // private packages; a PAT with read:packages, stored as the GHCR_TOKEN secret in
+  // the Mend portal, lets Renovate resolve their digests.
+  hostRules: [
+    {
+      matchHost: 'ghcr.io',
+      hostType: 'docker',
+      token: '{{ secrets.GHCR_TOKEN }}',
+    },
+  ],
+
   // Helm chart dependencies (Chart.yaml under apps/**) are picked up automatically by
   // the built-in helmv3 manager since every app directory is a real Helm chart.
 
