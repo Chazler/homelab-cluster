@@ -3,10 +3,10 @@ trivy-operator:
   resources:
     requests:
       cpu: 50m
-      memory: 128Mi
-    limits:
-      cpu: 250m
       memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 768Mi
 
   serviceMonitor:
     enabled: true
