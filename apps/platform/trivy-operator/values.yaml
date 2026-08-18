@@ -1,0 +1,29 @@
+trivy-operator:
+  # Bounded resource requests/limits for the operator's own controller pod.
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+  serviceMonitor:
+    enabled: true
+
+  operator:
+    # Vulnerability, exposed-secret, RBAC, infra-assessment, and
+    # cluster-compliance scanners (config-audit is on by default too).
+    vulnerabilityScannerEnabled: true
+    exposedSecretScannerEnabled: true
+    rbacAssessmentScannerEnabled: true
+    infraAssessmentScannerEnabled: true
+    clusterComplianceEnabled: true
+    configAuditScannerEnabled: true
+
+    # Reports are stored as in-cluster CRs only; nothing is exported.
+    webhookBroadcastURL: ""
+
+    # Cap how many scan jobs run at once and how long stale reports live.
+    scanJobsConcurrentLimit: 5
+    scannerReportTTL: "24h"
