@@ -12,12 +12,15 @@
 
   // ghcr.io/chazler/* images (polylearn, idea-triage-frontend, idea-triage-api) are
   // private packages; a PAT with read:packages, stored as the GHCR_TOKEN secret in
-  // the Mend portal, lets Renovate resolve their digests.
+  // the Mend portal, lets Renovate resolve their digests. GHCR's token-exchange
+  // endpoint requires Basic auth (username + PAT as password) rather than a bearer
+  // token, so this must use username/password, not the `token` field.
   hostRules: [
     {
       matchHost: 'ghcr.io',
       hostType: 'docker',
-      token: '{{ secrets.GHCR_TOKEN }}',
+      username: 'Chazler',
+      password: '{{ secrets.GHCR_TOKEN }}',
     },
   ],
 
