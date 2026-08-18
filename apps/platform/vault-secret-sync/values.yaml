@@ -150,6 +150,9 @@ namespaces:
               text: '{{ get .Secrets "client-secret" }}'
       observability-alertmanager:
         path: observability/alertmanager
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: alertmanager-ntfy
         transformation:
           templates:
             alertmanager.yaml:
