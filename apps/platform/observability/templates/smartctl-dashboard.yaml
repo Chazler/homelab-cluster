@@ -54,7 +54,7 @@ data:
           "id": 3,
           "type": "stat",
           "title": "Current Temperature",
-          "gridPos": { "h": 5, "w": 12, "x": 0, "y": 8 },
+          "gridPos": { "h": 5, "w": 8, "x": 0, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
@@ -68,9 +68,87 @@ data:
         {
           "id": 4,
           "type": "stat",
-          "title": "Reallocated Sectors (ATA disks)",
+          "title": "Current Pending Sector (ATA)",
+          "description": "Sectors that failed to read and are awaiting reallocation. Nonzero means unreadable data exists right now.",
+          "gridPos": { "h": 5, "w": 4, "x": 8, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(smartctl_device_attribute{attribute_id=\"197\",attribute_value_type=\"raw\"} and on(pod,device) smartctl_device{protocol=\"ATA\"}) * on(pod) group_left(node) kube_pod_info{pod=~\"smartctl-exporter-.*\"}",
+              "legendFormat": "{{ "{{" }}node{{ "}}" }} {{ "{{" }}device{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "value": null, "color": "green" },
+                  { "value": 1, "color": "red" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 5,
+          "type": "stat",
+          "title": "Offline Uncorrectable (ATA)",
+          "description": "Sectors that failed during an offline read verification and could not be corrected.",
+          "gridPos": { "h": 5, "w": 4, "x": 12, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(smartctl_device_attribute{attribute_id=\"198\",attribute_value_type=\"raw\"} and on(pod,device) smartctl_device{protocol=\"ATA\"}) * on(pod) group_left(node) kube_pod_info{pod=~\"smartctl-exporter-.*\"}",
+              "legendFormat": "{{ "{{" }}node{{ "}}" }} {{ "{{" }}device{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "value": null, "color": "green" },
+                  { "value": 1, "color": "red" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 6,
+          "type": "stat",
+          "title": "Reported Uncorrect (ATA)",
+          "description": "Cumulative count of errors the drive could not correct and reported to the host.",
+          "gridPos": { "h": 5, "w": 4, "x": 16, "y": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "(smartctl_device_attribute{attribute_id=\"187\",attribute_value_type=\"raw\"} and on(pod,device) smartctl_device{protocol=\"ATA\"}) * on(pod) group_left(node) kube_pod_info{pod=~\"smartctl-exporter-.*\"}",
+              "legendFormat": "{{ "{{" }}node{{ "}}" }} {{ "{{" }}device{{ "}}" }}"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "value": null, "color": "green" },
+                  { "value": 1, "color": "red" }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "id": 7,
+          "type": "stat",
+          "title": "Reallocated Sectors (ATA)",
           "description": "Sectors actually remapped to spares. Nonzero pending/offline-uncorrectable with 0 reallocated means bad sectors exist but haven't been rewritten yet.",
-          "gridPos": { "h": 5, "w": 12, "x": 12, "y": 8 },
+          "gridPos": { "h": 5, "w": 4, "x": 20, "y": 8 },
           "datasource": { "type": "prometheus", "uid": "prometheus" },
           "targets": [
             {
@@ -92,7 +170,7 @@ data:
           }
         },
         {
-          "id": 5,
+          "id": 8,
           "type": "timeseries",
           "title": "Sector Error Counts Over Time (ATA disks)",
           "description": "The core decision-driving trend: pending/offline-uncorrectable/reported-uncorrect sectors climbing means active, worsening media degradation. NVMe disks use different health signals and aren't shown here.",
@@ -128,7 +206,7 @@ data:
           }
         },
         {
-          "id": 6,
+          "id": 9,
           "type": "timeseries",
           "title": "UDMA CRC Error Count (ATA disks)",
           "description": "Interface/cable errors. Should stay flat at 0; if one climbs, the cause may be that disk's SATA cable/connector, not its platters.",
@@ -144,7 +222,7 @@ data:
           "fieldConfig": { "defaults": { "min": 0 } }
         },
         {
-          "id": 7,
+          "id": 10,
           "type": "timeseries",
           "title": "Temperature Over Time",
           "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
