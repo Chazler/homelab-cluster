@@ -116,6 +116,8 @@ spec:
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
+    - group: ""
+      kind: PersistentVolume
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"

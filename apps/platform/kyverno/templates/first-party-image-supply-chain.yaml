@@ -5,14 +5,18 @@ metadata:
 spec:
   validationFailureAction: Audit
   background: true
+  admission: true
+  emitWarning: false
   rules:
     - name: require-digest-for-chazler-images
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
               kinds:
                 - Pod
       validate:
+        allowExistingViolations: true
         message: >-
           First-party ghcr.io/chazler images must be pinned by digest
           (@sha256:...), not a mutable tag.
@@ -46,9 +50,13 @@ spec:
   # Audit mode: no ghcr.io/chazler image is signed yet. This documents the
   # gap for evaluation before enforcing; signing has to be added in the
   # upstream image-build repos (portfolio, polylearn, idea-triage, openclaw).
+  validationFailureAction: Audit
   background: false
+  admission: true
+  emitWarning: false
   rules:
     - name: verify-chazler-image-signature
+      skipBackgroundRequests: true
       match:
         any:
           - resources:
@@ -61,6 +69,8 @@ spec:
           mutateDigest: false
           verifyDigest: false
           required: true
+          useCache: true
+          signatureAlgorithm: sha256
           attestors:
             - entries:
                 - keyless:
