@@ -37,7 +37,7 @@ spec:
             value: /webhook-waiting
         - path:
             type: PathPrefix
-            value: /mcp
+            value: /mcp-server
       backendRefs:
         - group: ""
           kind: Service
