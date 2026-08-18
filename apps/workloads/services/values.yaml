@@ -41,7 +41,7 @@ umami:
       memory: 512Mi
 
 polylearn:
-  image: ghcr.io/chazler/polylearn@sha256:0a30f70df8d683232210cf0a82d3e164e4960bb9dcf03529103a9cf683a64500
+  image: ghcr.io/chazler/polylearn@sha256:16a17a8fbbf9727a2efd3e70c8306492f8374a930b884e0c2d5b92026b079e8a
   hostname: polylearn.joeriberman.nl
   storage: 1Gi
   resources:
