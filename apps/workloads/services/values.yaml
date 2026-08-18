@@ -9,7 +9,7 @@ gateway:
   sectionName: web-https
 
 postgres:
-  image: postgres@sha256:57c72fd2a128e416c7fcc499958864df5301e940bca0a56f58fddf30ffc07777
+  image: postgres@sha256:06cad38a5d9f5d24b4d83d86def30795d5e4b757fedbf5281172b576dedcd941
   storage: 10Gi
   resources:
     requests:
