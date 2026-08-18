@@ -72,6 +72,16 @@ falls back to its own hardcoded default (`openai/gpt-5.5`), which
 silently fails without an `OPENAI_API_KEY`. Change this if you add a
 different provider key to `services/openclaw-env`.
 
+`agents.defaults.models` is the picker allowlist — without it the
+Control UI model switcher only ever showed `openrouter/auto`, since an
+unset allowlist falls back to a tiny built-in catalog rather than every
+model OpenRouter serves. It's set to six current OpenRouter model IDs
+(one flagship per major lab plus `auto`), verified live against
+`GET https://openrouter.ai/api/v1/models` and confirmed `available:
+true` via `openclaw models list` against the pinned image — model
+naming and availability drift over time, so re-check both before
+editing this list.
+
 An init container seeds `openclaw.json`/`AGENTS.md` from the
 `openclaw-config` ConfigMap into the PVC on first boot only — after that
 the PVC copy is authoritative, so config edits made through OpenClaw
