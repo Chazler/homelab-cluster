@@ -77,3 +77,4 @@ spec:
                     subject: "https://github.com/Chazler/*"
                     rekor:
                       url: https://rekor.sigstore.dev
+                  signatureAlgorithm: sha256
