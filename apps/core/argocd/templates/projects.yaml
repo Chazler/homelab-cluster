@@ -55,6 +55,8 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: jellyfin
     - server: https://kubernetes.default.svc
+      namespace: nextcloud
+    - server: https://kubernetes.default.svc
       namespace: portfolio
     - server: https://kubernetes.default.svc
       namespace: services
@@ -109,6 +111,8 @@ spec:
       namespace: homeassistant
     - server: https://kubernetes.default.svc
       namespace: jellyfin
+    - server: https://kubernetes.default.svc
+      namespace: nextcloud
     - server: https://kubernetes.default.svc
       namespace: portfolio
     - server: https://kubernetes.default.svc
