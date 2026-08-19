@@ -33,6 +33,7 @@ spec:
                       app.kubernetes.io/name: nextcloud
                   topologyKey: kubernetes.io/hostname
           securityContext:
+            runAsUser: 33
             fsGroup: 33
             fsGroupChangePolicy: OnRootMismatch
           containers:

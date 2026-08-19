@@ -78,8 +78,9 @@ spec:
             failureThreshold: 60
             periodSeconds: 5
           readinessProbe:
-            httpGet:
-              path: /status.php
+            # Not an httpGet /status.php: kube-probe's Host header isn't in
+            # NEXTCLOUD_TRUSTED_DOMAINS, so Nextcloud answers 400.
+            tcpSocket:
               port: http
             periodSeconds: 10
           resources:
