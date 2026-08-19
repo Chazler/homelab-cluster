@@ -90,6 +90,34 @@ spec:
               mountPath: /var/www/html
             - name: data
               mountPath: /var/www/html/data
+        - name: cron
+          # Runs cron.php as a sidecar in the same pod, sharing the same
+          # volume mounts, instead of a separate CronJob: a standalone Job
+          # pod re-attaching the same RWO Longhorn volumes every 5 minutes
+          # intermittently hit "no Pending workload pods" FailedMount races
+          # against the long-running nextcloud pod.
+          image: {{ .Values.nextcloud.image | quote }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 33
+          command:
+            - sh
+            - -c
+            - |
+              while true; do
+                php -f /var/www/html/cron.php
+                sleep 300
+              done
+          env:
+            - name: TZ
+              value: Europe/Amsterdam
+          resources:
+            {{- toYaml .Values.nextcloud.cron.resources | nindent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /var/www/html
+            - name: data
+              mountPath: /var/www/html/data
       volumes:
         - name: config
           persistentVolumeClaim:
