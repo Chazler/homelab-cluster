@@ -29,6 +29,7 @@ spec:
                   - authentik
                   - homeassistant
                   - jellyfin
+                  - nextcloud
                   - ntfy
                   - observability
                   - portfolio
@@ -58,6 +59,7 @@ spec:
                   - authentik
                   - homeassistant
                   - jellyfin
+                  - nextcloud
                   - ntfy
                   - observability
                   - portfolio
