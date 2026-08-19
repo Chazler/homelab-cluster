@@ -24,6 +24,16 @@ namespaces:
   jellyfin:
     secrets:
       jellystat-secrets: {}
+  nextcloud:
+    secrets:
+      nextcloud-secrets:
+        rolloutRestartTargets:
+          - kind: Deployment
+            name: nextcloud
+          - kind: StatefulSet
+            name: nextcloud-postgres
+          - kind: Deployment
+            name: nextcloud-redis
   portfolio:
     secrets:
       ghcr-image-pull-secret:

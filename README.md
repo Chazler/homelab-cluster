@@ -26,9 +26,10 @@ Last verified: 2026-08-14.
 
 The workload layer includes Home Assistant; a media stack built around
 Jellyfin, Jellyseerr, Jellystat, Sonarr, Radarr, Prowlarr, Bazarr, SABnzbd and
-Deluge; and a services stack containing AdGuard Home, Umami, Polylearn, Idea
-Triage and n8n. Umami and Idea Triage use separate roles and databases on one
-PostgreSQL instance. Container images are pinned by digest.
+Deluge; a services stack containing AdGuard Home, Umami, Polylearn, Idea
+Triage and n8n; and Nextcloud with its own PostgreSQL and Redis instances.
+Umami and Idea Triage use separate roles and databases on one PostgreSQL
+instance. Container images are pinned by digest.
 
 Metrics Server, Prometheus, Grafana, Alertmanager and external-dns are not currently installed.
 
@@ -87,7 +88,13 @@ HTTPRoutes: the editor UI stays behind Authentik forward-auth, while
 `/.well-known/oauth-*` discovery paths are public and unauthenticated at
 the gateway, since webhook senders and MCP clients can't complete a
 browser SSO redirect; those paths rely on n8n's own per-node auth and
-its native MCP OAuth2 authorization server instead. Deluge has no
+its native MCP OAuth2 authorization server instead. Nextcloud follows the
+same split: its web UI is behind Authentik forward-auth, while
+`/remote.php`, `/public.php`, `/ocs`, `/status.php`, `/login/v2` and the
+CalDAV/CardDAV/WebFinger `/.well-known/*` paths are public and rely on
+Nextcloud's own app-password/token auth, since desktop/mobile sync
+clients, CalDAV/CardDAV clients and MCP integrations can't complete a
+browser SSO redirect either. Deluge has no
 public route and is reachable only by the other media services through its VPN
 pod. AdGuard's DNS listener is a separate Cilium LoadBalancer service and does
 not pass through Envoy.

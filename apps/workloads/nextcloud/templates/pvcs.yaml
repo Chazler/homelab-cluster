@@ -1,0 +1,22 @@
+{{- $claims := dict
+  "nextcloud-config" .Values.nextcloud.configStorage
+  "nextcloud-data" .Values.nextcloud.dataStorage
+  "nextcloud-postgres-data" .Values.postgres.storage
+-}}
+{{- range $name, $size := $claims }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ $name }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "nextcloud.labels" $ | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: {{ $.Values.storageClass | quote }}
+  resources:
+    requests:
+      storage: {{ $size | quote }}
+---
+{{- end }}
