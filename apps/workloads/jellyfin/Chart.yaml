@@ -1,6 +1,0 @@
-apiVersion: v2
-name: jellyfin
-description: Jellyfin and supporting media automation services
-type: application
-version: 0.4.0
-appVersion: "10.11.11"

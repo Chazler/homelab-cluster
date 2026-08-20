@@ -24,12 +24,11 @@ Last verified: 2026-08-14.
 - Authentik forward-auth for private application routes
 - Vault Community Edition with integrated Raft storage
 
-The workload layer includes Home Assistant; a media stack built around
-Jellyfin, Jellyseerr, Jellystat, Sonarr, Radarr, Prowlarr, Bazarr, SABnzbd and
-Deluge; a services stack containing AdGuard Home, Umami, Polylearn, Idea
-Triage and n8n; and Nextcloud with its own PostgreSQL and Redis instances.
-Umami and Idea Triage use separate roles and databases on one PostgreSQL
-instance. Container images are pinned by digest.
+The workload layer in this repo is limited to this portfolio site. The
+platform services above (ingress, auth, secrets, storage, policy,
+observability) are shared infrastructure for a larger set of self-hosted
+applications that live in a separate private repository and are not part of
+this public one. Container images are pinned by digest.
 
 Metrics Server, Prometheus, Grafana, Alertmanager and external-dns are not currently installed.
 
@@ -55,7 +54,8 @@ apps/
   core/              Argo CD self-management
   networking/        Cilium
   platform/          cert-manager, Envoy, Kyverno, Longhorn, Vault, secrets
-  workloads/         User workloads
+  workloads/         Public user workloads (this repo carries only the portfolio site;
+                     other self-hosted apps live in a separate private repo)
 talos/
   patches/           Safe, tracked Talos patches
   controlplane.yaml  Generated locally; ignored because it contains credentials
@@ -78,26 +78,13 @@ application for every private hostname, so application policies remain isolated.
 Google sign-in is configured only as an Authentik source and uses the
 `auth.joeriberman.nl` callback.
 
-Jellyfin, Jellyseerr, Polylearn, Home Assistant and OpenClaw are
-intentionally public (Home Assistant's companion apps require direct,
-unauthenticated access to its own login; OpenClaw authenticates its iOS
-client natively via a shared token, since a native client cannot complete
-Authentik's browser SSO redirect). n8n splits its hostname across two
-HTTPRoutes: the editor UI stays behind Authentik forward-auth, while
-`/webhook`, `/webhook-waiting`, `/mcp-server`, `/mcp-oauth` and the
-`/.well-known/oauth-*` discovery paths are public and unauthenticated at
-the gateway, since webhook senders and MCP clients can't complete a
-browser SSO redirect; those paths rely on n8n's own per-node auth and
-its native MCP OAuth2 authorization server instead. Nextcloud follows the
-same split: its web UI is behind Authentik forward-auth, while
-`/remote.php`, `/public.php`, `/ocs`, `/status.php`, `/login/v2` and the
-CalDAV/CardDAV/WebFinger `/.well-known/*` paths are public and rely on
-Nextcloud's own app-password/token auth, since desktop/mobile sync
-clients, CalDAV/CardDAV clients and MCP integrations can't complete a
-browser SSO redirect either. Deluge has no
-public route and is reachable only by the other media services through its VPN
-pod. AdGuard's DNS listener is a separate Cilium LoadBalancer service and does
-not pass through Envoy.
+This portfolio site is intentionally public and skips the label. Some
+self-hosted applications in the private repo need to split a single
+hostname across authenticated and unauthenticated routes — e.g. a web UI
+behind Authentik forward-auth alongside a `/webhook` or sync/API path that
+native clients (mobile apps, CalDAV/MCP clients, webhook senders) hit
+directly, since those clients can't complete a browser SSO redirect and
+rely on the application's own token/API auth instead.
 
 ## Secrets
 
@@ -122,8 +109,5 @@ and [cheatsheet.md](cheatsheet.md).
 - A single control-plane node means the Kubernetes API and etcd are not highly available.
 - Longhorn uses two replicas per volume. The third node adds placement options,
   but two replicas do not replace an external backup.
-- The media library is a retained local PV on `k8s-worker-2`; it is node-bound
-  and is not replicated by Longhorn.
-- Umami and Idea Triage share one PostgreSQL instance. Their databases and
-  roles are isolated, but the database pod and volume remain a shared failure
-  domain.
+- Some private-repo workloads use retained local PVs that are node-bound
+  and not replicated by Longhorn.
