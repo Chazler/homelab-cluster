@@ -1,4 +1,4 @@
-{{- $namespaces := list "argocd" "vault" "services" "jellyfin" "nextcloud" }}
+{{- $namespaces := list "argocd" "vault" "services" "jellyfin" "nextcloud" "vibe-trading" }}
 {{- range $namespace := $namespaces }}
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
@@ -48,6 +48,7 @@ data:
   (dict "slug" "bazarr" "name" "Bazarr" "hostname" "bazarr.joeriberman.nl")
   (dict "slug" "sabnzbd" "name" "SABnzbd" "hostname" "sabnzbd.joeriberman.nl")
   (dict "slug" "nextcloud" "name" "Nextcloud" "hostname" "nextcloud.joeriberman.nl")
+  (dict "slug" "vibe-trading" "name" "Vibe-Trading" "hostname" "vibe-trading.joeriberman.nl")
 }}
 {{- range $app := $apps }}
       - model: authentik_providers_proxy.proxyprovider
