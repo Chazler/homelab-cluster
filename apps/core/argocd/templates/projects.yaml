@@ -51,15 +51,9 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: vault-secrets-operator
     # vault-secret-sync also syncs Secrets/VaultAuth/VaultConnection into
-    # these workload namespaces (see apps/platform/vault-secret-sync/values.yaml).
-    - server: https://kubernetes.default.svc
-      namespace: jellyfin
-    - server: https://kubernetes.default.svc
-      namespace: nextcloud
+    # this workload namespace (see apps/platform/vault-secret-sync/values.yaml).
     - server: https://kubernetes.default.svc
       namespace: portfolio
-    - server: https://kubernetes.default.svc
-      namespace: services
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
@@ -108,15 +102,7 @@ spec:
     - https://github.com/Chazler/homelab-cluster.git
   destinations:
     - server: https://kubernetes.default.svc
-      namespace: homeassistant
-    - server: https://kubernetes.default.svc
-      namespace: jellyfin
-    - server: https://kubernetes.default.svc
-      namespace: nextcloud
-    - server: https://kubernetes.default.svc
       namespace: portfolio
-    - server: https://kubernetes.default.svc
-      namespace: services
   clusterResourceWhitelist:
     - group: ""
       kind: Namespace
