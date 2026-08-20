@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: private-applications
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: git@github.com:Chazler/homelab-private.git
+        revision: main
+        directories:
+          - path: "apps/*"
+  template:
+    metadata:
+      name: '{{path.basename}}'
+    spec:
+      project: private
+      source:
+        repoURL: git@github.com:Chazler/homelab-private.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - ServerSideApply=true

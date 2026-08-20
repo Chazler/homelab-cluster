@@ -141,6 +141,12 @@ kubectl apply -f apps/app-of-apps/platform-applications.yaml
 kubectl apply -f apps/app-of-apps/workload-applications.yaml
 ```
 
+Optionally, if a private services repo is configured (see "Private services repo" below):
+
+```bash
+kubectl apply -f apps/app-of-apps/private-applications.yaml
+```
+
 Monitor reconciliation:
 
 ```bash
@@ -278,6 +284,48 @@ kubectl delete pod vault-0 -n vault   # restart the active/leader node last
 Each pod auto-unseals via GCP KMS and rejoins Raft on its own; no `vault
 operator unseal` step is needed. Deleting the active node causes a brief,
 automatic Raft leader election to one of the standbys.
+
+### Private services repo
+
+`apps/app-of-apps/private-applications.yaml` is an ApplicationSet, scoped to
+the `private` AppProject, that mirrors `workload-applications.yaml` but
+sources from the private `git@github.com:Chazler/homelab-private.git` repo
+instead: every top-level `apps/*` directory in that repo becomes an
+Application/namespace. This keeps what runs there out of this public repo.
+Argo CD authenticates with a read-only deploy key, stored as a `SealedSecret`
+at `apps/core/argocd/templates/private-repo-secret.yaml` (part of the
+self-managed `argocd` chart, so it reconciles like any other in-repo change).
+
+Vault access for a namespace created by the private repo works the same way
+as any platform/workload namespace, except the `VaultConnection`/`VaultAuth`/
+`VaultStaticSecret` manifests must live in the private chart itself (via
+`apps/platform/vault-secret-sync/templates/vault-static-secrets.yaml` for the
+exact shape to copy) rather than in this repo's `vault-secret-sync` values,
+so secret names/paths for private services aren't exposed here either. Before
+a private chart's `VaultStaticSecret` will work, create its Vault
+kubernetes-auth role and policy once (break-glass, not tracked in git — same
+as every other namespace's):
+
+```bash
+kubectl exec -it -n vault vault-0 -- sh -c '
+VAULT_CACERT=/vault/userconfig/vault-server-tls/ca.crt
+export VAULT_CACERT
+vault policy write vault-sync-<namespace> - <<EOF
+path "kv/data/<namespace>/*" {
+  capabilities = ["read"]
+}
+path "kv/metadata/<namespace>/*" {
+  capabilities = ["list"]
+}
+EOF
+vault write auth/kubernetes/role/vault-sync-<namespace> \
+  bound_service_account_names=vault-secrets \
+  bound_service_account_namespaces=<namespace> \
+  audience=vault \
+  policies=vault-sync-<namespace> \
+  ttl=24h
+'
+```
 
 ### Diagnose certificate issuance
 
