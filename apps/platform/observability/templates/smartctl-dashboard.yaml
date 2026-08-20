@@ -24,7 +24,7 @@ data:
           "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
           "options": {
             "mode": "markdown",
-            "content": "SMART health for every physical disk in the cluster (system NVMe/SSDs plus the two bulk-storage disks on `k8s-worker-2`). Longhorn/iSCSI virtual devices are excluded (`protocol` restricted to ATA/NVMe). `k8s-worker-2 sdb` (Seagate `ST4000DM005-2DP166`, serial `WDH2336K`) is currently failing — see `.tasks/07-rebuild-media-storage-with-22tb.md`."
+            "content": "SMART health for every physical disk in the cluster (system NVMe/SSDs plus the two bulk-storage disks on `k8s-worker-2`). Longhorn/iSCSI virtual devices are excluded (`protocol` restricted to ATA/NVMe). `k8s-worker-2 sdb` (Seagate `ST4000DM005-2DP166`, serial `WDH2336K`) is currently failing — see homelab root `.tasks/07-rebuild-media-storage-with-22tb.md`."
           }
         },
         {

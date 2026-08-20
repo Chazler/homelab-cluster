@@ -26,7 +26,7 @@ spec:
       rules:
         # Vulnerability/config-audit/RBAC/infra/compliance findings need a
         # human triage pass to separate real risk from noise (see
-        # .tasks/09-trivy-visibility-and-remediation.md), so they aren't
+        # homelab root .tasks/09-trivy-visibility-and-remediation.md), so they aren't
         # wired as real-time alerts yet. Instead, each rule fires once during
         # a weekly window shortly after Renovate opens its Monday update PRs,
         # giving a standing count of what's still unresolved. hour() is UTC,
