@@ -174,7 +174,7 @@ namespaces:
                   group_by: [alertname, namespace]
                   group_wait: 30s
                   group_interval: 5m
-                  repeat_interval: 4h
+                  repeat_interval: 12h
                   routes:
                     # Watchdog and InfoInhibitor are kube-prometheus-stack's
                     # internal meta-alerts (a permanently-firing dead-man's-switch
