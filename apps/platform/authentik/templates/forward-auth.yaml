@@ -49,6 +49,7 @@ data:
   (dict "slug" "sabnzbd" "name" "SABnzbd" "hostname" "sabnzbd.joeriberman.nl")
   (dict "slug" "nextcloud" "name" "Nextcloud" "hostname" "nextcloud.joeriberman.nl")
   (dict "slug" "vibe-trading" "name" "Vibe-Trading" "hostname" "vibe-trading.joeriberman.nl")
+  (dict "slug" "hermes" "name" "Hermes Agent" "hostname" "hermes.joeriberman.nl")
 }}
 {{- range $app := $apps }}
       - model: authentik_providers_proxy.proxyprovider
