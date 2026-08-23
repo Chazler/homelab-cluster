@@ -50,7 +50,7 @@ Review both generated files before applying them. Configure the correct installa
 Generate or patch a separate worker configuration for each physical worker when
 their disks, interfaces, addresses or machine-specific mounts differ. The
 media worker additionally needs the local filesystem mounted at the path used
-by the `jellyfin-media` PV.
+by the media library's PV.
 
 Validate them:
 
@@ -89,6 +89,29 @@ export KUBECONFIG="$PWD/kubeconfig"
 ```
 
 The nodes remain `NotReady` until Cilium is installed.
+
+Talos's default `kube-system/coredns` ConfigMap forwards external queries via
+`/etc/resolv.conf`, whose `nameserver 127.0.0.53` is a node-local stub that
+non-host-network pods (including CoreDNS's own pods) cannot reach. CoreDNS
+silently falls back to a resolver that breaks EDNS-Client-Subnet-dependent
+lookups (e.g. UniFi's `*.id.ui.direct` hostnames used by the Home Assistant
+UniFi Protect integration), returning NXDOMAIN even though ordinary domains
+still resolve. Patch CoreDNS to forward directly to the LAN router instead:
+
+```bash
+kubectl get configmap -n kube-system coredns -o json | \
+  python3 -c "
+import json, sys
+cm = json.load(sys.stdin)
+cm['data']['Corefile'] = cm['data']['Corefile'].replace(
+    'forward . /etc/resolv.conf {', 'forward . 10.0.0.1 {')
+print(json.dumps(cm))
+" | kubectl apply -f -
+kubectl rollout restart deployment coredns -n kube-system
+```
+
+This is default Talos-bootstrapped CoreDNS config, not GitOps-managed, so it
+must be reapplied after any from-scratch cluster rebuild.
 
 ## 4. Install Cilium
 

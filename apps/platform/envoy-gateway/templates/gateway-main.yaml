@@ -21,21 +21,8 @@ spec:
         namespaces:
           from: Selector
           selector:
-            matchExpressions:
-              - key: kubernetes.io/metadata.name
-                operator: In
-                values:
-                  - argocd
-                  - authentik
-                  - homeassistant
-                  - jellyfin
-                  - nextcloud
-                  - ntfy
-                  - observability
-                  - portfolio
-                  - services
-                  - vault
-                  - vibe-trading
+            matchLabels:
+              gateway.joeriberman.nl/allow: "true"
       tls:
         mode: Terminate
         certificateRefs:
@@ -52,21 +39,8 @@ spec:
         namespaces:
           from: Selector
           selector:
-            matchExpressions:
-              - key: kubernetes.io/metadata.name
-                operator: In
-                values:
-                  - argocd
-                  - authentik
-                  - homeassistant
-                  - jellyfin
-                  - nextcloud
-                  - ntfy
-                  - observability
-                  - portfolio
-                  - services
-                  - vault
-                  - vibe-trading
+            matchLabels:
+              gateway.joeriberman.nl/allow: "true"
       tls:
         mode: Terminate
         certificateRefs:

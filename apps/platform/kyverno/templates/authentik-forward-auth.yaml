@@ -57,4 +57,38 @@ spec:
                   - x-authentik-email
                   - x-authentik-name
                   - x-authentik-uid
+    - name: generate-forward-auth-referencegrant
+      match:
+        any:
+          - resources:
+              kinds:
+                - Namespace
+              selector:
+                matchLabels:
+                  {{ .Values.policies.authentikForwardAuth.namespaceLabelKey }}: {{ .Values.policies.authentikForwardAuth.namespaceLabelValue | quote }}
+      generate:
+        apiVersion: gateway.networking.k8s.io/v1beta1
+        kind: ReferenceGrant
+        name: allow-{{ "{{request.object.metadata.name}}" }}-forward-auth
+        namespace: {{ .Values.policies.authentikForwardAuth.authentikNamespace | quote }}
+        synchronize: true
+        generateExisting: true
+        data:
+          apiVersion: gateway.networking.k8s.io/v1beta1
+          kind: ReferenceGrant
+          metadata:
+            name: allow-{{ "{{request.object.metadata.name}}" }}-forward-auth
+            namespace: {{ .Values.policies.authentikForwardAuth.authentikNamespace | quote }}
+          spec:
+            from:
+              - group: gateway.networking.k8s.io
+                kind: HTTPRoute
+                namespace: {{ "{{request.object.metadata.name}}" | quote }}
+              - group: gateway.envoyproxy.io
+                kind: SecurityPolicy
+                namespace: {{ "{{request.object.metadata.name}}" | quote }}
+            to:
+              - group: ""
+                kind: Service
+                name: {{ .Values.policies.authentikForwardAuth.authentikServiceName | quote }}
 {{- end }}

@@ -9,11 +9,11 @@ spec:
       rules:
         # Critical exposed secrets are rare and worth paging on immediately.
         # High severity is deliberately excluded here: several Debian-based
-        # images (authentik-postgresql, jellystat-db) ship the distro's
-        # well-known dummy /etc/ssl/private/ssl-cert-snakeoil.key, which
-        # Trivy always flags as a HIGH "exposed" private key even though
-        # it's not a real secret. That noise flows through the weekly
-        # digest instead, where it gets triaged rather than paged.
+        # images ship the distro's well-known dummy
+        # /etc/ssl/private/ssl-cert-snakeoil.key, which Trivy always flags as
+        # a HIGH "exposed" private key even though it's not a real secret.
+        # That noise flows through the weekly digest instead, where it gets
+        # triaged rather than paged.
         - alert: TrivyExposedSecretDetected
           expr: sum(trivy_image_exposedsecrets{severity="Critical"}) by (namespace, resource_name, container_name, severity) > 0
           for: 10m

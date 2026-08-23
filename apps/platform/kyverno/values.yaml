@@ -20,6 +20,18 @@ kyverno:
               - list
               - watch
           - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - referencegrants
+            verbs:
+              - get
+              - list
+              - watch
+              - create
+              - update
+              - patch
+              - delete
+          - apiGroups:
               - gateway.envoyproxy.io
             resources:
               - securitypolicies
@@ -45,6 +57,18 @@ kyverno:
               - list
               - watch
           - apiGroups:
+              - gateway.networking.k8s.io
+            resources:
+              - referencegrants
+            verbs:
+              - get
+              - list
+              - watch
+              - create
+              - update
+              - patch
+              - delete
+          - apiGroups:
               - gateway.envoyproxy.io
             resources:
               - securitypolicies
@@ -64,6 +88,11 @@ policies:
     # a public route for the provider's outpost endpoints.
     labelKey: authentik-forward-auth
     labelValue: "true"
+    # Namespaces carrying this label get a ReferenceGrant generated into
+    # authentikNamespace, allowing their HTTPRoutes/SecurityPolicies to
+    # reference the outpost Service.
+    namespaceLabelKey: authentik-forward-auth-namespace
+    namespaceLabelValue: "true"
     authentikNamespace: authentik
     authentikServiceName: ak-outpost-homelab-forward-auth
     authentikServicePort: 9000

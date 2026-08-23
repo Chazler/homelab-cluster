@@ -48,8 +48,8 @@ metadata:
   name: audit-first-party-image-cosign-signature
 spec:
   # Audit mode: no ghcr.io/chazler image is signed yet. This documents the
-  # gap for evaluation before enforcing; signing has to be added in the
-  # upstream image-build repos (portfolio, polylearn, idea-triage, openclaw).
+  # gap for evaluation before enforcing; signing has to be added in each
+  # upstream image-build repo.
   validationFailureAction: Audit
   background: false
   admission: true
