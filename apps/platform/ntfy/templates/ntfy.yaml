@@ -4,6 +4,8 @@ metadata:
   name: {{ .Release.Namespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    gateway.joeriberman.nl/allow: "true"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
