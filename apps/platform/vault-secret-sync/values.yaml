@@ -23,6 +23,8 @@ namespaces:
       cloudflare-api-token: {}
   authentik:
     createNamespace: true
+    namespaceLabels:
+      gateway.joeriberman.nl/allow: "true"
     secrets:
       authentik-runtime:
         path: authentik/runtime
@@ -118,6 +120,8 @@ namespaces:
               text: '{{ get .Secrets "client-secret" }}'
   observability:
     createNamespace: true
+    namespaceLabels:
+      gateway.joeriberman.nl/allow: "true"
     secrets:
       observability-grafana:
         path: observability/grafana
