@@ -14,6 +14,8 @@ spec:
   # policyreport` instead of going unnoticed.
   validationFailureAction: Audit
   background: true
+  admission: true
+  emitWarning: false
   rules:
     - name: require-forward-auth-securitypolicy
       match:
@@ -24,12 +26,15 @@ spec:
               selector:
                 matchLabels:
                   {{ .Values.policies.authentikForwardAuth.labelKey }}: {{ .Values.policies.authentikForwardAuth.labelValue | quote }}
+      skipBackgroundRequests: true
       context:
         - name: matchingSecurityPolicies
           apiCall:
+            method: GET
             urlPath: "/apis/gateway.envoyproxy.io/v1alpha1/namespaces/{{ "{{request.object.metadata.namespace}}" }}/securitypolicies"
             jmesPath: "items[?metadata.name=='authentik-forward-auth-{{ "{{request.object.metadata.name}}" }}'] | length(@)"
       validate:
+        allowExistingViolations: true
         message: >-
           HTTPRoute {{ "{{request.object.metadata.namespace}}" }}/{{ "{{request.object.metadata.name}}" }}
           carries {{ .Values.policies.authentikForwardAuth.labelKey }}={{ .Values.policies.authentikForwardAuth.labelValue | quote }}
