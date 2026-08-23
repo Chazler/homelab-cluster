@@ -1,0 +1,45 @@
+{{- if .Values.policies.authentikForwardAuth.enabled }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: audit-authentik-forward-auth-securitypolicy
+spec:
+  # The generate rule in authentik-forward-auth.yaml creates the protecting
+  # SecurityPolicy asynchronously in the background. If generation ever fails
+  # silently (background controller down, label typo, a generate race), the
+  # labeled HTTPRoute would otherwise go live with no ext-authz gate and no
+  # signal that anything is wrong. This policy re-scans labeled HTTPRoutes on
+  # a background schedule and reports (does not block) any that are missing
+  # their matching SecurityPolicy, so the gap shows up in `kubectl get
+  # policyreport` instead of going unnoticed.
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: require-forward-auth-securitypolicy
+      match:
+        any:
+          - resources:
+              kinds:
+                - gateway.networking.k8s.io/v1/HTTPRoute
+              selector:
+                matchLabels:
+                  {{ .Values.policies.authentikForwardAuth.labelKey }}: {{ .Values.policies.authentikForwardAuth.labelValue | quote }}
+      context:
+        - name: matchingSecurityPolicies
+          apiCall:
+            urlPath: "/apis/gateway.envoyproxy.io/v1alpha1/namespaces/{{ "{{request.object.metadata.namespace}}" }}/securitypolicies"
+            jmesPath: "items[?metadata.name=='authentik-forward-auth-{{ "{{request.object.metadata.name}}" }}'] | length(@)"
+      validate:
+        message: >-
+          HTTPRoute {{ "{{request.object.metadata.namespace}}" }}/{{ "{{request.object.metadata.name}}" }}
+          carries {{ .Values.policies.authentikForwardAuth.labelKey }}={{ .Values.policies.authentikForwardAuth.labelValue | quote }}
+          but no matching authentik-forward-auth-* SecurityPolicy exists. The route may be
+          serving traffic without the forward-auth ext-authz gate — check the
+          generate-authentik-forward-auth ClusterPolicy and background controller.
+        deny:
+          conditions:
+            any:
+              - key: "{{ "{{matchingSecurityPolicies}}" }}"
+                operator: Equals
+                value: 0
+{{- end }}

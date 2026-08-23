@@ -1,0 +1,27 @@
+# Default-deny ingress for the vault namespace: only the sources listed
+# below can reach Vault pods over the pod network. A compromised low-value
+# workload elsewhere in the cluster has no path in. Egress is left
+# untouched (Vault needs outbound access for GCP KMS auto-unseal, etc.).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-vault-access
+  namespace: vault
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    # Raft HA peers talking to each other, and any other intra-namespace traffic.
+    - from:
+        - podSelector: {}
+    # Vault's UI/API HTTPRoute is served through Envoy Gateway.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: envoy-gateway
+    # Vault Secrets Operator reads KV secrets from Vault on behalf of every app.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: vault-secrets-operator

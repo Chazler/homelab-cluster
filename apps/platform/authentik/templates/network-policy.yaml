@@ -1,0 +1,24 @@
+# Default-deny ingress for the authentik namespace: only the sources listed
+# below can reach Authentik's server/worker/postgres/redis directly over
+# the pod network. Egress is left untouched.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-authentik-access
+  namespace: authentik
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+  ingress:
+    # authentik-server <-> postgresql/redis/worker intra-namespace traffic.
+    - from:
+        - podSelector: {}
+    # Forward-auth ext-authz calls and Authentik's own HTTPRoutes are served
+    # through Envoy Gateway.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: envoy-gateway
+    # Vault Secrets Operator reads Authentik's secrets from Vault, not the
+    # other way around, so no ingress rule is needed for vault-secrets-operator here.
