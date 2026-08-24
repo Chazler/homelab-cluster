@@ -104,7 +104,7 @@ kube-prometheus-stack:
           memory: 2Gi
 
 alertmanagerNtfy:
-  image: docker.io/davidcasado/alertmanager-notifier@sha256:ea7502c80bc1fabe4f196ef03d9a63324ecb517ca8915e1f66032fa683296040
+  image: docker.io/davidcasado/alertmanager-notifier:1.0.3@sha256:ea7502c80bc1fabe4f196ef03d9a63324ecb517ca8915e1f66032fa683296040
 
 route:
   parentGateway:
