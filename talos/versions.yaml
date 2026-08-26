@@ -2,5 +2,5 @@
 # Dashboard. The actual cluster config (talos/controlplane.yaml, talos/worker*.yaml)
 # is gitignored and regenerated locally with talosctl, so it can't be tracked
 # directly; bump this file and regenerate/apply the config to match.
-talos: v1.13.7
-kubernetes: v1.35.0
+talos: v1.13.9
+kubernetes: v1.37.0
