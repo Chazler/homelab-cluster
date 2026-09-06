@@ -40,6 +40,9 @@
       managerFilePatterns: ['/^apps/.*values\\.ya?ml$/'],
       matchStrings: [
         "(?:image|ref|frontendImage|apiImage|vpnImage):\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
+        // Some Helm values, such as the portfolio chart, split the image
+        // repository and digest into separate fields under `image`.
+        "image:\\s*repository:\\s*(?<depName>[a-zA-Z0-9.\\-_/]+)\\s+digest:\\s*(?<currentDigest>sha256:[a-f0-9]{64})",
       ],
       datasourceTemplate: 'docker',
       versioningTemplate: 'docker',
