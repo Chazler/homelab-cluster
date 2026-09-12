@@ -12,6 +12,30 @@ spec:
     - type: IPAddress
       value: 10.0.0.242
   listeners:
+    # Redirect plain HTTP for the apex domain to HTTPS.
+    - name: web-http-apex
+      protocol: HTTP
+      port: 80
+      hostname: "joeriberman.nl"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.joeriberman.nl/allow: "true"
+
+    # Redirect plain HTTP for *.joeriberman.nl to HTTPS.
+    - name: web-http
+      protocol: HTTP
+      port: 80
+      hostname: "*.joeriberman.nl"
+      allowedRoutes:
+        namespaces:
+          from: Selector
+          selector:
+            matchLabels:
+              gateway.joeriberman.nl/allow: "true"
+
     # HTTPS Termination for the apex domain joeriberman.nl (wildcard does NOT match apex)
     - name: web-https-apex
       protocol: HTTPS
