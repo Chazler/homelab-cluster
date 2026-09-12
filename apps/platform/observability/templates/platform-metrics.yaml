@@ -1,22 +1,6 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: authentik-outpost
-  namespace: {{ .Release.Namespace }}
-spec:
-  namespaceSelector:
-    matchNames: [authentik]
-  selector:
-    matchLabels:
-      goauthentik.io/service-type: metrics
-      goauthentik.io/outpost-name: homelab-forward-auth
-  endpoints:
-    - port: http-metrics
-      interval: 60s
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
   name: envoy-gateway
   namespace: {{ .Release.Namespace }}
 spec:

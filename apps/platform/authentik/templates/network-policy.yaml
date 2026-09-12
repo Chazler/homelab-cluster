@@ -20,5 +20,17 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: envoy-gateway
+    # Prometheus scrapes the forward-auth outpost's dedicated metrics service.
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: observability
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: prometheus
+              app.kubernetes.io/instance: monitoring-prometheus
+      ports:
+        - protocol: TCP
+          port: 9300
     # Vault Secrets Operator reads Authentik's secrets from Vault, not the
     # other way around, so no ingress rule is needed for vault-secrets-operator here.
