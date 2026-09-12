@@ -5,5 +5,5 @@ description: Central authentication service for cluster applications.
 
 dependencies:
   - name: authentik
-    version: 2026.8.1
+    version: 2026.8.2
     repository: https://charts.goauthentik.io
