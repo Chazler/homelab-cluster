@@ -13,7 +13,11 @@ spec:
   hostnames:
     - joeriberman.nl
   rules:
-    - filters:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
@@ -34,7 +38,11 @@ spec:
   hostnames:
     - "*.joeriberman.nl"
   rules:
-    - filters:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      filters:
         - type: RequestRedirect
           requestRedirect:
             scheme: https
