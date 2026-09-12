@@ -75,7 +75,7 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
-      replicas: 0
+      replicas: 1
       scrapeInterval: 60s
       evaluationInterval: 60s
       retention: 10d
