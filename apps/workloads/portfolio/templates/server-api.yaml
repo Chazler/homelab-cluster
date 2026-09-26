@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server-api
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: server-api
+    {{- include "portfolio.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  revisionHistoryLimit: {{ .Values.revisionHistoryLimit }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: server-api
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: server-api
+        app.kubernetes.io/part-of: portfolio
+    spec:
+      containers:
+        - name: server-api
+          image: {{ .Values.serverApi.image | quote }}
+          imagePullPolicy: Always
+          command: ["/bin/sh", "-ec"]
+          args:
+            - 'test -n "$TELEGRAM_BOT_TOKEN" && test -n "$TELEGRAM_CHAT_ID" && exec npm start'
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serverApi.secretName }}
+                  key: TELEGRAM_BOT_TOKEN
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.serverApi.secretName }}
+                  key: TELEGRAM_CHAT_ID
+          ports:
+            - name: http
+              containerPort: 3011
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+          resources:
+            {{- toYaml .Values.serverApi.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: server-api
+  namespace: {{ .Release.Namespace }}
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: server-api
+  ports:
+    - name: http
+      port: 3011
+      targetPort: http

@@ -27,6 +27,9 @@ spec:
         - name: portfolio
           image: "{{ .Values.image.repository }}@{{ .Values.image.digest }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: TELEGRAM_API_UPSTREAM
+              value: "http://server-api.{{ .Release.Namespace }}.svc.cluster.local:3011"
           ports:
             - name: http
               containerPort: 80

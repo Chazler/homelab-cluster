@@ -38,3 +38,13 @@ probes:
   periodSeconds: 10
   timeoutSeconds: 2
   failureThreshold: 3
+
+serverApi:
+  image: joeriberman/server-api:latest
+  secretName: server-api-env
+  resources:
+    requests:
+      cpu: 25m
+      memory: 64Mi
+    limits:
+      memory: 256Mi
