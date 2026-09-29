@@ -132,3 +132,24 @@ spec:
   namespaceResourceWhitelist:
     - group: "*"
       kind: "*"
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: private-services-admin
+  namespace: argocd
+spec:
+  description: Private services chart with the cluster role binding required by Hermes.
+  sourceRepos:
+    - git@github.com:Chazler/homelab-private.git
+  destinations:
+    - server: https://kubernetes.default.svc
+      namespace: services
+  clusterResourceWhitelist:
+    - group: ""
+      kind: Namespace
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+  namespaceResourceWhitelist:
+    - group: "*"
+      kind: "*"

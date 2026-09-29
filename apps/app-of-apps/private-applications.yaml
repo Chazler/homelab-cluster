@@ -4,6 +4,9 @@ metadata:
   name: private-applications
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions:
+    - missingkey=error
   generators:
     - git:
         repoURL: git@github.com:Chazler/homelab-private.git
@@ -12,16 +15,16 @@ spec:
           - path: "apps/*"
   template:
     metadata:
-      name: '{{path.basename}}'
+      name: '{{ .path.basename }}'
     spec:
-      project: private
+      project: '{{ if eq .path.basename "services" }}private-services-admin{{ else }}private{{ end }}'
       source:
         repoURL: git@github.com:Chazler/homelab-private.git
         targetRevision: main
-        path: '{{path}}'
+        path: '{{ .path.path }}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{path.basename}}'
+        namespace: '{{ .path.basename }}'
       ignoreDifferences:
         # Bound PVCs have spec.volumeName populated by the cluster; Helm
         # templates omit it, causing permanent false drift under SSA.
