@@ -314,7 +314,15 @@ automatic Raft leader election to one of the standbys.
 the `private` AppProject, that mirrors `workload-applications.yaml` but
 sources from the private `git@github.com:Chazler/homelab-private.git` repo
 instead: every top-level `apps/*` directory in that repo becomes an
-Application/namespace. This keeps what runs there out of this public repo.
+Application/namespace. The `services` Application is routed to the separate
+`private-services-admin` AppProject, which only targets the `services`
+namespace and permits `ClusterRoleBinding` for Hermes' dedicated
+cluster-admin ServiceAccount; all other private apps remain in `private`.
+This keeps what runs there out of this public repo while containing the
+cluster-wide RBAC exception to the services chart. Hermes can read Secrets
+and make changes anywhere in Kubernetes, so keep its access limited to
+trusted operators. Its API credential is a rotating, pod-projected token,
+not a stored admin kubeconfig.
 Argo CD authenticates with a read-only deploy key, stored as a `SealedSecret`
 at `apps/core/argocd/templates/private-repo-secret.yaml` (part of the
 self-managed `argocd` chart, so it reconciles like any other in-repo change).
