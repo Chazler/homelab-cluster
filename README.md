@@ -14,7 +14,7 @@ Last verified: 2026-08-14.
 | Envoy Gateway | `envoy-gateway` | `10.0.0.242` |
 
 - Talos Linux 1.13.7
-- Kubernetes 1.35.0
+- Kubernetes 1.36.5
 - Cilium 1.18.5 with full kube-proxy replacement, LB-IPAM and L2 announcements
 - Argo CD with automated pruning and self-healing
 - Envoy Gateway and Gateway API

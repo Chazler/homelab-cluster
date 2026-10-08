@@ -40,7 +40,7 @@ talosctl gen secrets --output-file talos/secrets.yml
 
 talosctl gen config homelab-cluster https://10.0.0.10:6443 \
   --talos-version v1.13.7 \
-  --kubernetes-version v1.35.0 \
+  --kubernetes-version v1.36.5 \
   --output-dir talos \
   --with-secrets talos/secrets.yml \
   --config-patch @talos/patches/cilium-cni.yaml \
@@ -284,6 +284,46 @@ kubectl exec -n vault vault-2 -- sh -c 'VAULT_CACERT=/vault/userconfig/vault-ser
 ```
 
 ## Operations
+
+### Upgrade Kubernetes
+
+Before a minor upgrade, save an etcd snapshot and the live Talos machine
+configurations on an administration laptop outside Git. Back up application
+PVCs separately; an etcd snapshot does not include their files. For consistent
+filesystem backups, stop the volume's writers, archive the PVC from a
+read-only helper mount, verify the archive and checksum, then restore the
+original workload replicas. Exclude user-selected media PVCs by never mounting
+them in backup helpers. Temporary replica changes require pausing Argo's
+application controller; pause the monitoring operator as well when stopping
+its managed StatefulSets, and restore both controllers afterwards.
+
+```bash
+# Use a private directory outside Git for snapshots and generated configs.
+talosctl --nodes 10.0.0.10 etcd snapshot <backup-dir>/etcd.snapshot
+
+# Upgrade one Kubernetes minor at a time, using an explicit target patch.
+talosctl --nodes 10.0.0.10 upgrade-k8s --to 1.36.5 --dry-run --pre-pull-images=false
+talosctl --nodes 10.0.0.10 upgrade-k8s --to 1.36.5
+
+kubectl get nodes -o wide
+kubectl get applications,applicationsets -n argocd
+kubectl get pods -A
+talosctl --nodes 10.0.0.10 health --control-plane-nodes 10.0.0.10 --worker-nodes 10.0.0.20,10.0.0.30
+```
+
+`upgrade-k8s` discovers every node, updates control-plane components and
+kubelets sequentially, waits for health, and reconciles bootstrap manifests.
+Keep kube-proxy disabled because Cilium owns Service routing. Review the
+bootstrap manifest diff, especially CoreDNS, before applying the upgrade.
+Kubelet updates can restart workloads; the single control plane may also
+briefly interrupt API access. If interrupted, rerun the same explicit target
+command to continue rather than assuming all components upgraded.
+
+After live validation, update `talos/versions.yaml`, the generation versions
+above, and the Kubernetes version in README. Refresh ignored local machine
+configurations from the live nodes so a future apply cannot revert the
+Kubernetes component images. Keep snapshots and generated configurations
+private: they contain credentials.
 
 ### Upgrade Talos
 

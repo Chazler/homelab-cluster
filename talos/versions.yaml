@@ -3,4 +3,4 @@
 # is gitignored and regenerated locally with talosctl, so it can't be tracked
 # directly; bump this file and regenerate/apply the config to match.
 talos: v1.13.7
-kubernetes: v1.35.0
+kubernetes: v1.36.5
