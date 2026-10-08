@@ -1,0 +1,9 @@
+machine:
+  network:
+    nameservers:
+      - 10.0.0.1
+  features:
+    hostDNS:
+      enabled: true
+      # Pods use the LAN resolver directly, preserving UniFi Protect lookups.
+      forwardKubeDNSToHost: false

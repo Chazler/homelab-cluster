@@ -39,11 +39,19 @@ Generate secrets once, then generate machine configurations with Cilium as the C
 talosctl gen secrets --output-file talos/secrets.yml
 
 talosctl gen config homelab-cluster https://10.0.0.10:6443 \
+  --talos-version v1.13.7 \
+  --kubernetes-version v1.35.0 \
   --output-dir talos \
   --with-secrets talos/secrets.yml \
   --config-patch @talos/patches/cilium-cni.yaml \
-  --config-patch @talos/patches/disable-kube-proxy.yaml
+  --config-patch @talos/patches/disable-kube-proxy.yaml \
+  --config-patch @talos/patches/dns.yaml
 ```
+
+Match the generation versions to `talos/versions.yaml`. The explicit Talos
+version keeps the tracked v1alpha1 patches compatible when using a newer CLI;
+fresh Talos 1.14 configurations use separate network configuration documents
+and require converting these legacy network patches before generation.
 
 Review both generated files before applying them. Configure the correct installation disk, static address or DHCP reservation, interface, routes and certificate SANs. Generated machine configurations contain private keys and must remain outside Git.
 
@@ -90,13 +98,36 @@ export KUBECONFIG="$PWD/kubeconfig"
 
 The nodes remain `NotReady` until Cilium is installed.
 
-Talos's default `kube-system/coredns` ConfigMap forwards external queries via
-`/etc/resolv.conf`, whose `nameserver 127.0.0.53` is a node-local stub that
-non-host-network pods (including CoreDNS's own pods) cannot reach. CoreDNS
-silently falls back to a resolver that breaks EDNS-Client-Subnet-dependent
-lookups (e.g. UniFi's `*.id.ui.direct` hostnames used by the Home Assistant
-UniFi Protect integration), returning NXDOMAIN even though ordinary domains
-still resolve. Patch CoreDNS to forward directly to the LAN router instead:
+The shared `talos/patches/dns.yaml` sets the LAN router (`10.0.0.1`) as the
+upstream resolver and disables `machine.features.hostDNS.forwardKubeDNSToHost`.
+Host DNS caching remains enabled. Talos renders `/system/resolved/resolv.conf`
+for kubelet with the router address; CoreDNS's `dnsPolicy: Default` inherits
+that resolver. Keep the standard Corefile's `forward . /etc/resolv.conf` so
+Talos's Kubernetes upgrade manifest reconciliation preserves this behavior.
+This also preserves the router's resolution of UniFi Protect `*.id.ui.direct`
+hostnames used by Home Assistant.
+
+### Repair DNS configuration on an existing cluster
+
+Apply the shared DNS patch one node at a time without rebooting. After each
+node, confirm its pod resolver contains `nameserver 10.0.0.1` and that the node
+remains Ready before continuing:
+
+```bash
+talosctl patch machineconfig --nodes 10.0.0.20 --mode no-reboot --patch @talos/patches/dns.yaml
+talosctl read /system/resolved/resolv.conf --nodes 10.0.0.20
+kubectl get nodes
+# Repeat for 10.0.0.30, then 10.0.0.10.
+```
+
+Include the same patch when regenerating local machine configurations, or
+patch each existing local full machine configuration with
+`talosctl machineconfig patch <config-file> --patch @talos/patches/dns.yaml --output <patched-file>`.
+Generated files contain credentials and must stay outside Git.
+
+Once all three pod resolver files contain the router address, remove the
+previous manual Corefile override and recreate CoreDNS pods so they inherit
+the updated resolver file:
 
 ```bash
 kubectl get configmap -n kube-system coredns -o json | \
@@ -104,14 +135,17 @@ kubectl get configmap -n kube-system coredns -o json | \
 import json, sys
 cm = json.load(sys.stdin)
 cm['data']['Corefile'] = cm['data']['Corefile'].replace(
-    'forward . /etc/resolv.conf {', 'forward . 10.0.0.1 {')
+    'forward . 10.0.0.1 {', 'forward . /etc/resolv.conf {')
 print(json.dumps(cm))
 " | kubectl apply -f -
 kubectl rollout restart deployment coredns -n kube-system
+kubectl rollout status deployment coredns -n kube-system
 ```
 
-This is default Talos-bootstrapped CoreDNS config, not GitOps-managed, so it
-must be reapplied after any from-scratch cluster rebuild.
+Verify cluster service names, external domains and the actual UniFi Protect
+hostname from a workload pod. Run `talosctl upgrade-k8s --to <next-minor-patch>
+--dry-run --pre-pull-images=false` and confirm it no longer changes the
+CoreDNS forwarding line before upgrading Kubernetes.
 
 ## 4. Install Cilium
 
