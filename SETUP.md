@@ -562,7 +562,14 @@ and recreating its controller during the documented maintenance window; retain
 its original claim. Do not delete any PVC or PV as part of this operation.
 
 After restoring, stop the migration helpers, stop the old database controllers,
-publish the validated charts and resume Argo reconciliation. Verify PostgreSQL
+publish the validated charts. Before resuming reconciliation, pause the
+ApplicationSet controller and temporarily pin each affected Application source
+to its published commit SHA. Clear any pending sync operation against an older
+revision and request a hard refresh. This prevents cached `main` manifests from
+reverting the database image or PVC during controller startup. Resume the
+application controller, verify successful sync at the pinned revisions, then
+restore sources to `main` and the ApplicationSet controller to its original
+replicas. Verify PostgreSQL
 versions, database integrity, application readiness, authentication, and all
 affected Application health. Retain original volumes and local dumps until the
 migration has been accepted. To roll back before new production writes, pause
