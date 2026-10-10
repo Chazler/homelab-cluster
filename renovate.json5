@@ -65,6 +65,18 @@
       versioningTemplate: 'docker',
     },
     {
+      // Vault's Helm chart can remain unchanged while its server and injector
+      // images receive releases. Explicit overrides also track injected agents.
+      customType: 'regex',
+      description: 'Explicit Vault chart image overrides',
+      managerFilePatterns: ['/^apps/platform/vault/values\\.yaml$/'],
+      matchStrings: [
+        "(?:image|agentImage):\\s*repository:\\s*(?<depName>hashicorp/vault(?:-k8s)?)\\s+tag:\\s*(?<currentValue>[a-zA-Z0-9.\\-_]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
+      ],
+      datasourceTemplate: 'docker',
+      versioningTemplate: 'docker',
+    },
+    {
       // talos/controlplane.yaml and worker*.yaml are gitignored (they carry cluster
       // credentials) and regenerated locally with talosctl, so Renovate can't read
       // the live Talos/Kubernetes version from them directly. talos/versions.yaml is
@@ -105,9 +117,21 @@
       labels: ['renovate', 'major-update'],
     },
     {
-      description: 'Cilium, Kubernetes, and Talos are versioned together; group them so a compatibility review covers the whole set at once.',
-      matchFileNames: ['apps/networking/**', 'talos/versions.yaml'],
-      groupName: 'cluster networking (Cilium/Kubernetes/Talos)',
+      description: 'Keep Cilium separate from Talos and Kubernetes so compatible chart updates can deploy independently.',
+      matchManagers: ['helmv3'],
+      matchPackageNames: ['cilium'],
+      groupName: null,
+    },
+    {
+      description: 'Talos and Kubernetes are separate maintenance operations; approve each only after live compatibility review.',
+      matchPackageNames: ['siderolabs/talos', 'kubernetes/kubernetes'],
+      groupName: null,
+      dependencyDashboardApproval: true,
+    },
+    {
+      description: 'Vault image upgrades need backup and an ordered Raft rollout; keep them visible for explicit approval.',
+      matchDatasources: ['docker'],
+      matchPackageNames: ['hashicorp/vault', 'hashicorp/vault-k8s'],
       dependencyDashboardApproval: true,
     },
     {
