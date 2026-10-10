@@ -285,6 +285,48 @@ kubectl exec -n vault vault-2 -- sh -c 'VAULT_CACERT=/vault/userconfig/vault-ser
 
 ## Operations
 
+### Catch up Longhorn volume engines
+
+Treat the manager chart and each volume's engine as separate upgrades. Before
+either operation, take an independent etcd snapshot and verified application
+PVC backups. A Longhorn volume snapshot alone is not an off-cluster backup.
+Keep user-excluded media claims out of backup helpers. If no Longhorn backup
+target is configured, local cold PVC archives and resource exports provide an
+independent recovery bundle, but are not a native Longhorn system backup.
+
+Inventory the running engine versions and volume health before choosing a path:
+
+```bash
+kubectl -n longhorn get volumes.longhorn.io
+kubectl -n longhorn get engineimages.longhorn.io
+kubectl -n longhorn get engines.longhorn.io
+```
+
+For manager 1.12.1, the documented V1 live engine upgrade path starts at 1.11.x.
+Use the documented offline procedure for older 1.10.1 engines: pause Argo
+reconciliation, record and stop every writer of the selected PVC, and wait for
+the volume to detach. In Longhorn, use the volume's **Upgrade Engine** operation
+to select the default engine supplied by the installed manager, then restore
+the original workload replicas. Start with one low-impact volume and verify
+the engine version, replica health, filesystem writability and application
+behaviour before proceeding. Pause the monitoring operator before stopping
+its managed StatefulSets. Keep unused volumes detached.
+
+After the old engines have caught up and all workloads are healthy, prepare
+the next manager upgrade separately through GitOps. Manager 1.13.0 supports V1
+live engine upgrades from 1.12.x on healthy blockdev volumes; iSCSI frontends
+require the offline procedure. V2 volumes have a separate instance-manager
+upgrade procedure. Never remove an old engine image while volumes reference it.
+
+Stop on degraded or faulted volumes, failed mounts, read-only filesystems, or
+application errors. Longhorn does not support manager downgrades: reverting
+the chart is not a recovery plan. Preserve backups and review the matching
+restore procedure before maintenance.
+
+References: [1.12.1 engine upgrades](https://longhorn.io/docs/1.12.1/deploy/upgrade/upgrade-engine/),
+[1.13.0 manager upgrades](https://longhorn.io/docs/1.13.0/deploy/upgrade/),
+and [1.13.0 engine upgrades](https://longhorn.io/docs/1.13.0/deploy/upgrade/upgrade-engine/).
+
 ### Upgrade Kubernetes
 
 Before a minor upgrade, save an etcd snapshot and the live Talos machine
