@@ -516,6 +516,14 @@ the ApplicationSet controller. The new Applications adopt the existing resources
 Verify tracking ownership, sync and health, workload identities and PVC/PV UIDs.
 Do not cascade-delete an old Application during a rename or split.
 
+Directory discovery can briefly return a cached tree and recreate retired
+Applications. During the handoff, temporarily pin the live generator revision
+to the published private commit and enable `preserveResourcesOnDeletion`.
+Remove deletion finalizers from any recreated obsolete Applications before
+refreshing discovery. After the replacement Applications have adopted every
+resource, reapply the tracked `main` generator configuration and remove the
+temporary preservation override. Verify discovery remains correct on `main`.
+
 When archiving an application, retain its namespace and PVCs under an active
 retained-state chart with `Prune=false,Delete=false`. Stop and remove only its
 workloads, services, routes and reconciliation resources. Preserve Vault data
