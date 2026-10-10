@@ -530,3 +530,42 @@ workloads, services, routes and reconciliation resources. Preserve Vault data
 and runtime credentials for restoration; never delete its PVCs or namespace as
 part of archiving. Exclude the archive directory from application discovery,
 Helm CI and Renovate.
+
+### Migrate PostgreSQL major versions
+
+A PostgreSQL major image change requires a data migration. Rehearse a logical
+restore on a new `platform-rwo` PVC before replacing the running database.
+Preserve each original PVC with `Prune=false,Delete=false`; keep the new PVC
+explicitly configured in the owning chart. Keep database dumps, role/password
+exports, live resources and checksums in a private laptop directory outside Git.
+Exclude archived applications and externally managed databases from active
+cluster migrations.
+
+For a final cutover, pause the Argo application controller and stop all database
+writers: Umami and Idea Triage for `services/postgres`, Jellystat for
+`jellyfin/jellystat-db`, and Authentik server/worker for its PostgreSQL instance.
+Verify there are no remaining client sessions. Export cluster roles with
+`pg_dumpall --globals-only` and each non-template database with `pg_dump -Fc`.
+Restore roles and databases into the rehearsed target with `pg_restore
+--create --clean --if-exists --exit-on-error`; compare table row counts while
+writers remain stopped and refresh statistics with `vacuumdb --analyze-in-stages`.
+Disable login and clear the password on any temporary restore administrator
+before connecting production clients. PostgreSQL requires its bootstrap role to
+retain SUPERUSER and system-object ownership; keep that role inaccessible.
+
+PostgreSQL 18 uses `/var/lib/postgresql/18/docker` below the PVC mount at
+`/var/lib/postgresql` for the shared and Jellystat databases. Authentik retains
+its upstream chart's `/bitnami/postgresql/data` layout and non-root UID 1001.
+Its explicit `existingClaim` avoids replacing the old PVC. Changing a StatefulSet
+from `volumeClaimTemplates` to `existingClaim` requires stopping the StatefulSet
+and recreating its controller during the documented maintenance window; retain
+its original claim. Do not delete any PVC or PV as part of this operation.
+
+After restoring, stop the migration helpers, stop the old database controllers,
+publish the validated charts and resume Argo reconciliation. Verify PostgreSQL
+versions, database integrity, application readiness, authentication, and all
+affected Application health. Retain original volumes and local dumps until the
+migration has been accepted. To roll back before new production writes, pause
+Argo, stop clients, restore the old chart/controller definition and original PVC
+bindings, then resume reconciliation. After new writes, reconcile or migrate
+that data before rollback to avoid losing changes.
