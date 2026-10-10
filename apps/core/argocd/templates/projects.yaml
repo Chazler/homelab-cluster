@@ -136,10 +136,10 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: private-services-admin
+  name: private-hermes-admin
   namespace: argocd
 spec:
-  description: Private services chart with the cluster role binding required by Hermes.
+  description: Hermes chart with its existing cluster role binding.
   sourceRepos:
     - git@github.com:Chazler/homelab-private.git
   destinations:

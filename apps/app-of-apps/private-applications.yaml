@@ -13,18 +13,22 @@ spec:
         revision: main
         directories:
           - path: "apps/*"
+          - path: "apps/archive"
+            exclude: true
   template:
     metadata:
       name: '{{ .path.basename }}'
     spec:
-      project: '{{ if eq .path.basename "services" }}private-services-admin{{ else }}private{{ end }}'
+      project: '{{ if eq .path.basename "hermes" }}private-hermes-admin{{ else }}private{{ end }}'
       source:
         repoURL: git@github.com:Chazler/homelab-private.git
         targetRevision: main
         path: '{{ .path.path }}'
+        helm:
+          releaseName: '{{ if eq .path.basename "media-stack" }}jellyfin{{ else if has .path.basename (list "adguard" "umami" "polylearn" "idea-triage" "n8n" "hermes" "postgres" "services-foundation") }}services{{ else }}{{ .path.basename }}{{ end }}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{ .path.basename }}'
+        namespace: '{{ if eq .path.basename "media-stack" }}jellyfin{{ else if has .path.basename (list "adguard" "umami" "polylearn" "idea-triage" "n8n" "hermes" "postgres" "services-foundation") }}services{{ else }}{{ .path.basename }}{{ end }}'
       ignoreDifferences:
         # Bound PVCs have spec.volumeName populated by the cluster; Helm
         # templates omit it, causing permanent false drift under SSA.

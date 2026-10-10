@@ -430,12 +430,13 @@ automatic Raft leader election to one of the standbys.
 the `private` AppProject, that mirrors `workload-applications.yaml` but
 sources from the private `git@github.com:Chazler/homelab-private.git` repo
 instead: every top-level `apps/*` directory in that repo becomes an
-Application/namespace. The `services` Application is routed to the separate
-`private-services-admin` AppProject, which only targets the `services`
-namespace and permits `ClusterRoleBinding` for Hermes' dedicated
-cluster-admin ServiceAccount; all other private apps remain in `private`.
-This keeps what runs there out of this public repo while containing the
-cluster-wide RBAC exception to the services chart. Hermes can read Secrets
+Application, normally in its matching namespace. The split utility applications
+retain the existing `services` namespace; `media-stack` retains `jellyfin`.
+`apps/archive` is excluded from discovery. The `hermes` Application uses
+`private-hermes-admin`, scoped to the existing `services` namespace and its
+ClusterRoleBinding permission. Its existing `hermes-k8s-admin` ServiceAccount
+remains bound to `cluster-admin`; this exception belongs only to the Hermes
+chart. Hermes can read Secrets
 and make changes anywhere in Kubernetes, so keep its access limited to
 trusted operators. Its API credential is a rotating, pod-projected token,
 not a stored admin kubeconfig.
@@ -497,3 +498,27 @@ The normal endpoint is `https://argocd.joeriberman.nl`. For emergency access:
 ```bash
 kubectl port-forward service/argocd-server -n argocd 8080:443
 ```
+
+
+### Split or rename an Argo application without replacing storage
+
+Validate the union of the replacement charts against the existing manifests:
+resource identities, workload specs, selectors, routes, Vault paths and PVC
+specifications must remain unchanged. Save current Applications, controller
+replica counts and PVC/PV identities privately before the handoff.
+
+For an ownership transfer, pause both the ApplicationSet controller and the
+application controller. Remove the old Application resource finalizers and
+delete only the obsolete Application objects, leaving their workloads and
+storage intact. Publish the replacement chart paths and ApplicationSet rules. Apply the tracked
+ApplicationSet manifest as in the bootstrap procedure, then resume the application controller to reconcile those rules before resuming
+the ApplicationSet controller. The new Applications adopt the existing resources.
+Verify tracking ownership, sync and health, workload identities and PVC/PV UIDs.
+Do not cascade-delete an old Application during a rename or split.
+
+When archiving an application, retain its namespace and PVCs under an active
+retained-state chart with `Prune=false,Delete=false`. Stop and remove only its
+workloads, services, routes and reconciliation resources. Preserve Vault data
+and runtime credentials for restoration; never delete its PVCs or namespace as
+part of archiving. Exclude the archive directory from application discovery,
+Helm CI and Renovate.
