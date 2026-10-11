@@ -327,6 +327,40 @@ References: [1.12.1 engine upgrades](https://longhorn.io/docs/1.12.1/deploy/upgr
 [1.13.0 manager upgrades](https://longhorn.io/docs/1.13.0/deploy/upgrade/),
 and [1.13.0 engine upgrades](https://longhorn.io/docs/1.13.0/deploy/upgrade/upgrade-engine/).
 
+### Recover an emergency read-only Longhorn filesystem
+
+An attached, healthy volume and a Ready pod do not prove that application data
+is writable. On newer kernels, ext4 may report `rw,...,emergency_ro` while all
+writes fail. Check the application's mount options, write errors, the engine's
+`FilesystemReadOnly` condition, and Longhorn manager and Talos kernel logs.
+Save those logs before recovery because repeated remount failures can overwrite
+the original I/O error in the kernel log buffer.
+
+If automatic remounting fails, use a controlled full detach rather than repeated
+container restarts. Record original replicas, pause Argo's application controller
+and any workload operator, and stop every pod using the affected PVC. Preserve a
+verified local cold backup using a read-only helper mount; exclude media PVCs.
+Delete the helper, wait for the volume to become detached, then restore the
+original writers and controllers. CSI re-stage can then check and mount the
+filesystem afresh. Do not delete PVCs, force-detach mounted volumes, or run fsck
+against a mounted filesystem.
+
+Verify the mount no longer contains `emergency_ro`, perform a temporary file
+write and removal as the application's user, check application health and data,
+and confirm Argo and the storage replicas are healthy. Re-check all engines for
+other read-only volumes. If recovery fails, keep writers stopped and use the
+matching Longhorn repair procedure with the preserved backup.
+
+The October 2026 incident affected several volumes on worker 2 together. The
+installed 1.12.1 detected the condition but its remount failed; the 1.13.0 manager
+source still attempts the same remount operation. An upgrade alone is not a
+verified remedy for this failure. The original disruption remains unidentified;
+investigate node/network/engine history rather than assuming disk failure from
+the filesystem symptom.
+
+References: [Longhorn read-only recovery](https://longhorn.io/kb/troubleshooting-volume-readonly-or-io-error/)
+and [ext4 emergency read-only detection and recovery limitations](https://github.com/longhorn/longhorn/issues/13452).
+
 ### Upgrade Kubernetes
 
 Before a minor upgrade, save an etcd snapshot and the live Talos machine
