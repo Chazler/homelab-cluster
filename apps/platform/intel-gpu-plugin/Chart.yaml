@@ -1,0 +1,4 @@
+apiVersion: v2
+name: intel-gpu-plugin
+version: 1.0.0
+description: Intel i915 device allocation for hardware-accelerated workloads.

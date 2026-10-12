@@ -33,6 +33,8 @@ spec:
     - server: https://kubernetes.default.svc
       namespace: kyverno
     - server: https://kubernetes.default.svc
+      namespace: intel-gpu-plugin
+    - server: https://kubernetes.default.svc
       namespace: longhorn
     - server: https://kubernetes.default.svc
       namespace: ntfy
