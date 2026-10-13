@@ -610,3 +610,38 @@ migration has been accepted. To roll back before new production writes, pause
 Argo, stop clients, restore the old chart/controller definition and original PVC
 bindings, then resume reconciliation. After new writes, reconcile or migrate
 that data before rollback to avoid losing changes.
+
+## Intel GPU allocation and Jellyfin Quick Sync
+
+`apps/platform/intel-gpu-plugin` registers the i915 GPU on `k8s-worker-2`
+with kubelet. The platform Argo CD project allows its `intel-gpu-plugin`
+namespace, and `platform-applications` discovers the chart automatically.
+Talos worker-2's schematic includes the `siderolabs/i915` extension.
+
+For rollout, merge the platform configuration first and wait for the plugin
+before merging a workload that requests `gpu.intel.com/i915`. Otherwise the
+workload will remain Pending until the device becomes allocatable.
+
+```sh
+kubectl -n argocd get applications argocd intel-gpu-plugin
+kubectl -n intel-gpu-plugin rollout status daemonset/intel-gpu-plugin
+kubectl get node k8s-worker-2 -o jsonpath='{.status.allocatable.gpu\.intel\.com/i915}{"\n"}'
+```
+
+The allocatable value should be `1`. A single container allocation supports
+multiple concurrent FFmpeg transcodes; it is not a per-stream limit.
+
+After the media-stack configuration syncs, verify device access as the
+LinuxServer Jellyfin application user:
+
+```sh
+kubectl -n jellyfin rollout status deployment/jellyfin
+kubectl -n jellyfin exec deployment/jellyfin -- s6-setuidgid abc \
+  /usr/lib/jellyfin-ffmpeg/vainfo --display drm --device /dev/dri/renderD128
+```
+
+`vainfo` should list supported codec profiles without a device-open error.
+Then force video transcoding in a Jellyfin client by reducing playback quality
+and confirm the FFmpeg log uses `h264_qsv` or `hevc_qsv`. Direct Play and remux
+sessions do not verify hardware video transcoding. Jellyfin's Quick Sync
+setting lives in its persistent application configuration.
