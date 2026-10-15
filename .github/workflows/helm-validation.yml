@@ -1,0 +1,32 @@
+name: Helm validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Lint and render charts
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5
+        with:
+          version: v4.3.0
+      - name: Build dependencies, lint, and render charts
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r manifest; do
+            chart="${manifest%/Chart.yaml}"
+            name="${chart##*/}"
+            helm dependency update "$chart"
+            helm lint "$chart"
+            helm template "$name" "$chart" --namespace "$name" >/dev/null
+          done < <(find apps -name Chart.yaml -not -path '*/charts/*' | sort)

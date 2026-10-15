@@ -2,8 +2,10 @@
   $schema: 'https://docs.renovatebot.com/renovate-schema.json',
   extends: ['config:recommended'],
   timezone: 'Europe/Amsterdam',
-  // Weekly batch keeps PR noise low for a homelab; adjust if faster turnaround is wanted.
-  schedule: ['before 6am on monday'],
+  // Create and merge routine updates only during the overnight change window.
+  schedule: ['* 0-5 * * *'],
+  automergeSchedule: ['* 0-5 * * *'],
+  platformAutomerge: false,
   dependencyDashboard: true,
   dependencyDashboardTitle: 'Dependency updates',
   labels: ['renovate'],
@@ -135,9 +137,21 @@
       dependencyDashboardApproval: true,
     },
     {
-      description: 'No update type auto-merges yet: this repo has no CI that validates rendered manifests before Argo CD applies them.',
+      description: 'Updates require review unless a later rule opts them in.',
       matchPackageNames: ['*'],
       automerge: false,
+    },
+    {
+      description: 'Automerge validated patch releases and rebuilt image digests during the change window.',
+      matchUpdateTypes: ['patch', 'digest'],
+      automerge: true,
+      automergeType: 'pr',
+    },
+    {
+      description: 'Storage engine upgrades and Vault, Talos, and Kubernetes maintenance require explicit review.',
+      matchPackageNames: ['longhorn', 'hashicorp/vault', 'hashicorp/vault-k8s', 'siderolabs/talos', 'kubernetes/kubernetes'],
+      automerge: false,
+      dependencyDashboardApproval: true,
     },
   ],
 }
