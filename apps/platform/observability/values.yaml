@@ -17,6 +17,9 @@ kube-prometheus-stack:
     namespaceOverride: node-observability
 
   grafana:
+    # Keep dashboard memory off the GPU/media node.
+    nodeSelector:
+      kubernetes.io/hostname: k8s-worker-1
     admin:
       existingSecret: observability-grafana
       userKey: admin-user
@@ -75,6 +78,9 @@ kube-prometheus-stack:
 
   prometheus:
     prometheusSpec:
+      # Preserve worker-2 headroom for node-bound media workloads.
+      nodeSelector:
+        kubernetes.io/hostname: k8s-worker-1
       replicas: 1
       scrapeInterval: 60s
       evaluationInterval: 60s
@@ -99,7 +105,7 @@ kube-prometheus-stack:
       resources:
         requests:
           cpu: 250m
-          memory: 1Gi
+          memory: 2Gi
         limits:
           memory: 2Gi
 
