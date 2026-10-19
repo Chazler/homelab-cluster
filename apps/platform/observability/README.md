@@ -10,6 +10,11 @@ one replica to avoid doubling metrics write amplification. Prometheus has a
 Authentik at `grafana.joeriberman.nl`; Prometheus and Alertmanager remain
 cluster-internal.
 
+Prometheus and Grafana run on `k8s-worker-1`, leaving memory headroom on the
+GPU/media worker. Prometheus requests 2 GiB of memory, matching its limit;
+Grafana requests 192 MiB with a 768 MiB main-container limit. Their existing
+Longhorn volumes retain data independently of pod placement.
+
 Runtime secrets are synchronized from Vault:
 
 | Vault path | Required fields |
