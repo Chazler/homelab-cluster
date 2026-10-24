@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: azure/setup-helm@v5
         with:
-          version: v4.3.0
+          version: v4.3.1
       - name: Build dependencies, lint, and render charts
         shell: bash
         run: |
