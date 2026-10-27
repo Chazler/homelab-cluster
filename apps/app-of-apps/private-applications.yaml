@@ -28,7 +28,7 @@ spec:
           releaseName: '{{ if eq .path.basename "media-stack" }}jellyfin{{ else if has .path.basename (list "adguard" "umami" "polylearn" "idea-triage" "n8n" "hermes" "postgres" "services-foundation") }}services{{ else }}{{ .path.basename }}{{ end }}'
       destination:
         server: https://kubernetes.default.svc
-        namespace: '{{ if eq .path.basename "media-stack" }}jellyfin{{ else if has .path.basename (list "adguard" "umami" "polylearn" "idea-triage" "n8n" "hermes" "postgres" "services-foundation") }}services{{ else }}{{ .path.basename }}{{ end }}'
+        namespace: '{{ if eq .path.basename "media-stack" }}jellyfin{{ else if has .path.basename (list "adguard" "umami" "polylearn" "idea-triage" "n8n" "hermes" "postgres" "services-foundation" "webshop-analytics") }}services{{ else }}{{ .path.basename }}{{ end }}'
       ignoreDifferences:
         # Bound PVCs have spec.volumeName populated by the cluster; Helm
         # templates omit it, causing permanent false drift under SSA.
