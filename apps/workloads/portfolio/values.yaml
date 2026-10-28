@@ -7,7 +7,7 @@ imagePullSecrets:
 
 image:
   repository: ghcr.io/chazler/portfolio
-  digest: sha256:a2ecc543a18c7a01407b1c5d907ad2df2e12d1b19283e6b2c7fde22ac4fee628
+  digest: sha256:9264ebd6c53aacee18888076eb4c11c082a21c510fbf40277ebbc7276ffc063b
   pullPolicy: IfNotPresent
 
 service:
