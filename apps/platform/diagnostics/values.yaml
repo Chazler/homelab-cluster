@@ -1,0 +1,5 @@
+serviceAccountName: codex-diagnostics
+
+# Exec can read workload credentials and modify mounted application data.
+# Opt in explicitly; cluster configuration changes stay in GitHub.
+execNamespaces: []

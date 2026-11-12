@@ -1,0 +1,5 @@
+apiVersion: v2
+name: diagnostics
+description: Dedicated account for cluster troubleshooting.
+version: 1.0.0
+type: application
