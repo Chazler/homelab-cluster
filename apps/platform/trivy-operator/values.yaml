@@ -6,7 +6,11 @@ trivy-operator:
       memory: 256Mi
     limits:
       cpu: 500m
-      memory: 768Mi
+      memory: 1Gi
+
+  # Keep scanner activity away from the single control-plane node.
+  nodeSelector:
+    kubernetes.io/hostname: k8s-worker-1
 
   serviceMonitor:
     enabled: true
@@ -25,8 +29,20 @@ trivy-operator:
     webhookBroadcastURL: ""
 
     # Cap how many scan jobs run at once and how long stale reports live.
-    scanJobsConcurrentLimit: 5
+    scanJobsConcurrentLimit: 2
+    scanJobTimeout: 10m
+    scanJobNodeSelector:
+      kubernetes.io/hostname: k8s-worker-1
     scannerReportTTL: "24h"
+
+    # Standalone scan containers contend for a shared BoltDB cache lock.
+    builtInTrivyServer: true
+
+  trivy:
+    image:
+      tag: 0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa
+    # The database is a disposable cache and can be fetched again on restart.
+    storageClassEnabled: false
 
   # Talos has no systemd, so /etc/systemd and /lib/systemd don't exist on the
   # host and its read-only root blocks kubelet from creating them for a
