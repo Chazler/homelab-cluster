@@ -16,10 +16,22 @@ kube-prometheus-stack:
   prometheus-node-exporter:
     namespaceOverride: node-observability
 
+  kube-state-metrics:
+    # Secret metadata collection requires cluster-wide access to secret contents.
+    collectorsExclude:
+      - secrets
+
   grafana:
+    rbac:
+      useExistingClusterRole: observability-grafana-clusterrole
     # Keep dashboard memory off the GPU/media node.
     nodeSelector:
       kubernetes.io/hostname: k8s-worker-1
+    sidecar:
+      dashboards:
+        resource: configmap
+      datasources:
+        resource: configmap
     admin:
       existingSecret: observability-grafana
       userKey: admin-user
