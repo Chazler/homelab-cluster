@@ -40,7 +40,7 @@ probes:
   failureThreshold: 3
 
 serverApi:
-  image: joeriberman/server-api:latest@sha256:174694fd3f2725f0ee2971c59ced62722f9c4c217e74c65714226c10660a6742
+  image: joeriberman/server-api:latest@sha256:a001bc7f0fb03d354c04278024a1ec10f3661377b4805452fed02c1cde766e5f
   secretName: server-api-env
   resources:
     requests:
