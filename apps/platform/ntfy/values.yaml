@@ -1,4 +1,4 @@
-image: binwiederhier/ntfy:v2.37.2@sha256:1875ddcf815c8a3c981d6d78c67a93452d0abba79b1ab9520b1f5f5238902bd7
+image: binwiederhier/ntfy:v2.38.3@sha256:874299b207a9815e7a0cf551b3a094241db7604fa2d274bbd86f569154b6ea51
 hostname: ntfy.joeriberman.nl
 storageClassName: observability-rwo
 storageSize: 1Gi
